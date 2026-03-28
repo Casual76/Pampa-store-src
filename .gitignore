@@ -1,0 +1,24 @@
+# Gradle/Kotlin
+.gradle/
+.kotlin/
+**/build/
+
+# Local SDK and secrets
+local.properties
+*.jks
+*.keystore
+
+# Local tools and temp folders
+.tmp-aar/
+.tools/
+
+# Build artifacts
+*.apk
+*.aab
+*.msi
+*.exe
+
+# Logs
+*.log
+run_log*.txt
+gradle_run_output.txt

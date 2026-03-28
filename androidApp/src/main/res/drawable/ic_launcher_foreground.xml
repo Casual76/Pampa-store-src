@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Simple vector store icon (shopping bag shape) for the launcher foreground -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Shopping bag body -->
+    <path android:fillColor="#FFFFFF" android:pathData="M36,45 L72,45 L68,80 L40,80 Z"/>
+    <!-- Handle left -->
+    <path android:fillColor="#FFFFFF" android:strokeColor="#FFFFFF" android:strokeWidth="4" android:pathData="M42,45 Q42,30 54,30 Q66,30 66,45" android:fillAlpha="0"/>
+</vector>
