@@ -27,7 +27,7 @@ kotlin {
 
 compose.desktop {
     application {
-        val appVersion = "1.1.4"
+        val appVersion = "1.1.5"
         val desktopJavaHome = System.getenv("DESKTOP_JAVA_HOME")
         if (!desktopJavaHome.isNullOrBlank()) {
             javaHome = desktopJavaHome

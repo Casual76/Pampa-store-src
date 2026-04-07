@@ -169,14 +169,10 @@ class StoreViewModel(
                         .filterNot { it.id == STORE_APP_ID }
                         .map { entry ->
                         val installed = reconcileInstalledInfo(entry)
-                        val latestForInstalledChannel = when (installed?.channel) {
-                            Channel.STABLE -> entry.stable?.version
-                            Channel.BETA -> entry.beta?.version
-                            null -> entry.stable?.version ?: entry.beta?.version
-                        }
+                        val latestForInstalledChannel = resolveLatestVersionForInstalledChannel(entry, installed)
                         val hasUpdate = installed != null &&
                             latestForInstalledChannel != null &&
-                            latestForInstalledChannel != installed.version
+                            isVersionNewer(latestForInstalledChannel, installed.version)
 
                         AppDisplayInfo(
                             entry = entry,
@@ -368,6 +364,17 @@ class StoreViewModel(
             entry.beta?.version -> Channel.BETA
             entry.stable?.version -> Channel.STABLE
             else -> storedInfo?.channel ?: localStorage.getDefaultChannel()
+        }
+    }
+
+    private fun resolveLatestVersionForInstalledChannel(
+        entry: AppEntry,
+        installed: InstalledAppInfo?
+    ): String? {
+        return when (installed?.channel) {
+            Channel.STABLE -> entry.stable?.version ?: entry.beta?.version
+            Channel.BETA -> entry.beta?.version ?: entry.stable?.version
+            null -> entry.stable?.version ?: entry.beta?.version
         }
     }
 

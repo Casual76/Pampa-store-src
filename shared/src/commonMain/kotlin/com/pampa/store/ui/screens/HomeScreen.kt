@@ -88,57 +88,24 @@ fun HomeScreen(
         val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
 
         Column(modifier = Modifier.fillMaxSize()) {
-            HeaderSection(
-                totalApps = displayApps.size,
-                installedApps = installedCount,
-                updatableApps = updatableCount,
-                defaultChannel = defaultChannel,
-                onRefresh = viewModel::refreshApps
-            )
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
-                    .border(
-                        width = 1.dp,
-                        color = if (isDarkTheme) {
-                            GlassStrokeDark
-                        } else {
-                            GlassStrokeLight
-                        },
-                        shape = RoundedCornerShape(24.dp)
-                    ),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isDarkTheme) 0.62f else 0.78f)
+            if (!compactLayout) {
+                HeaderSection(
+                    totalApps = displayApps.size,
+                    installedApps = installedCount,
+                    updatableApps = updatableCount,
+                    defaultChannel = defaultChannel,
+                    onRefresh = viewModel::refreshApps
                 )
-            ) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = "Filtra la libreria",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    SearchBar(
-                        query = searchQuery,
-                        onQueryChanged = viewModel::onSearchQueryChanged
-                    )
-                    OwnershipFilterRow(
-                        selectedFilter = ownershipFilter,
-                        onFilterSelected = viewModel::onOwnershipFilterSelected
-                    )
-                    if (categories.isNotEmpty()) {
-                        CategoryFilterRow(
-                            categories = categories,
-                            selectedCategory = selectedCategory,
-                            onCategorySelected = viewModel::onCategorySelected
-                        )
-                    }
-                }
+                LibraryFiltersCard(
+                    query = searchQuery,
+                    onQueryChanged = viewModel::onSearchQueryChanged,
+                    ownershipFilter = ownershipFilter,
+                    onOwnershipFilterSelected = viewModel::onOwnershipFilterSelected,
+                    categories = categories,
+                    selectedCategory = selectedCategory,
+                    onCategorySelected = viewModel::onCategorySelected,
+                    isDarkTheme = isDarkTheme
+                )
             }
 
             PullRefreshContainer(
@@ -173,9 +140,32 @@ fun HomeScreen(
                     compactLayout -> {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 0.dp, bottom = 28.dp),
+                            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 28.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
+                            item(key = "header") {
+                                HeaderSection(
+                                    totalApps = displayApps.size,
+                                    installedApps = installedCount,
+                                    updatableApps = updatableCount,
+                                    defaultChannel = defaultChannel,
+                                    onRefresh = viewModel::refreshApps,
+                                    compact = true
+                                )
+                            }
+                            item(key = "filters") {
+                                LibraryFiltersCard(
+                                    query = searchQuery,
+                                    onQueryChanged = viewModel::onSearchQueryChanged,
+                                    ownershipFilter = ownershipFilter,
+                                    onOwnershipFilterSelected = viewModel::onOwnershipFilterSelected,
+                                    categories = categories,
+                                    selectedCategory = selectedCategory,
+                                    onCategorySelected = viewModel::onCategorySelected,
+                                    isDarkTheme = isDarkTheme,
+                                    compact = true
+                                )
+                            }
                             items(apps, key = { it.entry.id }) { app ->
                                 AppListItem(
                                     app = app,
@@ -220,9 +210,15 @@ private fun HeaderSection(
     installedApps: Int,
     updatableApps: Int,
     defaultChannel: Channel,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    compact: Boolean = false
 ) {
     val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
+    val outerShape = RoundedCornerShape(if (compact) 24.dp else 30.dp)
+    val iconContainerSize = if (compact) 50.dp else 60.dp
+    val iconSize = if (compact) 24.dp else 28.dp
+    val contentPadding = if (compact) 18.dp else 22.dp
+    val titleStyle = if (compact) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.headlineMedium
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -234,9 +230,9 @@ private fun HeaderSection(
                 } else {
                     GlassStrokeLight
                 },
-                shape = RoundedCornerShape(30.dp)
+                shape = outerShape
             ),
-        shape = RoundedCornerShape(30.dp),
+        shape = outerShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = if (isDarkTheme) 0.78f else 0.94f)
         )
@@ -253,29 +249,30 @@ private fun HeaderSection(
                         )
                     )
                 )
-                .padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .padding(contentPadding),
+            verticalArrangement = Arrangement.spacedBy(if (compact) 12.dp else 14.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(if (compact) 10.dp else 12.dp)
             ) {
                 Box(
                     modifier = Modifier
-                        .size(60.dp)
+                        .size(iconContainerSize)
                         .background(
                             brush = Brush.linearGradient(
                                 colors = listOf(AccentOrange, com.pampa.store.ui.theme.AccentPink)
                             ),
-                            shape = RoundedCornerShape(20.dp)
+                            shape = RoundedCornerShape(if (compact) 18.dp else 20.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Store,
                         contentDescription = null,
-                        tint = Color.White
+                        tint = Color.White,
+                        modifier = Modifier.size(iconSize)
                     )
                 }
 
@@ -290,12 +287,13 @@ private fun HeaderSection(
                     )
                     Text(
                         text = "Pampa Store",
-                        style = MaterialTheme.typography.headlineMedium
+                        style = titleStyle
                     )
                     Text(
                         text = "Le tue app, curate e ordinate come una libreria vera. Meno rumore, piu' controllo.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = if (compact) 2 else 3
                     )
                 }
 
@@ -309,26 +307,29 @@ private fun HeaderSection(
             }
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 MetricPanel(
                     title = "Catalogo",
                     value = totalApps.toString(),
                     accent = PrimaryViolet,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    compact = compact
                 )
                 MetricPanel(
                     title = "Installate",
                     value = installedApps.toString(),
                     accent = AccentGreen,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    compact = compact
                 )
                 MetricPanel(
                     title = "Da aggiornare",
                     value = updatableApps.toString(),
                     accent = AccentOrange,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    compact = compact
                 )
             }
 
@@ -356,17 +357,21 @@ private fun MetricPanel(
     title: String,
     value: String,
     accent: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    compact: Boolean = false
 ) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(if (compact) 18.dp else 20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.58f)
         )
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            modifier = Modifier.padding(
+                horizontal = if (compact) 12.dp else 14.dp,
+                vertical = if (compact) 10.dp else 12.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
@@ -376,10 +381,71 @@ private fun MetricPanel(
             )
             Text(
                 text = value,
-                style = MaterialTheme.typography.headlineSmall,
+                style = if (compact) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineSmall,
                 color = accent,
                 fontWeight = FontWeight.Bold
             )
+        }
+    }
+}
+
+@Composable
+private fun LibraryFiltersCard(
+    query: String,
+    onQueryChanged: (String) -> Unit,
+    ownershipFilter: com.pampa.store.data.model.OwnershipFilter,
+    onOwnershipFilterSelected: (com.pampa.store.data.model.OwnershipFilter) -> Unit,
+    categories: List<String>,
+    selectedCategory: String?,
+    onCategorySelected: (String?) -> Unit,
+    isDarkTheme: Boolean,
+    compact: Boolean = false
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .border(
+                width = 1.dp,
+                color = if (isDarkTheme) {
+                    GlassStrokeDark
+                } else {
+                    GlassStrokeLight
+                },
+                shape = RoundedCornerShape(if (compact) 20.dp else 24.dp)
+            ),
+        shape = RoundedCornerShape(if (compact) 20.dp else 24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isDarkTheme) 0.62f else 0.78f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(
+                horizontal = if (compact) 14.dp else 16.dp,
+                vertical = if (compact) 12.dp else 14.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Filtra la libreria",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold
+            )
+            SearchBar(
+                query = query,
+                onQueryChanged = onQueryChanged
+            )
+            OwnershipFilterRow(
+                selectedFilter = ownershipFilter,
+                onFilterSelected = onOwnershipFilterSelected
+            )
+            if (categories.isNotEmpty()) {
+                CategoryFilterRow(
+                    categories = categories,
+                    selectedCategory = selectedCategory,
+                    onCategorySelected = onCategorySelected
+                )
+            }
         }
     }
 }

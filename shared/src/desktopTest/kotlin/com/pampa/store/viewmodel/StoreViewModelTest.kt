@@ -203,6 +203,32 @@ class StoreViewModelTest {
     }
 
     @Test
+    fun refreshAppsDoesNotMarkAppUpdatableWhenInstalledVersionIsNewerThanCatalog() = runTest {
+        val (localStorage, _) = createLocalStorage()
+        localStorage.markInstalled("test-app", "1.0.0", Channel.STABLE, "")
+
+        val platformAppService = FakePlatformAppService(
+            installedVersions = mutableMapOf("com.example.test" to "1.3.0")
+        )
+        val viewModel = createViewModel(
+            localStorage,
+            FakeCatalogService(testManifest()),
+            FakeInstaller(listOf(InstallEvent.Success)),
+            platformAppService,
+            CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler)),
+            platform = AppPlatform.ANDROID
+        )
+
+        viewModel.init()
+        advanceUntilIdle()
+
+        val installed = assertNotNull(localStorage.getInstalledInfo("test-app"))
+        assertEquals("1.3.0", installed.version)
+        assertEquals(false, viewModel.displayApps.value.first().hasUpdate)
+        viewModel.dispose()
+    }
+
+    @Test
     fun refreshAppsRemovesMissingInstalledAppsWhenPackageIsGone() = runTest {
         val (localStorage, _) = createLocalStorage()
         localStorage.markInstalled("test-app", "1.0.0", Channel.STABLE, "")
