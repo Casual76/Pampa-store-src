@@ -1,0 +1,39 @@
+{
+  "name": "pampa-store-publisher",
+  "version": "0.2.0",
+  "description": "Repo-local MCP plugin that browses, manages, and publishes Android APK releases for the Pampa Store.",
+  "author": {
+    "name": "Pampa",
+    "email": "",
+    "url": ""
+  },
+  "homepage": "",
+  "repository": "",
+  "license": "MIT",
+  "keywords": [
+    "pampa-store",
+    "android",
+    "apk",
+    "github-release",
+    "mcp"
+  ],
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Pampa Store Publisher",
+    "shortDescription": "Browse the catalog, inspect apps and releases, edit store files, and publish Android APK releases",
+    "longDescription": "Use this repo-local MCP plugin to inspect the Pampa Store catalog, read and write repository files, manage catalog entries, inspect releases, and publish or dry-run Android APK releases while keeping app manifests and the central store index aligned.",
+    "developerName": "Pampa",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "",
+    "privacyPolicyURL": "",
+    "termsOfServiceURL": "",
+    "defaultPrompt": "List the Pampa Store apps, inspect the current app version and releases, then dry-run or publish the next APK release when everything looks correct",
+    "brandColor": "#0B7A75",
+    "screenshots": []
+  }
+}

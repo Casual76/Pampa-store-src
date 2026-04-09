@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "pampa-store-publisher": {
+      "type": "stdio",
+      "command": "python",
+      "args": [
+        "./mcp/server.py"
+      ]
+    }
+  }
+}

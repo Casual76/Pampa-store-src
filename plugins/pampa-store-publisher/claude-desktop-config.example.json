@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "pampa-store-publisher": {
+      "type": "stdio",
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "C:\\ViboCoded projects\\Pampa store\\plugins\\pampa-store-publisher\\run-pampa-store-publisher.cmd"
+      ],
+      "env": {
+        "PAMPA_STORE_REPO_ROOT": "C:\\ViboCoded projects\\Pampa store"
+      }
+    }
+  }
+}
