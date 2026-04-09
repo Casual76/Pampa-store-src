@@ -22,3 +22,5 @@ local.properties
 *.log
 run_log*.txt
 gradle_run_output.txt
+.claude/worktrees/funny-mestorf/
+.claude/worktrees/nifty-cohen/
