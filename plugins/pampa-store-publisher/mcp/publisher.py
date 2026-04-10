@@ -856,10 +856,64 @@ def is_unwanted_apk(path: Path) -> bool:
 
 
 def inspect_apk(apk_path: Path) -> dict[str, Any]:
+    # Validate APK file integrity and signature
+    validate_apk_is_valid_zip(apk_path)
+    validate_apk_is_signed(apk_path)
+
     return {
         "sizeBytes": apk_path.stat().st_size,
         "sha256": sha256_file(apk_path),
     }
+
+
+def validate_apk_is_valid_zip(apk_path: Path) -> None:
+    """Validate that the APK file is a valid ZIP archive."""
+    import zipfile
+    try:
+        with zipfile.ZipFile(apk_path, 'r') as zip_ref:
+            bad_file = zip_ref.testzip()
+            if bad_file is not None:
+                raise SkillError(f"APK is corrupted: bad file in archive: {bad_file}")
+    except zipfile.BadZipFile as e:
+        raise SkillError(f"APK file is not a valid ZIP archive: {e}")
+    except Exception as e:
+        raise SkillError(f"Failed to validate APK file: {e}")
+
+
+def validate_apk_is_signed(apk_path: Path) -> None:
+    """Validate that the APK is properly signed using apksigner or by checking for META-INF/MANIFEST.MF."""
+    import zipfile
+
+    try:
+        with zipfile.ZipFile(apk_path, 'r') as zip_ref:
+            # Check for signature files in META-INF directory
+            has_manifest = 'META-INF/MANIFEST.MF' in zip_ref.namelist()
+            has_cert = False
+
+            # Look for certificate files (RSA, EC, DSA)
+            for name in zip_ref.namelist():
+                if name.startswith('META-INF/') and name.upper().endswith(('.RSA', '.EC', '.DSA')):
+                    has_cert = True
+                    break
+
+            if not has_manifest:
+                raise SkillError(
+                    "APK is not signed: missing META-INF/MANIFEST.MF. "
+                    "Build a signed release APK using 'assembleRelease' or 'bundleRelease'."
+                )
+
+            if not has_cert:
+                raise SkillError(
+                    "APK is not signed: missing signature certificate in META-INF. "
+                    "The APK must be signed with a release keystore. "
+                    "Ensure your keystore is configured in build.gradle."
+                )
+    except SkillError:
+        raise
+    except zipfile.BadZipFile:
+        raise SkillError("APK file is not a valid ZIP archive (cannot check signature)")
+    except Exception as e:
+        raise SkillError(f"Failed to validate APK signature: {e}")
 
 
 def build_version_info(
