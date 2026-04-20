@@ -313,10 +313,10 @@ class StoreViewModelTest {
         platform: AppPlatform = AppPlatform.WINDOWS
     ): StoreViewModel {
         return StoreViewModel(
-            localStorage = localStorage,
+            preferencesRepository = com.pampa.store.data.repository.DefaultPreferencesRepository(localStorage),
             installerProvider = { installer },
             platformAppService = platformAppService,
-            catalogServiceFactory = { catalogService },
+            appRepositoryFactory = { com.pampa.store.data.repository.DefaultAppRepository(catalogService) },
             platformProvider = { platform },
             scope = scope
         )

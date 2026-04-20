@@ -25,6 +25,9 @@ import com.pampa.store.data.model.StoreManifest
 import com.pampa.store.data.model.StoreUpdateInfo
 import com.pampa.store.data.model.StoreReleaseChannels
 import com.pampa.store.data.model.VersionInfo
+import com.pampa.store.data.repository.DefaultAppRepository
+import com.pampa.store.data.repository.DefaultPreferencesRepository
+import com.pampa.store.data.repository.DefaultPublishingRepository
 import com.pampa.store.platform.ApkValidationService
 import java.nio.file.Files
 import kotlin.test.Test
@@ -325,8 +328,8 @@ class AdminViewModelTest {
         }
         val automationService = AdminTestAutomationService()
         val viewModel = AdminViewModel(
-            localStorage = localStorage,
-            publishingService = AdminTestPublishingService(),
+            preferencesRepository = DefaultPreferencesRepository(localStorage),
+            publishingRepository = DefaultPublishingRepository(AdminTestPublishingService()),
             apkValidationService = AdminTestApkValidationService(),
             releaseAutomationService = automationService,
             scope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
@@ -379,8 +382,8 @@ class AdminViewModelTest {
         }
         val automationService = AdminTestAutomationService()
         val viewModel = AdminViewModel(
-            localStorage = localStorage,
-            publishingService = AdminTestPublishingService(),
+            preferencesRepository = DefaultPreferencesRepository(localStorage),
+            publishingRepository = DefaultPublishingRepository(AdminTestPublishingService()),
             apkValidationService = AdminTestApkValidationService(),
             releaseAutomationService = automationService,
             scope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
@@ -441,8 +444,8 @@ class AdminViewModelTest {
         val automationService = AdminTestAutomationService()
         val publishingService = AdminTestPublishingService()
         val viewModel = AdminViewModel(
-            localStorage = localStorage,
-            publishingService = publishingService,
+            preferencesRepository = DefaultPreferencesRepository(localStorage),
+            publishingRepository = DefaultPublishingRepository(publishingService),
             apkValidationService = AdminTestApkValidationService(),
             releaseAutomationService = automationService,
             scope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
@@ -497,8 +500,8 @@ class AdminViewModelTest {
             uploadAssetResult = Result.failure(IllegalStateException("Upload ko"))
         )
         val viewModel = AdminViewModel(
-            localStorage = localStorage,
-            publishingService = publishingService,
+            preferencesRepository = DefaultPreferencesRepository(localStorage),
+            publishingRepository = DefaultPublishingRepository(publishingService),
             apkValidationService = AdminTestApkValidationService(),
             releaseAutomationService = automationService,
             scope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
@@ -570,9 +573,9 @@ class AdminViewModelTest {
         scope: CoroutineScope
     ): AdminViewModel {
         return AdminViewModel(
-            localStorage = createLocalStorage(),
-            catalogService = catalogService,
-            publishingService = publishingService,
+            preferencesRepository = DefaultPreferencesRepository(createLocalStorage()),
+            appRepository = DefaultAppRepository(catalogService),
+            publishingRepository = DefaultPublishingRepository(publishingService),
             apkValidationService = AdminTestApkValidationService(),
             scope = scope
         )

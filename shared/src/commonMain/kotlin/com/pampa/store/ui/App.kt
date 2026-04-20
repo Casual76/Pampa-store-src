@@ -5,6 +5,10 @@ import com.pampa.store.automation.ReleaseAutomationService
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Row
+import com.pampa.store.ui.components.PampaNavigationBar
+import com.pampa.store.ui.components.PampaNavigationRail
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -99,18 +103,19 @@ fun PampaStoreApp(
 
     val storeViewModel = remember {
         StoreViewModel(
-            localStorage = localStorage,
+            preferencesRepository = com.pampa.store.data.repository.DefaultPreferencesRepository(localStorage),
             installerProvider = installerProvider,
             platformAppService = platformAppService,
             appVersion = appVersion,
-            catalogServiceFactory = { GitHubCatalogService(storeRepository, token = catalogGitHubToken) }
+            appRepositoryFactory = { com.pampa.store.data.repository.DefaultAppRepository(GitHubCatalogService(storeRepository, token = catalogGitHubToken)) }
         ).also { it.init() }
     }
     val adminViewModel = remember {
         AdminViewModel(
-            localStorage = localStorage,
+            preferencesRepository = com.pampa.store.data.repository.DefaultPreferencesRepository(localStorage),
             storeRepository = storeRepository,
-            publishingService = adminPublishingService,
+            appRepository = com.pampa.store.data.repository.DefaultAppRepository(GitHubCatalogService(storeRepository, token = catalogGitHubToken)),
+            publishingRepository = com.pampa.store.data.repository.DefaultPublishingRepository(adminPublishingService),
             releaseAutomationService = releaseAutomationService
         ).also { it.init() }
     }
@@ -185,113 +190,68 @@ fun PampaStoreApp(
                     )
             )
 
-            Scaffold(
-                containerColor = Color.Transparent,
-                bottomBar = {
-                    if (showBottomBar) {
-                        Box(
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp, vertical = 10.dp)
-                                .clip(RoundedCornerShape(32.dp))
-                                .background(
-                                    Brush.horizontalGradient(
-                                        colors = listOf(
-                                            MaterialTheme.colorScheme.surface.copy(alpha = if (isDarkTheme) 0.92f else 0.94f),
-                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isDarkTheme) 0.82f else 0.88f)
-                                        )
-                                    )
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    color = if (isDarkTheme) {
-                                        GlassStrokeDark
-                                    } else {
-                                        GlassStrokeLight
-                                    },
-                                    shape = RoundedCornerShape(32.dp)
-                                )
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            NavigationBar(
-                                containerColor = Color.Transparent
-                            ) {
-                                NavigationBarItem(
-                                    selected = currentRoute == Routes.Home,
-                                    onClick = {
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val isWideScreen = maxWidth >= 600.dp
+                Row(modifier = Modifier.fillMaxSize()) {
+                    if (isWideScreen && showBottomBar) {
+                        PampaNavigationRail(
+                            currentRoute = currentRoute,
+                            isAdminVisible = isAdminVisible,
+                            isDarkTheme = isDarkTheme,
+                            onNavigateHome = {
+                                navController.navigate(Routes.Home) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                    popUpTo(Routes.Home) { saveState = true }
+                                }
+                            },
+                            onNavigateAdmin = {
+                                navController.navigate(Routes.Admin) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            onNavigateSettings = {
+                                navController.navigate(Routes.Settings) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        )
+                    }
+
+                    Scaffold(
+                        modifier = Modifier.weight(1f),
+                        containerColor = Color.Transparent,
+                        bottomBar = {
+                            if (!isWideScreen && showBottomBar) {
+                                PampaNavigationBar(
+                                    currentRoute = currentRoute,
+                                    isAdminVisible = isAdminVisible,
+                                    isDarkTheme = isDarkTheme,
+                                    onNavigateHome = {
                                         navController.navigate(Routes.Home) {
                                             launchSingleTop = true
                                             restoreState = true
                                             popUpTo(Routes.Home) { saveState = true }
                                         }
                                     },
-                                    icon = {
-                                        Icon(
-                                            imageVector = if (currentRoute == Routes.Home) Icons.Filled.Store else Icons.Outlined.Storefront,
-                                            contentDescription = "Store"
-                                        )
-                                    },
-                                    label = { Text("Store", fontSize = 11.sp) },
-                                    colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = PrimaryViolet,
-                                        selectedTextColor = PrimaryViolet,
-                                        indicatorColor = PrimaryViolet.copy(alpha = 0.16f)
-                                    )
-                                )
-
-                                if (isAdminVisible) {
-                                    NavigationBarItem(
-                                        selected = currentRoute == Routes.Admin,
-                                        onClick = {
-                                            navController.navigate(Routes.Admin) {
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
-                                        },
-                                        icon = {
-                                            Icon(
-                                                imageVector = if (currentRoute == Routes.Admin) {
-                                                    Icons.Filled.AdminPanelSettings
-                                                } else {
-                                                    Icons.Outlined.AdminPanelSettings
-                                                },
-                                                contentDescription = "Admin"
-                                            )
-                                        },
-                                        label = { Text("Admin", fontSize = 11.sp) },
-                                        colors = NavigationBarItemDefaults.colors(
-                                            selectedIconColor = AccentOrange,
-                                            selectedTextColor = AccentOrange,
-                                            indicatorColor = AccentOrange.copy(alpha = 0.16f)
-                                        )
-                                    )
-                                }
-
-                                NavigationBarItem(
-                                    selected = currentRoute == Routes.Settings,
-                                    onClick = {
-                                        navController.navigate(Routes.Settings) {
+                                    onNavigateAdmin = {
+                                        navController.navigate(Routes.Admin) {
                                             launchSingleTop = true
                                             restoreState = true
                                         }
                                     },
-                                    icon = {
-                                        Icon(
-                                            imageVector = if (currentRoute == Routes.Settings) Icons.Filled.Settings else Icons.Outlined.Settings,
-                                            contentDescription = "Impostazioni"
-                                        )
-                                    },
-                                    label = { Text("Impostazioni", fontSize = 11.sp) },
-                                    colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = SecondaryTeal,
-                                        selectedTextColor = SecondaryTeal,
-                                        indicatorColor = SecondaryTeal.copy(alpha = 0.16f)
-                                    )
+                                    onNavigateSettings = {
+                                        navController.navigate(Routes.Settings) {
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
                                 )
                             }
                         }
-                    }
-                }
-            ) { paddingValues ->
+                    ) { paddingValues ->
                 NavHost(
                     navController = navController,
                     startDestination = Routes.Home,
@@ -356,6 +316,8 @@ fun PampaStoreApp(
                             )
                         }
                     }
+                }
+            }
                 }
             }
 
@@ -425,7 +387,7 @@ private fun RowActions(
     onPublishBeta: () -> Unit,
     onLater: () -> Unit
 ) {
-    androidx.compose.foundation.layout.Row {
+    Row {
         TextButton(onClick = onPublishBeta) {
             Text("Pubblica Beta")
         }

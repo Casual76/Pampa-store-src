@@ -531,7 +531,7 @@ HANDLERS: dict[str, Callable[[dict[str, Any] | None], dict[str, Any]]] = {
     "remove_pampa_store_index_entry": store_tools.remove_pampa_store_index_entry,
     "validate_pampa_store_manifest": store_tools.validate_pampa_store_manifest,
     "probe_pampa_store_android_release": publisher.probe_from_params,
-    "publish_pampa_store_android_release": publisher.publish_from_params,
+    "publish_pampa_store_release": publisher.publish_from_params,
 }
 
 
@@ -690,6 +690,13 @@ def error_response(message_id: Any, code: int, message: str) -> dict[str, Any]:
 
 
 def log_error(context: str, error: Exception) -> None:
+    print(f"[pampa-store-publisher] {context}: {error}", file=sys.stderr)
+    traceback.print_exc(file=sys.stderr)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+tion) -> None:
     print(f"[pampa-store-publisher] {context}: {error}", file=sys.stderr)
     traceback.print_exc(file=sys.stderr)
 

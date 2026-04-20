@@ -90,6 +90,7 @@ def build_parser() -> argparse.ArgumentParser:
     publish_parser.add_argument("--store-repo", default="", help="Override the central Pampa Store repo.")
     publish_parser.add_argument("--store-manifest-path", default=DEFAULT_MANIFEST_PATH, help="Manifest path in the store repository.")
     publish_parser.add_argument("--apk-path", default="", help="Use an existing APK instead of discovering one.")
+    publish_parser.add_argument("--exe-path", default="", help="Use an existing EXE/MSI instead of discovering one.")
     publish_parser.add_argument("--task", default="", help="Explicit Gradle release task.")
     publish_parser.add_argument("--skip-build", action="store_true", help="Skip the Gradle build step.")
     publish_parser.add_argument("--dry-run", action="store_true", help="Compute the publish plan without pushing changes.")
@@ -170,6 +171,7 @@ def build_publish_namespace(params: dict[str, Any] | None) -> argparse.Namespace
         store_repo=coerce_string(source.get("storeRepo")),
         store_manifest_path=coerce_string(source.get("storeManifestPath")) or DEFAULT_MANIFEST_PATH,
         apk_path=coerce_string(source.get("apkPath")),
+        exe_path=coerce_string(source.get("exePath")),
         task=coerce_string(source.get("task")),
         skip_build=coerce_bool(source.get("skipBuild")),
         dry_run=coerce_bool(source.get("dryRun")),
@@ -256,11 +258,29 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
     developer = resolve_field(args.developer, app_manifest_get(app_manifest, "developer"), "Pampa")
     category = resolve_field(args.category, app_manifest_get(app_manifest, "category"), "General")
 
-    apk_path = resolve_apk_path(args, repo_root, selected_module)
-    apk_stats = inspect_apk(apk_path)
+    apk_path = None
+    apk_stats = {}
+    asset_name = ""
+    if args.apk_path or not getattr(args, "exe_path", ""):
+        apk_path = resolve_apk_path(args, repo_root, selected_module)
+        apk_stats = inspect_apk(apk_path)
+        asset_name = f"{app_id}-{version}.apk"
+
+    exe_path = None
+    exe_stats = {}
+    exe_asset_name = ""
+    if getattr(args, "exe_path", ""):
+        exe_path = Path(args.exe_path).expanduser().resolve()
+        if not exe_path.exists():
+            raise SkillError(f"EXE/MSI not found: {exe_path}")
+        exe_stats = {
+            "sizeBytes": exe_path.stat().st_size,
+            "sha256": sha256_file(exe_path),
+        }
+        exe_asset_name = f"{app_id}-{version}-installer{exe_path.suffix}"
+
     release_tag = f"{channel}-{app_id}-v{version}"
     release_name = f"{app_name} {version}" if channel == "stable" else f"{app_name} Beta {version}"
-    asset_name = f"{app_id}-{version}.apk"
 
     store_owner = args.store_owner.strip() or os.getenv("PAMPA_REPO_OWNER", "").strip() or DEFAULT_STORE_OWNER
     store_repo = args.store_repo.strip() or os.getenv("PAMPA_REPO_NAME", "").strip() or DEFAULT_STORE_REPO
@@ -274,12 +294,17 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
         allow_missing=True,
     )
 
+    primary_size = apk_stats.get("sizeBytes", 0)
+    if not primary_size and exe_stats:
+        primary_size = exe_stats.get("sizeBytes", 0)
+
     version_info = build_version_info(
         version=version,
         changelog=changelog,
         release_tag=release_tag,
         asset_name=asset_name,
-        size_bytes=apk_stats["sizeBytes"],
+        size_bytes=primary_size,
+        exe_asset_name=exe_asset_name,
     )
     updated_app_manifest = upsert_app_manifest(
         existing_manifest=app_manifest,
@@ -922,6 +947,7 @@ def build_version_info(
     release_tag: str,
     asset_name: str,
     size_bytes: int,
+    exe_asset_name: str = "",
 ) -> dict[str, Any]:
     return {
         "version": version,
@@ -929,7 +955,7 @@ def build_version_info(
         "changelog": changelog,
         "releaseTag": release_tag,
         "apkAsset": asset_name,
-        "exeAsset": "",
+        "exeAsset": exe_asset_name,
         "sizeBytes": size_bytes,
     }
 

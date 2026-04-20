@@ -1,8 +1,10 @@
 package com.pampa.store.viewmodel
 
-import com.pampa.store.data.api.CatalogService
+import com.pampa.store.domain.repository.AppRepository
 import com.pampa.store.data.api.DownloadEvent
 import com.pampa.store.data.api.GitHubCatalogService
+import com.pampa.store.data.repository.DefaultAppRepository
+import com.pampa.store.domain.repository.PreferencesRepository
 import com.pampa.store.data.local.LocalStorage
 import com.pampa.store.data.model.AppDisplayInfo
 import com.pampa.store.data.model.AppEntry
@@ -36,15 +38,15 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class StoreViewModel(
-    private val localStorage: LocalStorage,
+    private val preferencesRepository: PreferencesRepository,
     private val installerProvider: () -> InstallerService,
     private val platformAppService: PlatformAppService,
     private val appVersion: String = "dev",
-    private val catalogServiceFactory: () -> CatalogService = { GitHubCatalogService() },
+    private val appRepositoryFactory: () -> AppRepository = { DefaultAppRepository(GitHubCatalogService()) },
     private val platformProvider: () -> AppPlatform = ::getCurrentPlatform,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 ) {
-    private var catalogService: CatalogService? = null
+    private var appRepository: AppRepository? = null
 
     private val _apps = MutableStateFlow<List<AppDisplayInfo>>(emptyList())
     val apps: StateFlow<List<AppDisplayInfo>> = _apps.asStateFlow()
@@ -78,12 +80,12 @@ class StoreViewModel(
     private val _installPrerequisites = MutableStateFlow(InstallPrerequisites())
     val installPrerequisites: StateFlow<InstallPrerequisites> = _installPrerequisites.asStateFlow()
 
-    val defaultChannel: StateFlow<Channel> = localStorage.preferences
-        .map { localStorage.getDefaultChannel() }
+    val defaultChannel: StateFlow<Channel> = preferencesRepository.preferences
+        .map { preferencesRepository.getDefaultChannel() }
         .stateIn(scope, SharingStarted.Eagerly, Channel.STABLE)
 
-    val storeUpdateChannel: StateFlow<Channel> = localStorage.preferences
-        .map { localStorage.getStoreUpdateChannel() }
+    val storeUpdateChannel: StateFlow<Channel> = preferencesRepository.preferences
+        .map { preferencesRepository.getStoreUpdateChannel() }
         .stateIn(scope, SharingStarted.Eagerly, Channel.STABLE)
 
     val displayApps: StateFlow<List<AppDisplayInfo>> = combine(_apps, _downloadStates) { apps, downloadStates ->
@@ -116,19 +118,19 @@ class StoreViewModel(
 
     fun init() {
         scope.launch {
-            localStorage.init()
+            preferencesRepository.init()
             initCatalogService()
             refreshInstallPrerequisites()
             refreshApps()
-            if (localStorage.preferences.value.storeUpdateAutoCheckEnabled) {
+            if (preferencesRepository.preferences.value.storeUpdateAutoCheckEnabled) {
                 checkStoreUpdate()
             }
         }
     }
 
     private fun initCatalogService() {
-        catalogService?.close()
-        catalogService = catalogServiceFactory()
+        appRepository?.close()
+        appRepository = appRepositoryFactory()
     }
 
     fun onSearchQueryChanged(query: String) {
@@ -155,14 +157,14 @@ class StoreViewModel(
             _error.value = null
             refreshInstallPrerequisites()
 
-            val service = catalogService
+            val service = appRepository
             if (service == null) {
                 _error.value = "Catalogo non disponibile."
                 _isLoading.value = false
                 return@launch
             }
 
-            service.getManifest().fold(
+            service.getStoreManifest().fold(
                 onSuccess = { manifest ->
                     val warningMessage = manifest.warnings.takeIf { it.isNotEmpty() }?.joinToString("\n")
                     val displayApps = manifest.apps
@@ -197,7 +199,7 @@ class StoreViewModel(
 
     fun checkStoreUpdate(channelOverride: Channel? = null) {
         scope.launch {
-            val service = catalogService
+            val service = appRepository
             if (service == null) {
                 _storeUpdateState.value = _storeUpdateState.value.copy(
                     isChecking = false,
@@ -207,7 +209,7 @@ class StoreViewModel(
                 return@launch
             }
 
-            val channel = channelOverride ?: localStorage.getStoreUpdateChannel()
+            val channel = channelOverride ?: preferencesRepository.getStoreUpdateChannel()
             _storeUpdateState.value = _storeUpdateState.value.copy(isChecking = true, error = null)
             service.getLatestStoreUpdate(channel).fold(
                 onSuccess = { update ->
@@ -269,7 +271,7 @@ class StoreViewModel(
                 return@launch
             }
 
-            val downloadDir = localStorage.preferences.value.downloadPath.trim()
+            val downloadDir = preferencesRepository.preferences.value.downloadPath.trim()
             if (downloadDir.isEmpty()) {
                 updateDownloadState(appId, DownloadState.Error("Percorso download non configurato."))
                 return@launch
@@ -282,7 +284,7 @@ class StoreViewModel(
                 savePath = savePath,
                 updateState = { updateDownloadState(appId, it) },
                 onInstallSuccess = { filePath ->
-                    localStorage.markInstalled(
+                    preferencesRepository.markInstalled(
                         appId = appId,
                         version = versionInfo.version,
                         channel = channel,
@@ -313,7 +315,7 @@ class StoreViewModel(
                 return@launch
             }
 
-            val downloadDir = localStorage.preferences.value.downloadPath.trim()
+            val downloadDir = preferencesRepository.preferences.value.downloadPath.trim()
             if (downloadDir.isEmpty()) {
                 _storeUpdateDownloadState.value = DownloadState.Error("Percorso download non configurato.")
                 return@launch
@@ -330,7 +332,7 @@ class StoreViewModel(
     }
 
     private suspend fun reconcileInstalledInfo(entry: AppEntry): InstalledAppInfo? {
-        val storedInfo = localStorage.getInstalledInfo(entry.id)
+        val storedInfo = preferencesRepository.getInstalledInfo(entry.id)
         if (platformProvider() != AppPlatform.ANDROID) {
             return storedInfo
         }
@@ -341,14 +343,14 @@ class StoreViewModel(
         val resolvedVersion = platformAppService.resolveInstalledVersion(entry.packageName)
         if (resolvedVersion == null) {
             if (storedInfo != null) {
-                localStorage.markUninstalled(entry.id)
+                preferencesRepository.markUninstalled(entry.id)
             }
             return null
         }
 
         val resolvedChannel = inferChannel(entry, resolvedVersion, storedInfo)
         if (storedInfo == null || storedInfo.version != resolvedVersion || storedInfo.channel != resolvedChannel) {
-            localStorage.markInstalled(
+            preferencesRepository.markInstalled(
                 appId = entry.id,
                 version = resolvedVersion,
                 channel = resolvedChannel,
@@ -356,14 +358,14 @@ class StoreViewModel(
             )
         }
 
-        return localStorage.getInstalledInfo(entry.id)
+        return preferencesRepository.getInstalledInfo(entry.id)
     }
 
     private fun inferChannel(entry: AppEntry, version: String, storedInfo: InstalledAppInfo?): Channel {
         return when (version) {
             entry.beta?.version -> Channel.BETA
             entry.stable?.version -> Channel.STABLE
-            else -> storedInfo?.channel ?: localStorage.getDefaultChannel()
+            else -> storedInfo?.channel ?: preferencesRepository.getDefaultChannel()
         }
     }
 
@@ -385,7 +387,7 @@ class StoreViewModel(
         updateState: (DownloadState) -> Unit,
         onInstallSuccess: suspend (String) -> Unit
     ) {
-        val service = catalogService ?: run {
+        val service = appRepository ?: run {
             updateState(DownloadState.Error("Catalogo non disponibile."))
             return
         }
@@ -480,13 +482,13 @@ class StoreViewModel(
 
     fun onConfigUpdated() {
         refreshApps()
-        if (localStorage.preferences.value.storeUpdateAutoCheckEnabled) {
+        if (preferencesRepository.preferences.value.storeUpdateAutoCheckEnabled) {
             checkStoreUpdate()
         }
     }
 
     fun dispose() {
-        catalogService?.close()
+        appRepository?.close()
         scope.cancel()
     }
 }

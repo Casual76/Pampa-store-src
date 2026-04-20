@@ -3,11 +3,14 @@ package com.pampa.store.viewmodel
 import com.pampa.store.automation.NoOpReleaseAutomationService
 import com.pampa.store.automation.ReleaseAutomationEvent
 import com.pampa.store.automation.ReleaseAutomationService
-import com.pampa.store.data.api.AdminPublishingService
-import com.pampa.store.data.api.CatalogService
+import com.pampa.store.domain.repository.PublishingRepository
+import com.pampa.store.data.repository.DefaultPublishingRepository
+import com.pampa.store.domain.repository.AppRepository
+import com.pampa.store.data.repository.DefaultAppRepository
 import com.pampa.store.data.api.DisabledAdminPublishingService
 import com.pampa.store.data.api.GitHubCatalogService
 import com.pampa.store.data.api.RepositoryBootstrapMetadata
+import com.pampa.store.domain.repository.PreferencesRepository
 import com.pampa.store.data.local.LocalStorage
 import com.pampa.store.data.model.AppEntry
 import com.pampa.store.data.model.AppManifest
@@ -50,16 +53,16 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class AdminViewModel(
-    private val localStorage: LocalStorage,
+    private val preferencesRepository: PreferencesRepository,
     private val storeRepository: GitHubRepositoryRef = GitHubRepositoryRef(
         repoOwner = DEFAULT_STORE_OWNER,
         repoName = DEFAULT_STORE_REPO,
         manifestPath = DEFAULT_GITHUB_MANIFEST_PATH
     ),
-    private val catalogService: CatalogService = GitHubCatalogService(storeRepository),
-    private val publishingService: AdminPublishingService = DisabledAdminPublishingService(
+    private val appRepository: AppRepository = DefaultAppRepository(GitHubCatalogService(storeRepository)),
+    private val publishingRepository: PublishingRepository = DefaultPublishingRepository(DisabledAdminPublishingService(
         "Publishing non configurato per questa piattaforma."
-    ),
+    )),
     private val apkValidationService: ApkValidationService = createApkValidationService(),
     private val releaseAutomationService: ReleaseAutomationService = NoOpReleaseAutomationService,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -85,10 +88,10 @@ class AdminViewModel(
     private val _showEditor = MutableStateFlow(false)
     val showEditor: StateFlow<Boolean> = _showEditor.asStateFlow()
 
-    private val _publishingEnabled = MutableStateFlow(publishingService.isConfigured)
+    private val _publishingEnabled = MutableStateFlow(publishingRepository.isConfigured)
     val publishingEnabled: StateFlow<Boolean> = _publishingEnabled.asStateFlow()
 
-    private val _publishingDisabledReason = MutableStateFlow(publishingService.disabledReason)
+    private val _publishingDisabledReason = MutableStateFlow(publishingRepository.disabledReason)
     val publishingDisabledReason: StateFlow<String?> = _publishingDisabledReason.asStateFlow()
 
     private val _automationProfiles = MutableStateFlow<List<ReleaseAutomationProfile>>(emptyList())
@@ -113,8 +116,8 @@ class AdminViewModel(
         startAutomationEventsObserver()
 
         scope.launch {
-            localStorage.init()
-            if (publishingService.isConfigured) {
+            preferencesRepository.init()
+            if (publishingRepository.isConfigured) {
                 ensureAutomationStarted()
                 releaseAutomationService.updateProfiles(_automationProfiles.value)
             }
@@ -127,12 +130,12 @@ class AdminViewModel(
         preferencesObserverStarted = true
 
         scope.launch {
-            localStorage.preferences.collect { prefs ->
+            preferencesRepository.preferences.collect { prefs ->
                 _automationProfiles.value = prefs.releaseAutomationProfiles.sortedBy { it.name.lowercase() }
                 _pendingReleaseDrafts.value = sortDrafts(prefs.pendingReleaseDrafts)
                 _activePromptDraft.value = _pendingReleaseDrafts.value.firstOrNull { it.state == PendingReleaseDraftState.READY }
 
-                if (publishingService.isConfigured) {
+                if (publishingRepository.isConfigured) {
                     ensureAutomationStarted()
                     releaseAutomationService.updateProfiles(_automationProfiles.value)
                 } else {
@@ -165,9 +168,9 @@ class AdminViewModel(
     private fun loadManifest() {
         scope.launch {
             _isLoading.value = true
-            val publicManifestResult = catalogService.getManifest()
-            val storeIndexResult = if (publishingService.isConfigured) {
-                publishingService.getStoreIndex()
+            val publicManifestResult = appRepository.getStoreManifest()
+            val storeIndexResult = if (publishingRepository.isConfigured) {
+                publishingRepository.getStoreIndex()
             } else {
                 Result.success(StoreIndexManifest())
             }
@@ -228,13 +231,13 @@ class AdminViewModel(
                 _isSaving.value = false
                 return@launch
             }
-            publishingService.updateAppManifest(
+            publishingRepository.updateAppManifest(
                 repository = normalizedApp.repository,
                 manifest = AppManifest(normalizedApp)
             ).fold(
                 onSuccess = {
                     val updatedIndex = upsertStoreIndexEntry(normalizedApp.toStoreIndexEntry())
-                    publishingService.updateStoreIndex(updatedIndex).fold(
+                    publishingRepository.updateStoreIndex(updatedIndex).fold(
                         onSuccess = {
                             _storeIndex.value = updatedIndex
                             _manifest.value = mergeStoreData(
@@ -262,7 +265,7 @@ class AdminViewModel(
             val updatedIndex = _storeIndex.value.copy(
                 apps = _storeIndex.value.apps.filter { it.id != appId }
             )
-            publishingService.updateStoreIndex(updatedIndex).fold(
+            publishingRepository.updateStoreIndex(updatedIndex).fold(
                 onSuccess = {
                     _storeIndex.value = updatedIndex
                     _manifest.value = _manifest.value.copy(
@@ -368,7 +371,7 @@ class AdminViewModel(
             val updatedIndex = _storeIndex.value.copy(
                 storeReleases = _storeIndex.value.storeReleases.copy(stable = betaVersion)
             )
-            publishingService.updateStoreIndex(updatedIndex).fold(
+            publishingRepository.updateStoreIndex(updatedIndex).fold(
                 onSuccess = {
                     _storeIndex.value = updatedIndex
                     _message.value = "Versione beta ${betaVersion.version} dello store promossa a stable."
@@ -388,15 +391,15 @@ class AdminViewModel(
                 .filterNot { it.id == normalizedProfile.id }
                 .plus(normalizedProfile)
 
-            localStorage.saveReleaseAutomationProfiles(updatedProfiles)
+            preferencesRepository.saveReleaseAutomationProfiles(updatedProfiles)
             _message.value = "Profilo '${normalizedProfile.name}' salvato."
         }
     }
 
     fun deleteAutomationProfile(profileId: String) {
         scope.launch {
-            localStorage.saveReleaseAutomationProfiles(_automationProfiles.value.filterNot { it.id == profileId })
-            localStorage.savePendingReleaseDrafts(_pendingReleaseDrafts.value.filterNot { it.profileId == profileId })
+            preferencesRepository.saveReleaseAutomationProfiles(_automationProfiles.value.filterNot { it.id == profileId })
+            preferencesRepository.savePendingReleaseDrafts(_pendingReleaseDrafts.value.filterNot { it.profileId == profileId })
             _message.value = "Profilo automazione rimosso."
         }
     }
@@ -414,7 +417,7 @@ class AdminViewModel(
                     profile
                 }
             }
-            localStorage.saveReleaseAutomationProfiles(updatedProfiles)
+            preferencesRepository.saveReleaseAutomationProfiles(updatedProfiles)
         }
     }
 
@@ -442,8 +445,8 @@ class AdminViewModel(
         scope.launch {
             val draft = _pendingReleaseDrafts.value.firstOrNull { it.id == draftId } ?: return@launch
             val remainingDrafts = _pendingReleaseDrafts.value.filterNot { it.id == draftId }
-            localStorage.savePendingReleaseDrafts(remainingDrafts)
-            localStorage.markReleaseArtifactsHandled(draft.signatures())
+            preferencesRepository.savePendingReleaseDrafts(remainingDrafts)
+            preferencesRepository.markReleaseArtifactsHandled(draft.signatures())
             _message.value = "Bozza ${draft.profileName} ${draft.version} scartata."
         }
     }
@@ -481,8 +484,8 @@ class AdminViewModel(
 
             publishResult.fold(
                 onSuccess = { successMessage ->
-                    localStorage.savePendingReleaseDrafts(_pendingReleaseDrafts.value.filterNot { it.id == draftId })
-                    localStorage.markReleaseArtifactsHandled(draft.signatures())
+                    preferencesRepository.savePendingReleaseDrafts(_pendingReleaseDrafts.value.filterNot { it.id == draftId })
+                    preferencesRepository.markReleaseArtifactsHandled(draft.signatures())
                     _message.value = successMessage
                 },
                 onFailure = { error ->
@@ -540,7 +543,7 @@ class AdminViewModel(
             exeAsset = buildWindowsAssetName(appId, normalizedVersion, exePath)
         )
 
-        val release = publishingService.createRelease(
+        val release = publishingRepository.createRelease(
             repository = app.repository,
             tag = resolvedVersionInfo.releaseTag,
             name = when (channel) {
@@ -630,7 +633,7 @@ class AdminViewModel(
             exeAsset = exeAsset
         )
 
-        val release = publishingService.createStoreRelease(
+        val release = publishingRepository.createStoreRelease(
             tag = tag,
             name = when (channel) {
                 Channel.STABLE -> "Pampa Store $normalizedVersion"
@@ -659,7 +662,7 @@ class AdminViewModel(
             )
         }
         val updatedIndex = _storeIndex.value.copy(storeReleases = updatedStoreReleases)
-        publishingService.updateStoreIndex(updatedIndex).getOrElse { throw it }
+        publishingRepository.updateStoreIndex(updatedIndex).getOrElse { throw it }
         _storeIndex.value = updatedIndex
 
         when (channel) {
@@ -669,9 +672,9 @@ class AdminViewModel(
     }
 
     private suspend fun handleDetectedArtifact(profileId: String, artifact: DetectedArtifact) {
-        val currentPrefs = localStorage.preferences.value
+        val currentPrefs = preferencesRepository.preferences.value
         val profile = currentPrefs.releaseAutomationProfiles.firstOrNull { it.id == profileId && it.enabled } ?: return
-        if (localStorage.isReleaseArtifactHandled(artifact.signature)) return
+        if (preferencesRepository.isReleaseArtifactHandled(artifact.signature)) return
 
         val existingDrafts = currentPrefs.pendingReleaseDrafts
         val duplicateDraft = existingDrafts.firstOrNull { it.hasSignature(artifact.signature) }
@@ -719,7 +722,7 @@ class AdminViewModel(
         val updatedDrafts = existingDrafts
             .filterNot { it.id == updatedDraft.id }
             .plus(updatedDraft)
-        localStorage.savePendingReleaseDrafts(updatedDrafts)
+        preferencesRepository.savePendingReleaseDrafts(updatedDrafts)
 
         val updatedProfiles = currentPrefs.releaseAutomationProfiles.map { currentProfile ->
             if (currentProfile.id == profileId) {
@@ -733,21 +736,21 @@ class AdminViewModel(
                 currentProfile
             }
         }
-        localStorage.saveReleaseAutomationProfiles(updatedProfiles)
+        preferencesRepository.saveReleaseAutomationProfiles(updatedProfiles)
         _message.value = "Bozza release rilevata: ${profile.name} ${artifact.version}."
     }
 
     private suspend fun handleAutomationProfileError(profileId: String, message: String?) {
         val normalizedMessage = message?.trim().orEmpty()
-        val updatedProfiles = localStorage.preferences.value.releaseAutomationProfiles.map { profile ->
+        val updatedProfiles = preferencesRepository.preferences.value.releaseAutomationProfiles.map { profile ->
             if (profile.id == profileId) {
                 profile.copy(lastError = normalizedMessage)
             } else {
                 profile
             }
         }
-        if (updatedProfiles != localStorage.preferences.value.releaseAutomationProfiles) {
-            localStorage.saveReleaseAutomationProfiles(updatedProfiles)
+        if (updatedProfiles != preferencesRepository.preferences.value.releaseAutomationProfiles) {
+            preferencesRepository.saveReleaseAutomationProfiles(updatedProfiles)
         }
     }
 
@@ -757,7 +760,7 @@ class AdminViewModel(
         errorMessage: String
     ) {
         val now = com.pampa.store.data.local.currentTimeMillis()
-        val updatedDrafts = localStorage.preferences.value.pendingReleaseDrafts.map { draft ->
+        val updatedDrafts = preferencesRepository.preferences.value.pendingReleaseDrafts.map { draft ->
             if (draft.id == draftId) {
                 draft.copy(
                     state = state,
@@ -768,17 +771,17 @@ class AdminViewModel(
                 draft
             }
         }
-        localStorage.savePendingReleaseDrafts(updatedDrafts)
+        preferencesRepository.savePendingReleaseDrafts(updatedDrafts)
     }
 
     private suspend fun persistAppAndIndex(updatedApp: AppEntry, successMessage: String) {
-        publishingService.updateAppManifest(
+        publishingRepository.updateAppManifest(
             repository = updatedApp.repository,
             manifest = AppManifest(updatedApp)
         ).fold(
             onSuccess = {
                 val updatedIndex = upsertStoreIndexEntry(updatedApp.toStoreIndexEntry())
-                publishingService.updateStoreIndex(updatedIndex).fold(
+                publishingRepository.updateStoreIndex(updatedIndex).fold(
                     onSuccess = {
                         _storeIndex.value = updatedIndex
                         _manifest.value = mergeStoreData(
@@ -801,13 +804,13 @@ class AdminViewModel(
     }
 
     private suspend fun persistAppAndIndexOrThrow(updatedApp: AppEntry) {
-        publishingService.updateAppManifest(
+        publishingRepository.updateAppManifest(
             repository = updatedApp.repository,
             manifest = AppManifest(updatedApp)
         ).getOrElse { throw it }
 
         val updatedIndex = upsertStoreIndexEntry(updatedApp.toStoreIndexEntry())
-        publishingService.updateStoreIndex(updatedIndex).getOrElse { throw it }
+        publishingRepository.updateStoreIndex(updatedIndex).getOrElse { throw it }
 
         _storeIndex.value = updatedIndex
         _manifest.value = mergeStoreData(
@@ -825,7 +828,7 @@ class AdminViewModel(
         when (channel) {
             Channel.STABLE -> {
                 val releaseApiVersion = if (stableVersion.isBlank() && betaVersion.isBlank()) {
-                    publishingService.getLatestStoreRelease()
+                    publishingRepository.getLatestStoreRelease()
                         .getOrElse { throw it }
                         ?.let { extractStoreVersion(it.tag_name, it.name) }
                         .orEmpty()
@@ -857,7 +860,7 @@ class AdminViewModel(
         val current = _manifest.value.apps.find { it.id == appId }
         if (current != null) return current
 
-        return catalogService.getManifest().getOrNull()
+        return appRepository.getStoreManifest().getOrNull()
             ?.also { _manifest.value = it }
             ?.apps
             ?.find { it.id == appId }
@@ -888,7 +891,7 @@ class AdminViewModel(
         exeAssetName: String
     ): Result<Unit> = runCatching {
         if (apkPath != null && apkAssetName.isNotBlank()) {
-            publishingService.uploadAsset(
+            publishingRepository.uploadAsset(
                 uploadUrl = releaseUploadUrl,
                 fileBytes = readFileBytes(apkPath),
                 fileName = apkAssetName,
@@ -896,7 +899,7 @@ class AdminViewModel(
             ).getOrThrow()
         }
         if (exePath != null && exeAssetName.isNotBlank()) {
-            publishingService.uploadAsset(
+            publishingRepository.uploadAsset(
                 uploadUrl = releaseUploadUrl,
                 fileBytes = readFileBytes(exePath),
                 fileName = exeAssetName,
@@ -939,7 +942,7 @@ class AdminViewModel(
             developer = app.developer.trim().ifBlank { "Pampa" }
         )
 
-        val result = publishingService.ensureRepository(app.repository, metadata).getOrElse { throw it }
+        val result = publishingRepository.ensureRepository(app.repository, metadata).getOrElse { throw it }
         if (result.failed) {
             throw IllegalStateException(
                 result.reason.ifBlank {
@@ -1076,10 +1079,10 @@ class AdminViewModel(
     }
 
     private fun requirePublishingEnabled(): Boolean {
-        if (publishingService.isConfigured) {
+        if (publishingRepository.isConfigured) {
             return true
         }
-        _message.value = publishingService.disabledReason ?: "Publishing non disponibile."
+        _message.value = publishingRepository.disabledReason ?: "Publishing non disponibile."
         return false
     }
 
@@ -1092,8 +1095,8 @@ class AdminViewModel(
     }
 
     fun dispose() {
-        catalogService.close()
-        publishingService.close()
+        appRepository.close()
+        publishingRepository.close()
         releaseAutomationService.stop()
         scope.cancel()
     }
