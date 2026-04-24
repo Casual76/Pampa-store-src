@@ -5,8 +5,14 @@ from __future__ import annotations
 
 import json
 import sys
+import os
 import traceback
 from typing import Any, Callable
+
+if sys.platform == "win32":
+    import msvcrt
+    msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+    msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
 import publisher
 import store_tools
@@ -287,6 +293,7 @@ TOOLS = [
                     "description": "Alias for textContent.",
                 },
                 "jsonContent": {
+                    "type": "object",
                     "description": "JSON object or array to serialize and write.",
                 },
                 "commitMessage": {
