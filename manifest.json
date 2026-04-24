@@ -15,24 +15,33 @@
       "ref": ""
     },
     "stable": {
-      "version": "1.2.0",
-      "releaseDate": "2026-04-17",
-      "changelog": "Release 1.2.0",
-      "releaseTag": "stable-pampa-store-v1.2.0",
-      "apkAsset": "pampa-store-1.2.0.apk",
-      "exeAsset": "pampa-store-1.2.0-installer.exe",
-      "sizeBytes": 2681868
+      "version": "1.1.6",
+      "releaseDate": "2026-04-24",
+      "changelog": "Release 1.1.6",
+      "releaseTag": "stable-pampa-store-v1.1.6",
+      "apkAsset": "",
+      "exeAsset": "pampa-store-1.1.6-installer.exe",
+      "sizeBytes": 104348160
     },
     "beta": {
-      "version": "1.2.0",
-      "releaseDate": "2026-04-17",
-      "changelog": "Release 1.2.0",
-      "releaseTag": "stable-pampa-store-v1.2.0",
-      "apkAsset": "pampa-store-1.2.0.apk",
-      "exeAsset": "pampa-store-1.2.0-installer.exe",
-      "sizeBytes": 2681868
+      "version": "1.1.6",
+      "releaseDate": "2026-04-24",
+      "changelog": "Release 1.1.6",
+      "releaseTag": "stable-pampa-store-v1.1.6",
+      "apkAsset": "",
+      "exeAsset": "pampa-store-1.1.6-installer.exe",
+      "sizeBytes": 104348160
     },
     "history": [
+      {
+        "version": "1.2.0",
+        "releaseDate": "2026-04-17",
+        "changelog": "Release 1.2.0",
+        "releaseTag": "stable-pampa-store-v1.2.0",
+        "apkAsset": "pampa-store-1.2.0.apk",
+        "exeAsset": "pampa-store-1.2.0-installer.exe",
+        "sizeBytes": 2681868
+      },
       {
         "version": "1.1.5",
         "releaseDate": "2026-04-17",
