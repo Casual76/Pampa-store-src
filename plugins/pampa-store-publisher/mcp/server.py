@@ -696,10 +696,3 @@ def log_error(context: str, error: Exception) -> None:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-tion) -> None:
-    print(f"[pampa-store-publisher] {context}: {error}", file=sys.stderr)
-    traceback.print_exc(file=sys.stderr)
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
