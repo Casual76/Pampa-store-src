@@ -36,8 +36,6 @@ def build_tool(
         "description": description,
         "inputSchema": input_schema,
     }
-    if max_result_chars is not None:
-        tool["_meta"] = {"anthropic/maxResultSizeChars": max_result_chars}
     return tool
 
 
