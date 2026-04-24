@@ -651,7 +651,7 @@ def read_message() -> dict[str, Any] | None:
             return None
 
         line = raw_line.decode("utf-8")
-        if line in ("\r\n", "\n", ""):
+        if not line.strip():
             break
 
         name, separator, value = line.partition(":")
