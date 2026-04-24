@@ -141,33 +141,30 @@ fun PampaStoreApp(
             ?: "Publishing non configurato. Fornisci credenziali GitHub valide."
     }
 
-    val storeViewModel = remember {
+    // Ricalcola i ViewModel se le dipendenze critiche (token, repository) cambiano
+    // Catturiamo esplicitamente i valori per evitare "Snapshot state" exceptions nei thread in background
+    val repoValue = currentStoreRepository
+    val tokenValue = currentToken
+    val adminServiceValue = currentAdminPublishingService
+
+    val storeViewModel = remember(repoValue, tokenValue) {
         StoreViewModel(
             preferencesRepository = com.pampa.store.data.repository.DefaultPreferencesRepository(localStorage),
             installerProvider = installerProvider,
             platformAppService = platformAppService,
             appVersion = appVersion,
-            appRepositoryFactory = { com.pampa.store.data.repository.DefaultAppRepository(GitHubCatalogService(currentStoreRepository, token = currentToken)) }
+            appRepositoryFactory = { com.pampa.store.data.repository.DefaultAppRepository(GitHubCatalogService(repoValue, token = tokenValue)) }
         ).also { it.init() }
     }
     
-    val adminViewModel = remember {
+    val adminViewModel = remember(adminServiceValue, repoValue, tokenValue) {
         AdminViewModel(
             preferencesRepository = com.pampa.store.data.repository.DefaultPreferencesRepository(localStorage),
-            storeRepository = currentStoreRepository,
-            appRepository = com.pampa.store.data.repository.DefaultAppRepository(GitHubCatalogService(currentStoreRepository, token = currentToken)),
-            publishingRepository = com.pampa.store.data.repository.DefaultPublishingRepository(currentAdminPublishingService),
+            storeRepository = repoValue,
+            appRepository = com.pampa.store.data.repository.DefaultAppRepository(GitHubCatalogService(repoValue, token = tokenValue)),
+            publishingRepository = com.pampa.store.data.repository.DefaultPublishingRepository(adminServiceValue),
             releaseAutomationService = releaseAutomationService
         ).also { it.init() }
-    }
-    
-    // Aggiorna i ViewModel quando cambiano i servizi (configurazione dinamica)
-    LaunchedEffect(currentAdminPublishingService, currentStoreRepository, currentToken) {
-        // Qui potremmo chiamare dei metodi di refresh sui ViewModel se necessario
-        // Per ora i ViewModel useranno i nuovi repository nelle loro prossime chiamate
-        // se passiamo delle factory o reference aggiornabili.
-        // Dato che i ViewModel nel codice attuale ricevono istanze fisse, 
-        // forziamo un refresh delle dipendenze interne se possibile.
     }
 
     DisposableEffect(Unit) {
