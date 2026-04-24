@@ -8,7 +8,8 @@
         "plugins\\pampa-store-publisher\\run-pampa-store-publisher.cmd"
       ],
       "env": {
-        "PAMPA_STORE_REPO_ROOT": "C:\\ViboCoded projects\\Pampa store"
+        "PAMPA_STORE_REPO_ROOT": "C:\\VibeCoded Projects\\Pampa-store-src",
+        "PAMPA_GH_TOKEN": "${PAMPA_GH_TOKEN}"
       }
     }
   }
