@@ -43,4 +43,8 @@ class DefaultPreferencesRepository(
     override suspend fun markReleaseArtifactsHandled(signatures: List<String>) {
         localStorage.markReleaseArtifactsHandled(signatures)
     }
+
+    override suspend fun setGitHubCredentials(token: String, owner: String, repo: String) {
+        localStorage.setGitHubCredentials(token, owner, repo)
+    }
 }

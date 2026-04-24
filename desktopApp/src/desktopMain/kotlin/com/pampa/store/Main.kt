@@ -19,21 +19,36 @@ import com.pampa.store.data.model.GitHubRepositoryRef
 import com.pampa.store.platform.AppInstaller
 import com.pampa.store.platform.DesktopPlatformAppService
 import com.pampa.store.ui.PampaStoreApp
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.util.Properties
 
 fun main() = application {
     val prefsStorage = PreferencesStorage()
     val localStorage = LocalStorage(prefsStorage)
+    
+    // Inizializzazione sincrona (bloccante all'avvio) delle preferenze
+    runBlocking { localStorage.init() }
+    
+    val prefs = localStorage.preferences.value
     val installer = AppInstaller()
     val platformAppService = DesktopPlatformAppService()
-    val storeRepository = createDesktopStoreRepository()
-    val githubToken = resolveDesktopGitHubToken()
+    
+    val githubToken = prefs.githubToken.ifBlank { resolveDesktopGitHubToken() }
+    val storeRepository = if (prefs.repoOwner.isNotBlank() && prefs.repoName.isNotBlank()) {
+        GitHubRepositoryRef(
+            repoOwner = prefs.repoOwner,
+            repoName = prefs.repoName,
+            manifestPath = DEFAULT_GITHUB_MANIFEST_PATH
+        )
+    } else {
+        createDesktopStoreRepository()
+    }
+    
     val adminPublishingService = createDesktopAdminPublishingService(storeRepository, githubToken)
-    val appVersion = System.getProperty("pampa.app.version")
-        ?: object {}.javaClass.`package`?.implementationVersion
-        ?: "dev"
-    val adminPanelBuildEnabled = resolveDesktopAdminPanelBuildFlag(appVersion)
+    val appVersion = "1.1.6" // Versione aggiornata come richiesto
+    val adminPanelBuildEnabled = prefs.adminPanelEnabled || resolveDesktopAdminPanelBuildFlag(appVersion)
+    
     val releaseAutomationService = if (adminPanelBuildEnabled && adminPublishingService.isConfigured) {
         DesktopReleaseAutomationService()
     } else {

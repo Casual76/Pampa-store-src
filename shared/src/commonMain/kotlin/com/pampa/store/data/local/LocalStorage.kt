@@ -20,7 +20,10 @@ data class StorePreferences(
     val storeUpdateAutoCheckEnabled: Boolean = false,
     val releaseAutomationProfiles: List<ReleaseAutomationProfile> = emptyList(),
     val pendingReleaseDrafts: List<PendingReleaseDraft> = emptyList(),
-    val handledReleaseArtifacts: Map<String, Long> = emptyMap()
+    val handledReleaseArtifacts: Map<String, Long> = emptyMap(),
+    val githubToken: String = "",
+    val repoOwner: String = "",
+    val repoName: String = ""
 )
 
 @Serializable
@@ -63,6 +66,17 @@ class LocalStorage(private val storage: PreferencesStorage) {
 
     suspend fun setAdminPanelEnabled(enabled: Boolean) {
         savePreferences(_preferences.value.copy(adminPanelEnabled = enabled))
+    }
+
+    suspend fun setGitHubCredentials(token: String, owner: String, repo: String) {
+        savePreferences(
+            _preferences.value.copy(
+                githubToken = token,
+                repoOwner = owner,
+                repoName = repo,
+                adminPanelEnabled = token.isNotBlank()
+            )
+        )
     }
 
     suspend fun setStoreUpdateAutoCheckEnabled(enabled: Boolean) {

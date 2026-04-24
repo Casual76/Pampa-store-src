@@ -20,4 +20,5 @@ interface PreferencesRepository {
     suspend fun savePendingReleaseDrafts(drafts: List<PendingReleaseDraft>)
     suspend fun isReleaseArtifactHandled(signature: String): Boolean
     suspend fun markReleaseArtifactsHandled(signatures: List<String>)
+    suspend fun setGitHubCredentials(token: String, owner: String, repo: String)
 }

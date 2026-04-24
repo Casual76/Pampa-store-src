@@ -36,6 +36,8 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -53,6 +55,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pampa.store.data.local.LocalStorage
@@ -214,54 +217,95 @@ fun SettingsScreen(
                 icon = Icons.Filled.AdminPanelSettings,
                 iconColor = AccentOrange
             ) {
-                SettingsInfoRow(
-                    label = "Strumenti admin",
-                    value = if (adminPanelVisible) "Visibili" else "Nascosti"
-                )
-                Spacer(Modifier.height(8.dp))
+                var githubToken by remember(prefs.githubToken) { mutableStateOf(prefs.githubToken) }
+                var repoOwner by remember(prefs.repoOwner) { mutableStateOf(prefs.repoOwner) }
+                var repoName by remember(prefs.repoName) { mutableStateOf(prefs.repoName) }
+                var showToken by remember { mutableStateOf(false) }
+
+                val hasGitHubChanges = githubToken != prefs.githubToken ||
+                    repoOwner != prefs.repoOwner ||
+                    repoName != prefs.repoName
+
                 SettingsInfoRow(
                     label = "Publishing GitHub",
                     value = if (adminPublishingEnabled) "Configurato" else "Non configurato"
                 )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = if (adminPanelVisible && adminPublishingEnabled) {
-                        "La tab Admin e' disponibile e puoi gestire anche l'automazione release."
-                    } else if (adminPanelVisible) {
-                        adminDisabledReason
-                            ?: "Puoi configurare i profili di automazione, ma per pubblicare serve un token GitHub valido."
-                    } else {
-                        adminDisabledReason
-                            ?: "La tab Admin resta nascosta in questa installazione."
-                    },
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                if (!adminPanelBuildEnabled) {
-                    Spacer(Modifier.height(12.dp))
-                    SettingsToggle(
-                        title = "Mostra strumenti admin su questo PC",
-                        subtitle = "Sblocca la tab Admin anche nella build stable. Il publish resta protetto dalle credenziali GitHub.",
-                        icon = Icons.Filled.AdminPanelSettings,
-                        checked = prefs.adminPanelEnabled,
-                        onCheckedChange = { enabled ->
-                            scope.launch {
-                                localStorage.setAdminPanelEnabled(enabled)
-                            }
-                        }
+                
+                Spacer(Modifier.height(16.dp))
+                
+                OutlinedTextField(
+                    value = githubToken,
+                    onValueChange = { githubToken = it },
+                    label = { Text("GitHub Personal Access Token") },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = if (showToken) androidx.compose.ui.text.input.VisualTransformation.None else PasswordVisualTransformation(),
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = AccentOrange,
+                        focusedLabelColor = AccentOrange
                     )
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        text = if (adminPublishingEnabled) {
-                            "Dopo l'attivazione trovi i profili di automazione nella tab Admin."
-                        } else {
-                            "Dopo l'attivazione puoi configurare i profili di automazione dalla tab Admin. Per pubblicare serve PAMPA_GH_TOKEN o un token GitHub equivalente."
-                        },
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                Spacer(Modifier.height(12.dp))
+                
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = repoOwner,
+                        onValueChange = { repoOwner = it },
+                        label = { Text("Repo Owner") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = AccentOrange,
+                            focusedLabelColor = AccentOrange
+                        )
+                    )
+                    OutlinedTextField(
+                        value = repoName,
+                        onValueChange = { repoName = it },
+                        label = { Text("Repo Name") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = AccentOrange,
+                            focusedLabelColor = AccentOrange
+                        )
                     )
                 }
+
+                if (hasGitHubChanges) {
+                    Spacer(Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                localStorage.setGitHubCredentials(githubToken, repoOwner, repoName)
+                                onConfigSaved()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = AccentOrange)
+                    ) {
+                        Text("Salva credenziali GitHub")
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+                
+                SettingsToggle(
+                    title = "Mostra strumenti admin",
+                    subtitle = "Sblocca la tab Admin anche nella build stable.",
+                    icon = Icons.Filled.AdminPanelSettings,
+                    checked = prefs.adminPanelEnabled,
+                    onCheckedChange = { enabled ->
+                        scope.launch {
+                            localStorage.setAdminPanelEnabled(enabled)
+                        }
+                    }
+                )
             }
 
             SettingsSection(

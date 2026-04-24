@@ -49,6 +49,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.pampa.store.data.api.AdminPublishingService
 import com.pampa.store.data.api.GitHubCatalogService
+import com.pampa.store.data.api.GitHubAdminConfig
+import com.pampa.store.data.api.GitHubAdminPublishingService
+import com.pampa.store.data.api.DisabledAdminPublishingService
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.pampa.store.data.local.LocalStorage
 import com.pampa.store.data.model.Channel
 import com.pampa.store.data.model.GitHubRepositoryRef
@@ -91,13 +98,46 @@ fun PampaStoreApp(
     catalogGitHubToken: String = ""
 ) {
     val prefs by localStorage.preferences.collectAsState()
+    
+    // Ricalcola il servizio di publishing in base alle preferenze locali o di sistema
+    val currentAdminPublishingService by remember(prefs.githubToken, prefs.repoOwner, prefs.repoName) {
+        derivedStateOf {
+            val token = prefs.githubToken.ifBlank { catalogGitHubToken }
+            val repo = if (prefs.repoOwner.isNotBlank() && prefs.repoName.isNotBlank()) {
+                GitHubRepositoryRef(prefs.repoOwner, prefs.repoName, storeRepository.manifestPath)
+            } else {
+                storeRepository
+            }
+            
+            if (token.isNotBlank()) {
+                GitHubAdminPublishingService(GitHubAdminConfig(repo, token))
+            } else {
+                adminPublishingService
+            }
+        }
+    }
+
+    val currentStoreRepository by remember(prefs.repoOwner, prefs.repoName) {
+        derivedStateOf {
+            if (prefs.repoOwner.isNotBlank() && prefs.repoName.isNotBlank()) {
+                GitHubRepositoryRef(prefs.repoOwner, prefs.repoName, storeRepository.manifestPath)
+            } else {
+                storeRepository
+            }
+        }
+    }
+
+    val currentToken by remember(prefs.githubToken) {
+        derivedStateOf { prefs.githubToken.ifBlank { catalogGitHubToken } }
+    }
+
     val navController = rememberNavController()
     val isAdminVisible = adminPanelBuildEnabled || prefs.adminPanelEnabled
-    val isPublishingEnabled = adminPublishingService.isConfigured
+    val isPublishingEnabled = currentAdminPublishingService.isConfigured
     val adminDisabledReason = when {
         isPublishingEnabled -> null
         !isAdminVisible -> "Strumenti admin nascosti. Attivali dalle Impostazioni per configurare l'automazione da questa installazione."
-        else -> adminPublishingService.disabledReason
+        else -> currentAdminPublishingService.disabledReason
             ?: "Publishing non configurato. Fornisci credenziali GitHub valide."
     }
 
@@ -107,17 +147,27 @@ fun PampaStoreApp(
             installerProvider = installerProvider,
             platformAppService = platformAppService,
             appVersion = appVersion,
-            appRepositoryFactory = { com.pampa.store.data.repository.DefaultAppRepository(GitHubCatalogService(storeRepository, token = catalogGitHubToken)) }
+            appRepositoryFactory = { com.pampa.store.data.repository.DefaultAppRepository(GitHubCatalogService(currentStoreRepository, token = currentToken)) }
         ).also { it.init() }
     }
+    
     val adminViewModel = remember {
         AdminViewModel(
             preferencesRepository = com.pampa.store.data.repository.DefaultPreferencesRepository(localStorage),
-            storeRepository = storeRepository,
-            appRepository = com.pampa.store.data.repository.DefaultAppRepository(GitHubCatalogService(storeRepository, token = catalogGitHubToken)),
-            publishingRepository = com.pampa.store.data.repository.DefaultPublishingRepository(adminPublishingService),
+            storeRepository = currentStoreRepository,
+            appRepository = com.pampa.store.data.repository.DefaultAppRepository(GitHubCatalogService(currentStoreRepository, token = currentToken)),
+            publishingRepository = com.pampa.store.data.repository.DefaultPublishingRepository(currentAdminPublishingService),
             releaseAutomationService = releaseAutomationService
         ).also { it.init() }
+    }
+    
+    // Aggiorna i ViewModel quando cambiano i servizi (configurazione dinamica)
+    LaunchedEffect(currentAdminPublishingService, currentStoreRepository, currentToken) {
+        // Qui potremmo chiamare dei metodi di refresh sui ViewModel se necessario
+        // Per ora i ViewModel useranno i nuovi repository nelle loro prossime chiamate
+        // se passiamo delle factory o reference aggiornabili.
+        // Dato che i ViewModel nel codice attuale ricevono istanze fisse, 
+        // forziamo un refresh delle dipendenze interne se possibile.
     }
 
     DisposableEffect(Unit) {

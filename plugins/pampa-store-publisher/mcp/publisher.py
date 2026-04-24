@@ -93,6 +93,7 @@ def build_parser() -> argparse.ArgumentParser:
     publish_parser.add_argument("--exe-path", default="", help="Use an existing EXE/MSI instead of discovering one.")
     publish_parser.add_argument("--task", default="", help="Explicit Gradle release task.")
     publish_parser.add_argument("--skip-build", action="store_true", help="Skip the Gradle build step.")
+    publish_parser.add_argument("--force", action="store_true", help="Skip version check and allow overwriting or downgrading.")
     publish_parser.add_argument("--dry-run", action="store_true", help="Compute the publish plan without pushing changes.")
     return parser
 
@@ -252,7 +253,8 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
     package_name = resolve_package_name(args, app_manifest, selected_module)
     version = resolve_version(args, app_manifest, selected_module)
     channel = args.channel
-    ensure_version_is_newer(app_manifest, channel, version)
+    if not args.force:
+        ensure_version_is_newer(app_manifest, channel, version)
     changelog = resolve_changelog(args, version)
     description = resolve_description(args, app_manifest, app_name)
     developer = resolve_field(args.developer, app_manifest_get(app_manifest, "developer"), "Pampa")
@@ -381,13 +383,25 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
         body=changelog,
         prerelease=(channel == "beta"),
     )
-    upload_asset(
-        upload_url=release_payload["upload_url"],
-        token=token,
-        asset_name=asset_name,
-        content_type="application/vnd.android.package-archive",
-        payload=apk_path.read_bytes(),
-    )
+    
+    if apk_path:
+        upload_asset(
+            upload_url=release_payload["upload_url"],
+            token=token,
+            asset_name=asset_name,
+            content_type="application/vnd.android.package-archive",
+            payload=apk_path.read_bytes(),
+        )
+        
+    if exe_path:
+        upload_asset(
+            upload_url=release_payload["upload_url"],
+            token=token,
+            asset_name=exe_asset_name,
+            content_type="application/octet-stream",
+            payload=exe_path.read_bytes(),
+        )
+        
     upsert_remote_file(
         owner=repository["repoOwner"],
         repo=repository["repoName"],
