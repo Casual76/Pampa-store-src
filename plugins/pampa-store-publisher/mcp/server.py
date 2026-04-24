@@ -383,6 +383,7 @@ TOOLS = [
                     "description": "Inline JSON string to validate.",
                 },
                 "jsonContent": {
+                    "type": "object",
                     "description": "Inline JSON object or array to validate.",
                 },
             },
