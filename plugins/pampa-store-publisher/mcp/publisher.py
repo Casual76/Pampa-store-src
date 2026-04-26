@@ -175,6 +175,7 @@ def build_publish_namespace(params: dict[str, Any] | None) -> argparse.Namespace
         exe_path=coerce_string(source.get("exePath")),
         task=coerce_string(source.get("task")),
         skip_build=coerce_bool(source.get("skipBuild")),
+        force=coerce_bool(source.get("force")),
         dry_run=coerce_bool(source.get("dryRun")),
     )
 
