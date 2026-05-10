@@ -1,11 +1,11 @@
 {
   "app": {
     "id": "pampa-store",
-    "name": "PampaStore",
-    "description": "PampaStore Android app",
+    "name": "Pampa Store",
+    "description": "Store Android per installare e aggiornare le app Pampa.",
     "packageName": "com.pampa.store",
     "iconUrl": "",
-    "category": "General",
+    "category": "Tools",
     "developer": "Pampa",
     "screenshots": [],
     "repository": {
@@ -15,24 +15,33 @@
       "ref": ""
     },
     "stable": {
-      "version": "1.1.7",
-      "releaseDate": "2026-04-24",
-      "changelog": "Release 1.1.7",
-      "releaseTag": "stable-pampa-store-v1.1.7",
-      "apkAsset": "",
-      "exeAsset": "pampa-store-1.1.7-installer.exe",
-      "sizeBytes": 104344064
+      "version": "1.2.1",
+      "releaseDate": "2026-05-10",
+      "changelog": "Redesign mobile completo con estetica Material 3 Expressive: nuovo hero compatto, ricerca e filtri integrati, card app ridisegnate, dock di navigazione aggiornato, palette rinnovata e predictive back abilitato.",
+      "releaseTag": "stable-pampa-store-v1.2.1",
+      "apkAsset": "pampa-store-1.2.1.apk",
+      "exeAsset": "",
+      "sizeBytes": 2698448
     },
     "beta": {
-      "version": "1.1.7",
-      "releaseDate": "2026-04-24",
-      "changelog": "Release 1.1.7",
-      "releaseTag": "stable-pampa-store-v1.1.7",
-      "apkAsset": "",
-      "exeAsset": "pampa-store-1.1.7-installer.exe",
-      "sizeBytes": 104344064
+      "version": "1.2.1",
+      "releaseDate": "2026-05-10",
+      "changelog": "Redesign mobile completo con estetica Material 3 Expressive: nuovo hero compatto, ricerca e filtri integrati, card app ridisegnate, dock di navigazione aggiornato, palette rinnovata e predictive back abilitato.",
+      "releaseTag": "stable-pampa-store-v1.2.1",
+      "apkAsset": "pampa-store-1.2.1.apk",
+      "exeAsset": "",
+      "sizeBytes": 2698448
     },
     "history": [
+      {
+        "version": "1.1.7",
+        "releaseDate": "2026-04-24",
+        "changelog": "Release 1.1.7",
+        "releaseTag": "stable-pampa-store-v1.1.7",
+        "apkAsset": "",
+        "exeAsset": "pampa-store-1.1.7-installer.exe",
+        "sizeBytes": 104344064
+      },
       {
         "version": "1.1.6",
         "releaseDate": "2026-04-24",
