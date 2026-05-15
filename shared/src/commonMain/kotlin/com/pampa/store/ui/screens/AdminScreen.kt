@@ -1,7 +1,7 @@
 package com.pampa.store.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,6 +32,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
@@ -60,7 +61,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -83,8 +84,6 @@ import com.pampa.store.ui.components.EmptyState
 import com.pampa.store.ui.components.StatusBadge
 import com.pampa.store.ui.theme.AccentGreen
 import com.pampa.store.ui.theme.AccentOrange
-import com.pampa.store.ui.theme.GlassStrokeDark
-import com.pampa.store.ui.theme.GlassStrokeLight
 import com.pampa.store.ui.theme.PrimaryViolet
 import com.pampa.store.viewmodel.AdminViewModel
 import kotlinx.coroutines.launch
@@ -304,7 +303,6 @@ private fun StoreUpdateCard(
     val filePicker = rememberFilePicker()
     val scope = rememberCoroutineScope()
     val isDesktopPlatform = getCurrentPlatform() == AppPlatform.WINDOWS
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
 
     var releaseChannel by rememberSaveable { mutableStateOf(Channel.STABLE) }
     var version by rememberSaveable { mutableStateOf("") }
@@ -326,32 +324,15 @@ private fun StoreUpdateCard(
         }
     }
 
-    Card(
-        modifier = Modifier.border(
-            width = 1.dp,
-            color = if (isDarkTheme) {
-                GlassStrokeDark
-            } else {
-                GlassStrokeLight
-            },
-            shape = RoundedCornerShape(24.dp)
+    ElevatedCard(
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isDarkTheme) 0.68f else 0.84f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            AccentOrange.copy(alpha = 0.14f),
-                            MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-                )
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -515,23 +496,13 @@ private fun AdminAppCard(
     onDelete: () -> Unit
 ) {
     var confirmDelete by remember { mutableStateOf(false) }
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
 
-    Card(
-        modifier = Modifier.border(
-            width = 1.dp,
-            color = if (isDarkTheme) {
-                GlassStrokeDark
-            } else {
-                GlassStrokeLight
-            },
-            shape = RoundedCornerShape(22.dp)
+    ElevatedCard(
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isDarkTheme) 0.66f else 0.82f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -962,19 +933,11 @@ private fun VersionLine(
     version: VersionInfo,
     color: Color
 ) {
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
-    Card(
-        modifier = Modifier.border(
-            width = 1.dp,
-            color = if (isDarkTheme) {
-                GlassStrokeDark
-            } else {
-                GlassStrokeLight
-            },
-            shape = RoundedCornerShape(16.dp)
-        ),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = if (isDarkTheme) 0.14f else 0.18f))
+    ElevatedCard(
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = color.copy(alpha = 0.12f)
+        )
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -991,19 +954,11 @@ private fun VersionLine(
 
 @Composable
 private fun WarningCard(message: String) {
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
-    Card(
-        modifier = Modifier.border(
-            width = 1.dp,
-            color = if (isDarkTheme) {
-                GlassStrokeDark
-            } else {
-                GlassStrokeLight
-            },
-            shape = RoundedCornerShape(20.dp)
-        ),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.1f))
+    ElevatedCard(
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        )
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

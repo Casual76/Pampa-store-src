@@ -1,7 +1,6 @@
 package com.pampa.store.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
@@ -37,9 +35,11 @@ import androidx.compose.material.icons.filled.SystemUpdateAlt
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -58,7 +58,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.pampa.store.data.model.AppDisplayInfo
 import com.pampa.store.data.model.AppEntry
@@ -67,9 +66,6 @@ import com.pampa.store.data.model.DownloadState
 import com.pampa.store.data.model.OwnershipFilter
 import com.pampa.store.ui.theme.AccentGreen
 import com.pampa.store.ui.theme.AccentOrange
-import com.pampa.store.ui.theme.GlassStrokeDark
-import com.pampa.store.ui.theme.GlassStrokeLight
-import com.pampa.store.ui.theme.PrimaryViolet
 import com.pampa.store.ui.theme.getCategoryColor
 
 @Composable
@@ -80,37 +76,29 @@ fun AppCard(
     onInstallClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
-    Card(
+    val categoryColor = getCategoryColor(app.entry.category)
+
+    ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .border(
-                width = 1.dp,
-                color = if (isDarkTheme) {
-                    GlassStrokeDark
-                } else {
-                    GlassStrokeLight
-                },
-                shape = RoundedCornerShape(30.dp)
-            ),
-        shape = RoundedCornerShape(30.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = if (isDarkTheme) 0.74f else 0.92f)
+            .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
     ) {
         Column {
+            // Hero area with category gradient
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(188.dp)
+                    .height(160.dp)
                     .background(
                         Brush.linearGradient(
                             colors = listOf(
-                                getCategoryColor(app.entry.category).copy(alpha = 0.42f),
-                                AccentOrange.copy(alpha = 0.18f),
-                                MaterialTheme.colorScheme.surfaceVariant
+                                categoryColor.copy(alpha = 0.3f),
+                                MaterialTheme.colorScheme.surfaceContainerHigh
                             )
                         )
                     )
@@ -118,55 +106,55 @@ fun AppCard(
                 Icon(
                     imageVector = categoryIconFor(app.entry.category),
                     contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.14f),
+                    tint = categoryColor.copy(alpha = 0.1f),
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(20.dp)
-                        .size(96.dp)
+                        .padding(16.dp)
+                        .size(80.dp)
                 )
 
+                // Category chip
                 Surface(
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .padding(12.dp),
-                    shape = RoundedCornerShape(999.dp),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = if (isDarkTheme) 0.76f else 0.9f)
+                    shape = MaterialTheme.shapes.small,
+                    color = categoryColor.copy(alpha = 0.15f),
+                    contentColor = categoryColor
                 ) {
                     Text(
                         text = app.entry.category,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                         style = MaterialTheme.typography.labelMedium,
-                        color = getCategoryColor(app.entry.category),
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
 
+                // App artwork + name overlay at bottom
                 Row(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .padding(18.dp),
+                        .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     AppArtwork(
                         app = app.entry,
-                        modifier = Modifier.size(78.dp),
-                        cornerRadius = 24
+                        modifier = Modifier.size(64.dp),
+                        cornerRadius = 18
                     )
-
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
                             text = app.entry.name,
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
                             text = app.entry.developer,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White.copy(alpha = 0.82f)
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -174,8 +162,8 @@ fun AppCard(
                 if (app.hasUpdate) {
                     StatusBadge(
                         text = "Aggiornamento",
-                        background = AccentGreen.copy(alpha = 0.96f),
-                        contentColor = Color(0xFF11261B),
+                        background = AccentGreen,
+                        contentColor = Color.White,
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(12.dp)
@@ -183,17 +171,17 @@ fun AppCard(
                 }
             }
 
+            // Content area
             Column(
-                modifier = Modifier.padding(18.dp),
+                modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
                     text = app.entry.description,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                    lineHeight = 20.sp
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Row(
@@ -201,19 +189,11 @@ fun AppCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(
-                            text = buildVersionLabel(app, preferredChannel),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = app.entry.category,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = getCategoryColor(app.entry.category)
-                        )
-                    }
-
+                    Text(
+                        text = buildVersionLabel(app, preferredChannel),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     InstallButton(
                         downloadState = app.downloadState,
                         isInstalled = app.installedVersion != null,
@@ -234,50 +214,28 @@ fun AppListItem(
     onInstallClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
-    Card(
+    val categoryColor = getCategoryColor(app.entry.category)
+
+    ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .border(
-                width = 1.dp,
-                color = if (isDarkTheme) {
-                    GlassStrokeDark
-                } else {
-                    GlassStrokeLight
-                },
-                shape = RoundedCornerShape(24.dp)
-            ),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = if (isDarkTheme) 0.74f else 0.9f)
+            .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
     ) {
         Row(
-            modifier = Modifier.padding(18.dp),
+            modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                getCategoryColor(app.entry.category).copy(alpha = 0.34f),
-                                MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        )
-                    )
-                    .padding(8.dp)
-            ) {
-                AppArtwork(
-                    app = app.entry,
-                    modifier = Modifier.size(64.dp),
-                    cornerRadius = 18
-                )
-            }
+            AppArtwork(
+                app = app.entry,
+                modifier = Modifier.size(56.dp),
+                cornerRadius = 16
+            )
 
             Column(
                 modifier = Modifier.weight(1f),
@@ -285,37 +243,46 @@ fun AppListItem(
             ) {
                 Text(
                     text = app.entry.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = app.entry.developer,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = app.entry.description,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                        StatusBadge(
-                            text = app.entry.category,
-                            background = getCategoryColor(app.entry.category).copy(alpha = 0.12f),
-                            contentColor = getCategoryColor(app.entry.category)
-                        )
-                    if (app.installedVersion != null) {
-                        StatusBadge(
-                            text = "Installata",
-                            background = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    StatusBadge(
+                        text = app.entry.category,
+                        background = categoryColor.copy(alpha = 0.12f),
+                        contentColor = categoryColor
+                    )
                     if (app.hasUpdate) {
                         StatusBadge(
-                            text = "Da aggiornare",
-                            background = AccentGreen.copy(alpha = 0.2f),
+                            text = "Update",
+                            background = AccentGreen.copy(alpha = 0.15f),
                             contentColor = AccentGreen
+                        )
+                    } else if (app.installedVersion != null) {
+                        StatusBadge(
+                            text = "Installata",
+                            background = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            contentColor = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -325,7 +292,8 @@ fun AppListItem(
                 downloadState = app.downloadState,
                 isInstalled = app.installedVersion != null,
                 hasUpdate = app.hasUpdate,
-                onClick = onInstallClick
+                onClick = onInstallClick,
+                modifier = Modifier.size(44.dp)
             )
         }
     }
@@ -344,8 +312,7 @@ fun AppArtwork(
                 Brush.linearGradient(
                     colors = listOf(
                         getCategoryColor(app.category),
-                        getCategoryColor(app.category).copy(alpha = 0.62f),
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                        getCategoryColor(app.category).copy(alpha = 0.6f)
                     )
                 )
             ),
@@ -355,7 +322,7 @@ fun AppArtwork(
             imageVector = categoryIconFor(app.category),
             contentDescription = null,
             tint = Color.White,
-            modifier = Modifier.size(28.dp)
+            modifier = Modifier.size(24.dp)
         )
 
         if (app.iconUrl.isNotBlank()) {
@@ -382,23 +349,12 @@ fun AppScreenshotCarousel(
         contentPadding = PaddingValues(end = 8.dp)
     ) {
         items(screenshots) { screenshot ->
-            Card(
+            ElevatedCard(
                 modifier = Modifier
-                    .width(232.dp)
-                    .aspectRatio(16f / 9f)
-                    .border(
-                        width = 1.dp,
-                        color = if (MaterialTheme.colorScheme.background.red < 0.3f) {
-                            GlassStrokeDark
-                        } else {
-                            GlassStrokeLight
-                        },
-                        shape = RoundedCornerShape(20.dp)
-                    ),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.78f)
-                )
+                    .width(220.dp)
+                    .aspectRatio(16f / 9f),
+                shape = MaterialTheme.shapes.medium,
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -407,7 +363,7 @@ fun AppScreenshotCarousel(
                     Icon(
                         imageVector = Icons.Filled.Android,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
                         modifier = Modifier.size(36.dp)
                     )
                     AsyncImage(
@@ -437,7 +393,7 @@ fun InstallButton(
                     progress = { downloadState.progress },
                     modifier = Modifier.size(40.dp),
                     strokeWidth = 3.dp,
-                    color = PrimaryViolet
+                    color = MaterialTheme.colorScheme.primary
                 )
                 Text(
                     text = "${(downloadState.progress * 100).toInt()}",
@@ -454,7 +410,7 @@ fun InstallButton(
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
                     strokeWidth = 3.dp,
-                    color = AccentOrange
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             }
         }
@@ -464,8 +420,8 @@ fun InstallButton(
                 onClick = onClick,
                 modifier = modifier.size(40.dp),
                 colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.14f),
-                    contentColor = MaterialTheme.colorScheme.error
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
                 )
             ) {
                 Icon(Icons.Filled.ErrorOutline, contentDescription = "Riprova")
@@ -474,9 +430,9 @@ fun InstallButton(
 
         else -> {
             val (icon, containerColor, iconTint) = when {
-                hasUpdate -> Triple(Icons.Filled.SystemUpdateAlt, AccentGreen, Color.Black)
-                isInstalled -> Triple(Icons.Filled.CheckCircle, MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.onSurfaceVariant)
-                else -> Triple(Icons.Filled.Download, PrimaryViolet, Color.White)
+                hasUpdate -> Triple(Icons.Filled.SystemUpdateAlt, AccentGreen, Color.White)
+                isInstalled -> Triple(Icons.Filled.CheckCircle, MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.onSurfaceVariant)
+                else -> Triple(Icons.Filled.Download, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary)
             }
 
             if (isInstalled && !hasUpdate) {
@@ -510,71 +466,28 @@ fun ChannelToggle(
     hasBeta: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
     Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(18.dp))
-            .border(
-                width = 1.dp,
-                color = if (isDarkTheme) {
-                    GlassStrokeDark
-                } else {
-                    GlassStrokeLight
-                },
-                shape = RoundedCornerShape(18.dp)
-            )
-            .background(
-                Brush.horizontalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isDarkTheme) 0.7f else 0.82f),
-                        MaterialTheme.colorScheme.surface.copy(alpha = if (isDarkTheme) 0.6f else 0.88f)
-                    )
-                )
-            )
-            .padding(4.dp),
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        ChannelChip(
-            label = "Stable",
+        FilterChip(
             selected = selectedChannel == Channel.STABLE,
-            enabled = true,
-            color = AccentGreen,
-            onClick = { onChannelChanged(Channel.STABLE) }
+            onClick = { onChannelChanged(Channel.STABLE) },
+            label = { Text("Stable") },
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = AccentGreen.copy(alpha = 0.15f),
+                selectedLabelColor = AccentGreen
+            )
         )
-        ChannelChip(
-            label = "Beta",
+        FilterChip(
             selected = selectedChannel == Channel.BETA,
+            onClick = { onChannelChanged(Channel.BETA) },
             enabled = hasBeta,
-            color = AccentOrange,
-            onClick = { onChannelChanged(Channel.BETA) }
-        )
-    }
-}
-
-@Composable
-private fun ChannelChip(
-    label: String,
-    selected: Boolean,
-    enabled: Boolean,
-    color: Color,
-    onClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .clip(RoundedCornerShape(14.dp))
-            .clickable(enabled = enabled, onClick = onClick),
-        color = if (selected) color.copy(alpha = 0.22f) else Color.Transparent,
-        shape = RoundedCornerShape(14.dp)
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 11.dp),
-            color = when {
-                !enabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
-                selected -> color
-                else -> MaterialTheme.colorScheme.onSurfaceVariant
-            },
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+            label = { Text("Beta") },
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = AccentOrange.copy(alpha = 0.15f),
+                selectedLabelColor = AccentOrange
+            )
         )
     }
 }
@@ -590,12 +503,16 @@ fun SearchBar(
         onValueChange = onQueryChanged,
         modifier = modifier.fillMaxWidth(),
         singleLine = true,
-        shape = RoundedCornerShape(22.dp),
+        shape = MaterialTheme.shapes.extraLarge,
         placeholder = {
-            Text("Cerca app, categorie o developer")
+            Text("Cerca nello store")
         },
         leadingIcon = {
-            Icon(Icons.Filled.Search, contentDescription = null, tint = AccentOrange)
+            Icon(
+                Icons.Filled.Search,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         },
         trailingIcon = {
             if (query.isNotBlank()) {
@@ -605,10 +522,10 @@ fun SearchBar(
             }
         },
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = AccentOrange,
-            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.28f),
-            focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
-            unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f)
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
         )
     )
 }
@@ -632,13 +549,7 @@ fun OwnershipFilterRow(
             FilterChip(
                 selected = selectedFilter == filter,
                 onClick = { onFilterSelected(filter) },
-                label = { Text(label) },
-                colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = PrimaryViolet.copy(alpha = 0.24f),
-                    selectedLabelColor = PrimaryViolet,
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.56f),
-                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                label = { Text(label) }
             )
         }
     }
@@ -659,26 +570,19 @@ fun CategoryFilterRow(
             FilterChip(
                 selected = selectedCategory == null,
                 onClick = { onCategorySelected(null) },
-                label = { Text("Tutte le categorie") },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = PrimaryViolet.copy(alpha = 0.24f),
-                    selectedLabelColor = PrimaryViolet,
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.56f),
-                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                label = { Text("Tutte") }
             )
         }
 
         items(categories) { category ->
+            val color = getCategoryColor(category)
             FilterChip(
                 selected = selectedCategory == category,
                 onClick = { onCategorySelected(category) },
                 label = { Text(category) },
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = getCategoryColor(category).copy(alpha = 0.18f),
-                    selectedLabelColor = getCategoryColor(category),
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.56f),
-                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    selectedContainerColor = color.copy(alpha = 0.15f),
+                    selectedLabelColor = color
                 )
             )
         }
@@ -694,13 +598,13 @@ fun StatusBadge(
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(999.dp),
+        shape = MaterialTheme.shapes.small,
         color = background
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelSmall,
             color = contentColor,
             fontWeight = FontWeight.SemiBold
         )
@@ -721,25 +625,19 @@ fun EmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Box(
-            modifier = Modifier
-                .size(78.dp)
-                .clip(RoundedCornerShape(26.dp))
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            AccentOrange.copy(alpha = 0.24f),
-                            PrimaryViolet.copy(alpha = 0.18f)
-                        )
-                    )
-                ),
-            contentAlignment = Alignment.Center
+        Surface(
+            modifier = Modifier.size(72.dp),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ) {
-            Icon(
-                imageVector = Icons.Filled.Apps,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface
-            )
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                Icon(
+                    imageVector = Icons.Filled.Apps,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
         }
         Spacer(Modifier.height(16.dp))
         Text(
@@ -778,7 +676,7 @@ private fun buildVersionLabel(app: AppDisplayInfo, preferredChannel: Channel): S
         if (app.installedVersion != null) {
             append("Installata v${app.installedVersion}")
         } else {
-            append("Ultima v${preferredVersion ?: "-"}")
+            append("v${preferredVersion ?: "-"}")
         }
     }
 }

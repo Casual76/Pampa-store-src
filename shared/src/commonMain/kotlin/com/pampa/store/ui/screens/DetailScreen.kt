@@ -1,7 +1,6 @@
 package com.pampa.store.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ErrorOutline
@@ -30,9 +28,9 @@ import androidx.compose.material.icons.filled.SettingsApplications
 import androidx.compose.material.icons.filled.SystemUpdateAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -68,9 +66,6 @@ import com.pampa.store.ui.components.EmptyState
 import com.pampa.store.ui.components.StatusBadge
 import com.pampa.store.ui.theme.AccentGreen
 import com.pampa.store.ui.theme.AccentOrange
-import com.pampa.store.ui.theme.GlassStrokeDark
-import com.pampa.store.ui.theme.GlassStrokeLight
-import com.pampa.store.ui.theme.PrimaryViolet
 import com.pampa.store.ui.theme.getCategoryColor
 import com.pampa.store.viewmodel.StoreViewModel
 
@@ -120,7 +115,6 @@ fun DetailScreen(
         appDisplay.downloadState is DownloadState.AwaitingUserAction ||
         appDisplay.downloadState is DownloadState.Installing
     val hasLaunchTarget = appDisplay.installedVersion != null && appDisplay.entry.packageName.isNotBlank()
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
 
     Scaffold(
         modifier = modifier
@@ -144,32 +138,24 @@ fun DetailScreen(
                 )
             )
         },
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             Surface(
-                tonalElevation = 0.dp,
-                shadowElevation = 0.dp,
-                color = Color.Transparent
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                tonalElevation = 3.dp
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.surface.copy(alpha = if (isDarkTheme) 0.04f else 0.08f),
-                                    MaterialTheme.colorScheme.surface.copy(alpha = if (isDarkTheme) 0.86f else 0.92f)
-                                )
-                            )
-                        )
                         .padding(horizontal = 20.dp, vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     if (!installPrerequisites.canInstallPackages) {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = AccentOrange.copy(alpha = 0.12f)
+                        ElevatedCard(
+                            colors = CardDefaults.elevatedCardColors(
+                                containerColor = MaterialTheme.colorScheme.tertiaryContainer
                             ),
-                            shape = RoundedCornerShape(18.dp)
+                            shape = MaterialTheme.shapes.medium
                         ) {
                             Row(
                                 modifier = Modifier.padding(14.dp),
@@ -179,12 +165,12 @@ fun DetailScreen(
                                 Icon(
                                     imageVector = Icons.Filled.SettingsApplications,
                                     contentDescription = null,
-                                    tint = AccentOrange
+                                    tint = MaterialTheme.colorScheme.onTertiaryContainer
                                 )
                                 Text(
                                     text = installPrerequisites.message ?: "Abilita le origini sconosciute per continuare.",
                                     modifier = Modifier.weight(1f),
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
                                 )
                             }
                         }
@@ -192,8 +178,11 @@ fun DetailScreen(
                         Button(
                             onClick = viewModel::openInstallSettings,
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(18.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = AccentOrange)
+                            shape = MaterialTheme.shapes.medium,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                contentColor = MaterialTheme.colorScheme.onTertiary
+                            )
                         ) {
                             Icon(Icons.Filled.SettingsApplications, contentDescription = null)
                             Spacer(Modifier.size(8.dp))
@@ -207,10 +196,10 @@ fun DetailScreen(
                                 .height(56.dp),
                             enabled = versionInfo != null && !isBusy &&
                                 (appDisplay.installedVersion == null || appDisplay.hasUpdate || appDisplay.downloadState is DownloadState.Error),
-                            shape = RoundedCornerShape(18.dp),
+                            shape = MaterialTheme.shapes.medium,
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (appDisplay.hasUpdate) AccentGreen else PrimaryViolet,
-                                contentColor = if (appDisplay.hasUpdate) Color.Black else Color.White
+                                containerColor = if (appDisplay.hasUpdate) AccentGreen else MaterialTheme.colorScheme.primary,
+                                contentColor = if (appDisplay.hasUpdate) Color.White else MaterialTheme.colorScheme.onPrimary
                             )
                         ) {
                             when (val state = appDisplay.downloadState) {
@@ -278,7 +267,7 @@ fun DetailScreen(
                             OutlinedButton(
                                 onClick = { viewModel.launchInstalledApp(appDisplay.entry.packageName) },
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(18.dp)
+                                shape = MaterialTheme.shapes.medium
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null)
                                 Spacer(Modifier.size(8.dp))
@@ -298,7 +287,7 @@ fun DetailScreen(
                 top = innerPadding.calculateTopPadding(),
                 bottom = innerPadding.calculateBottomPadding() + 18.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
                 HeroSection(appDisplay = appDisplay)
@@ -356,22 +345,14 @@ fun DetailScreen(
 
 @Composable
 private fun HeroSection(appDisplay: AppDisplayInfo) {
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
-    Card(
-        modifier = Modifier.border(
-            width = 1.dp,
-            color = if (isDarkTheme) {
-                GlassStrokeDark
-            } else {
-                GlassStrokeLight
-            },
-            shape = RoundedCornerShape(30.dp)
+    val categoryColor = getCategoryColor(appDisplay.entry.category)
+
+    ElevatedCard(
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = RoundedCornerShape(30.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = if (isDarkTheme) 0.76f else 0.94f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
     ) {
         Box(
             modifier = Modifier
@@ -379,69 +360,58 @@ private fun HeroSection(appDisplay: AppDisplayInfo) {
                 .background(
                     Brush.linearGradient(
                         colors = listOf(
-                            getCategoryColor(appDisplay.entry.category).copy(alpha = 0.4f),
-                            AccentOrange.copy(alpha = if (isDarkTheme) 0.16f else 0.1f),
-                            MaterialTheme.colorScheme.surfaceVariant
+                            categoryColor.copy(alpha = 0.2f),
+                            MaterialTheme.colorScheme.surfaceContainerHigh
                         )
                     )
                 )
         ) {
-            Icon(
-                imageVector = Icons.Filled.AutoAwesome,
-                contentDescription = null,
-                tint = Color.White.copy(alpha = 0.12f),
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(20.dp)
-                    .size(110.dp)
-            )
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(22.dp),
+                    .padding(20.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AppArtwork(
                     app = appDisplay.entry,
-                    modifier = Modifier.size(112.dp),
-                    cornerRadius = 30
+                    modifier = Modifier.size(88.dp),
+                    cornerRadius = 24
                 )
 
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     StatusBadge(
                         text = appDisplay.entry.category,
-                        background = MaterialTheme.colorScheme.surface.copy(alpha = if (isDarkTheme) 0.52f else 0.78f),
-                        contentColor = getCategoryColor(appDisplay.entry.category)
+                        background = categoryColor.copy(alpha = 0.12f),
+                        contentColor = categoryColor
                     )
 
                     Text(
                         text = appDisplay.entry.name,
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = appDisplay.entry.developer,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (appDisplay.installedVersion != null) {
                             StatusBadge(
-                                text = "Installata v${appDisplay.installedVersion}",
-                                background = PrimaryViolet.copy(alpha = 0.15f),
-                                contentColor = PrimaryViolet
+                                text = "v${appDisplay.installedVersion}",
+                                background = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                         if (appDisplay.hasUpdate) {
                             StatusBadge(
-                                text = "Aggiornamento disponibile",
-                                background = AccentGreen.copy(alpha = 0.18f),
+                                text = "Aggiornamento",
+                                background = AccentGreen.copy(alpha = 0.15f),
                                 contentColor = AccentGreen
                             )
                         }
@@ -458,50 +428,32 @@ private fun VersionInfoSection(
     selectedChannel: Channel,
     versionInfo: VersionInfo?
 ) {
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
     if (versionInfo == null) {
-        Card(
-            modifier = Modifier.border(
-                width = 1.dp,
-                color = if (isDarkTheme) {
-                    GlassStrokeDark
-                } else {
-                    GlassStrokeLight
-                },
-                shape = RoundedCornerShape(22.dp)
-            ),
-            shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isDarkTheme) 0.64f else 0.82f)
+        ElevatedCard(
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
             )
         ) {
             Text(
                 text = "Nessuna release ${selectedChannel.displayName} disponibile.",
-                modifier = Modifier.padding(18.dp),
+                modifier = Modifier.padding(16.dp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         return
     }
 
-    Card(
-        modifier = Modifier.border(
-            width = 1.dp,
-            color = if (isDarkTheme) {
-                GlassStrokeDark
-            } else {
-                GlassStrokeLight
-            },
-            shape = RoundedCornerShape(22.dp)
+    ElevatedCard(
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = if (isDarkTheme) 0.72f else 0.9f)
-        )
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
     ) {
         Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -510,15 +462,15 @@ private fun VersionInfoSection(
             ) {
                 Text(
                     text = "Release ${selectedChannel.displayName}",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )
                 StatusBadge(
                     text = "v${versionInfo.version}",
                     background = if (selectedChannel == Channel.BETA) {
-                        AccentOrange.copy(alpha = 0.2f)
+                        AccentOrange.copy(alpha = 0.15f)
                     } else {
-                        AccentGreen.copy(alpha = 0.2f)
+                        AccentGreen.copy(alpha = 0.15f)
                     },
                     contentColor = if (selectedChannel == Channel.BETA) AccentOrange else AccentGreen
                 )
@@ -526,21 +478,24 @@ private fun VersionInfoSection(
 
             Text(
                 text = "Pubblicata il ${versionInfo.releaseDate}",
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             if (appDisplay.installedVersion != null) {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Text(
                     text = "Versione installata: ${appDisplay.installedVersion}",
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
             if (versionInfo.changelog.isNotBlank()) {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Text(
                     text = versionInfo.changelog,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -550,25 +505,16 @@ private fun VersionInfoSection(
 
 @Composable
 private fun DescriptionCard(description: String) {
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
-    Card(
-        modifier = Modifier.border(
-            width = 1.dp,
-            color = if (isDarkTheme) {
-                GlassStrokeDark
-            } else {
-                GlassStrokeLight
-            },
-            shape = RoundedCornerShape(22.dp)
+    ElevatedCard(
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = if (isDarkTheme) 0.72f else 0.9f)
-        )
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
     ) {
         Text(
             text = description,
-            modifier = Modifier.padding(18.dp),
+            modifier = Modifier.padding(16.dp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyLarge
         )
@@ -577,9 +523,11 @@ private fun DescriptionCard(description: String) {
 
 @Composable
 private fun ErrorCard(message: String) {
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.12f))
+    ElevatedCard(
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        )
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -589,11 +537,11 @@ private fun ErrorCard(message: String) {
             Icon(
                 imageVector = Icons.Filled.ErrorOutline,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.error
+                tint = MaterialTheme.colorScheme.onErrorContainer
             )
             Text(
                 text = message,
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.onErrorContainer
             )
         }
     }
@@ -601,39 +549,36 @@ private fun ErrorCard(message: String) {
 
 @Composable
 private fun HistoryCard(version: VersionInfo) {
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
-    Card(
-        modifier = Modifier.border(
-            width = 1.dp,
-            color = if (isDarkTheme) {
-                GlassStrokeDark
-            } else {
-                GlassStrokeLight
-            },
-            shape = RoundedCornerShape(20.dp)
+    ElevatedCard(
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isDarkTheme) 0.6f else 0.8f)
-        )
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Text(
-                text = "v${version.version}",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = version.releaseDate,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "v${version.version}",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = version.releaseDate,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             if (version.changelog.isNotBlank()) {
                 Text(
                     text = version.changelog,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -650,10 +595,14 @@ private fun SectionTitle(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = AccentOrange)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold
         )
     }

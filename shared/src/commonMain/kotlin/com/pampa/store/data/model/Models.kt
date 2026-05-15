@@ -178,6 +178,21 @@ data class StoreUpdateState(
     val error: String? = null
 )
 
+sealed class SeamlessUpdateState {
+    data object Idle : SeamlessUpdateState()
+    data object Checking : SeamlessUpdateState()
+    data class Downloading(val progress: Float) : SeamlessUpdateState()
+    data class Ready(
+        val version: String,
+        val changelog: String,
+        val filePath: String,
+        val appId: String = STORE_APP_ID
+    ) : SeamlessUpdateState()
+    data class Installing(val message: String) : SeamlessUpdateState()
+    data object Dismissed : SeamlessUpdateState()
+    data class Error(val message: String) : SeamlessUpdateState()
+}
+
 fun ApkValidationResult.isPublishable(): Boolean = this is ApkValidationResult.Valid
 
 fun GitHubRepositoryRef.isConfigured(): Boolean {

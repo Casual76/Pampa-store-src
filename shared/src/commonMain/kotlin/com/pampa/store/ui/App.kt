@@ -2,8 +2,6 @@ package com.pampa.store.ui
 
 import com.pampa.store.automation.NoOpReleaseAutomationService
 import com.pampa.store.automation.ReleaseAutomationService
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
@@ -12,22 +10,12 @@ import com.pampa.store.ui.components.PampaNavigationRail
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AdminPanelSettings
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Store
-import androidx.compose.material.icons.outlined.AdminPanelSettings
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Button
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,10 +24,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -63,18 +47,19 @@ import com.pampa.store.data.model.PendingReleaseDraft
 import com.pampa.store.platform.InstallerService
 import com.pampa.store.platform.PlatformAppService
 import com.pampa.store.ui.components.EmptyState
+import com.pampa.store.ui.components.SeamlessUpdateBanner
 import com.pampa.store.ui.screens.AdminScreen
 import com.pampa.store.ui.screens.DetailScreen
 import com.pampa.store.ui.screens.HomeScreen
 import com.pampa.store.ui.screens.SettingsScreen
-import com.pampa.store.ui.theme.GlassStrokeDark
-import com.pampa.store.ui.theme.GlassStrokeLight
-import com.pampa.store.ui.theme.AccentOrange
 import com.pampa.store.ui.theme.PampaStoreTheme
-import com.pampa.store.ui.theme.PrimaryViolet
-import com.pampa.store.ui.theme.SecondaryTeal
 import com.pampa.store.viewmodel.AdminViewModel
 import com.pampa.store.viewmodel.StoreViewModel
+import com.pampa.store.data.model.SeamlessUpdateState
+import androidx.compose.foundation.layout.Column
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 
 private object Routes {
     const val Home = "home"
@@ -178,65 +163,13 @@ fun PampaStoreApp(
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBottomBar = currentRoute != Routes.Detail
     val activePromptDraft by adminViewModel.activePromptDraft.collectAsState()
+    val seamlessUpdateState by storeViewModel.seamlessUpdateState.collectAsState()
 
     PampaStoreTheme(darkTheme = prefs.darkMode) {
-        val isDarkTheme = prefs.darkMode
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.background,
-                            MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isDarkTheme) 0.92f else 0.45f)
-                        )
-                    )
-                )
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                AccentOrange.copy(alpha = if (isDarkTheme) 0.2f else 0.12f),
-                                Color.Transparent
-                            ),
-                            center = androidx.compose.ui.geometry.Offset(180f, 120f),
-                            radius = 760f
-                        )
-                    )
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                PrimaryViolet.copy(alpha = if (isDarkTheme) 0.22f else 0.13f),
-                                Color.Transparent
-                            ),
-                            center = androidx.compose.ui.geometry.Offset(1180f, 360f),
-                            radius = 1120f
-                        )
-                    )
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                SecondaryTeal.copy(alpha = if (isDarkTheme) 0.18f else 0.1f),
-                                Color.Transparent
-                            ),
-                            center = androidx.compose.ui.geometry.Offset(1040f, 2080f),
-                            radius = 1180f
-                        )
-                    )
-            )
-
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 val isWideScreen = maxWidth >= 600.dp
                 Row(modifier = Modifier.fillMaxSize()) {
@@ -244,7 +177,6 @@ fun PampaStoreApp(
                         PampaNavigationRail(
                             currentRoute = currentRoute,
                             isAdminVisible = isAdminVisible,
-                            isDarkTheme = isDarkTheme,
                             onNavigateHome = {
                                 navController.navigate(Routes.Home) {
                                     launchSingleTop = true
@@ -269,13 +201,12 @@ fun PampaStoreApp(
 
                     Scaffold(
                         modifier = Modifier.weight(1f),
-                        containerColor = Color.Transparent,
+                        containerColor = MaterialTheme.colorScheme.background,
                         bottomBar = {
                             if (!isWideScreen && showBottomBar) {
                                 PampaNavigationBar(
                                     currentRoute = currentRoute,
                                     isAdminVisible = isAdminVisible,
-                                    isDarkTheme = isDarkTheme,
                                     onNavigateHome = {
                                         navController.navigate(Routes.Home) {
                                             launchSingleTop = true
@@ -299,72 +230,93 @@ fun PampaStoreApp(
                             }
                         }
                     ) { paddingValues ->
-                NavHost(
-                    navController = navController,
-                    startDestination = Routes.Home,
-                    modifier = Modifier
-                ) {
-                    composable(Routes.Home) {
-                        HomeScreen(
-                            viewModel = storeViewModel,
-                            onAppClicked = { app ->
-                                navController.navigate(Routes.detail(app.id))
-                            },
-                            contentPadding = paddingValues
-                        )
-                    }
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            // Seamless update banner
+                            AnimatedVisibility(
+                                visible = seamlessUpdateState is SeamlessUpdateState.Ready,
+                                enter = expandVertically(),
+                                exit = shrinkVertically()
+                            ) {
+                                val readyState = seamlessUpdateState as? SeamlessUpdateState.Ready
+                                if (readyState != null) {
+                                    SeamlessUpdateBanner(
+                                        version = readyState.version,
+                                        changelog = readyState.changelog,
+                                        onInstall = { storeViewModel.installPendingUpdate() },
+                                        onDismiss = { storeViewModel.dismissUpdate() }
+                                    )
+                                }
+                            }
 
-                    composable(
-                        route = Routes.Detail,
-                        arguments = listOf(navArgument("appId") { type = NavType.StringType })
-                    ) { backStackEntry ->
-                        val appId = backStackEntry.arguments?.getString("appId").orEmpty()
-                        DetailScreen(
-                            appId = appId,
-                            viewModel = storeViewModel,
-                            onBack = { navController.navigateUp() },
-                            contentPadding = paddingValues
-                        )
-                    }
+                            Box(modifier = Modifier.weight(1f)) {
+                                NavHost(
+                                    navController = navController,
+                                    startDestination = Routes.Home,
+                                    modifier = Modifier
+                                ) {
+                                    composable(Routes.Home) {
+                                        HomeScreen(
+                                            viewModel = storeViewModel,
+                                            onAppClicked = { app ->
+                                                navController.navigate(Routes.detail(app.id))
+                                            },
+                                            contentPadding = paddingValues
+                                        )
+                                    }
 
-                    composable(Routes.Settings) {
-                        SettingsScreen(
-                            viewModel = storeViewModel,
-                            localStorage = localStorage,
-                            appVersion = appVersion,
-                            adminPanelVisible = isAdminVisible,
-                            adminPanelBuildEnabled = adminPanelBuildEnabled,
-                            adminPublishingEnabled = isPublishingEnabled,
-                            adminDisabledReason = adminDisabledReason,
-                            onBack = { navController.navigateUp() },
-                            onConfigSaved = { storeViewModel.onConfigUpdated() },
-                            contentPadding = paddingValues
-                        )
-                    }
+                                    composable(
+                                        route = Routes.Detail,
+                                        arguments = listOf(navArgument("appId") { type = NavType.StringType })
+                                    ) { backStackEntry ->
+                                        val appId = backStackEntry.arguments?.getString("appId").orEmpty()
+                                        DetailScreen(
+                                            appId = appId,
+                                            viewModel = storeViewModel,
+                                            onBack = { navController.navigateUp() },
+                                            contentPadding = paddingValues
+                                        )
+                                    }
 
-                    composable(Routes.Admin) {
-                        if (isAdminVisible) {
-                            AdminScreen(
-                                viewModel = adminViewModel,
-                                onBack = { navController.navigateUp() },
-                                contentPadding = paddingValues
-                            )
-                        } else {
-                            AdminLockedScreen(
-                                contentPadding = paddingValues,
-                                reason = adminDisabledReason
-                                    ?: "Pannello admin non disponibile in questa configurazione.",
-                                onOpenSettings = {
-                                    navController.navigate(Routes.Settings) {
-                                        popUpTo(Routes.Admin) { inclusive = true }
-                                        launchSingleTop = true
+                                    composable(Routes.Settings) {
+                                        SettingsScreen(
+                                            viewModel = storeViewModel,
+                                            localStorage = localStorage,
+                                            appVersion = appVersion,
+                                            adminPanelVisible = isAdminVisible,
+                                            adminPanelBuildEnabled = adminPanelBuildEnabled,
+                                            adminPublishingEnabled = isPublishingEnabled,
+                                            adminDisabledReason = adminDisabledReason,
+                                            onBack = { navController.navigateUp() },
+                                            onConfigSaved = { storeViewModel.onConfigUpdated() },
+                                            contentPadding = paddingValues
+                                        )
+                                    }
+
+                                    composable(Routes.Admin) {
+                                        if (isAdminVisible) {
+                                            AdminScreen(
+                                                viewModel = adminViewModel,
+                                                onBack = { navController.navigateUp() },
+                                                contentPadding = paddingValues
+                                            )
+                                        } else {
+                                            AdminLockedScreen(
+                                                contentPadding = paddingValues,
+                                                reason = adminDisabledReason
+                                                    ?: "Pannello admin non disponibile in questa configurazione.",
+                                                onOpenSettings = {
+                                                    navController.navigate(Routes.Settings) {
+                                                        popUpTo(Routes.Admin) { inclusive = true }
+                                                        launchSingleTop = true
+                                                    }
+                                                }
+                                            )
+                                        }
                                     }
                                 }
-                            )
+                            }
                         }
                     }
-                }
-            }
                 }
             }
 

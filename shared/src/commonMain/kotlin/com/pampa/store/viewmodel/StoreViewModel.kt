@@ -16,6 +16,7 @@ import com.pampa.store.data.model.InstalledAppInfo
 import com.pampa.store.data.model.OwnershipFilter
 import com.pampa.store.data.model.ReleaseAssetSource
 import com.pampa.store.data.model.STORE_APP_ID
+import com.pampa.store.data.model.SeamlessUpdateState
 import com.pampa.store.data.model.StoreUpdateState
 import com.pampa.store.data.model.VersionInfo
 import com.pampa.store.platform.InstallPrerequisites
@@ -77,6 +78,9 @@ class StoreViewModel(
     private val _storeUpdateDownloadState = MutableStateFlow<DownloadState>(DownloadState.Idle)
     val storeUpdateDownloadState: StateFlow<DownloadState> = _storeUpdateDownloadState.asStateFlow()
 
+    private val _seamlessUpdateState = MutableStateFlow<SeamlessUpdateState>(SeamlessUpdateState.Idle)
+    val seamlessUpdateState: StateFlow<SeamlessUpdateState> = _seamlessUpdateState.asStateFlow()
+
     private val _installPrerequisites = MutableStateFlow(InstallPrerequisites())
     val installPrerequisites: StateFlow<InstallPrerequisites> = _installPrerequisites.asStateFlow()
 
@@ -124,6 +128,8 @@ class StoreViewModel(
             refreshApps()
             if (preferencesRepository.preferences.value.storeUpdateAutoCheckEnabled) {
                 checkStoreUpdate()
+                // Seamless: auto-download if update found
+                startSeamlessUpdateIfAvailable()
             }
         }
     }
@@ -329,6 +335,95 @@ class StoreViewModel(
                 onInstallSuccess = { }
             )
         }
+    }
+
+    private fun startSeamlessUpdateIfAvailable() {
+        scope.launch {
+            // Wait for store update check to complete
+            val maxWait = 30
+            var waited = 0
+            while (_storeUpdateState.value.isChecking && waited < maxWait) {
+                kotlinx.coroutines.delay(500)
+                waited++
+            }
+
+            val update = _storeUpdateState.value.availableUpdate ?: return@launch
+            val assetName = assetNameForPlatform(update.versionInfo)
+            if (assetName.isBlank()) return@launch
+
+            val downloadDir = preferencesRepository.preferences.value.downloadPath.trim()
+            if (downloadDir.isEmpty()) return@launch
+
+            val savePath = buildSavePath(downloadDir, assetName)
+            val source = ReleaseAssetSource(update.repository, update.versionInfo.releaseTag, assetName)
+            val service = appRepository ?: return@launch
+
+            _seamlessUpdateState.value = SeamlessUpdateState.Checking
+
+            try {
+                _seamlessUpdateState.value = SeamlessUpdateState.Downloading(0f)
+                service.downloadAsset(
+                    source = source,
+                    savePath = savePath,
+                    onProgress = { }
+                ).collect { event ->
+                    when (event) {
+                        is DownloadEvent.Started -> _seamlessUpdateState.value = SeamlessUpdateState.Downloading(0f)
+                        is DownloadEvent.Progress -> _seamlessUpdateState.value = SeamlessUpdateState.Downloading(event.progress)
+                        is DownloadEvent.Completed -> {
+                            _seamlessUpdateState.value = SeamlessUpdateState.Ready(
+                                version = update.versionInfo.version,
+                                changelog = update.versionInfo.changelog,
+                                filePath = event.filePath
+                            )
+                        }
+                        is DownloadEvent.Error -> {
+                            _seamlessUpdateState.value = SeamlessUpdateState.Error(event.message)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _seamlessUpdateState.value = SeamlessUpdateState.Error(
+                    e.message ?: "Download aggiornamento non riuscito."
+                )
+            }
+        }
+    }
+
+    fun installPendingUpdate() {
+        val readyState = _seamlessUpdateState.value as? SeamlessUpdateState.Ready ?: return
+        scope.launch {
+            _seamlessUpdateState.value = SeamlessUpdateState.Installing("Installazione in corso...")
+            try {
+                installerProvider().install(readyState.filePath, readyState.appId).collect { event ->
+                    when (event) {
+                        is InstallEvent.Preparing -> {
+                            _seamlessUpdateState.value = SeamlessUpdateState.Installing("Preparazione installazione...")
+                        }
+                        is InstallEvent.AwaitingUserAction -> {
+                            _seamlessUpdateState.value = SeamlessUpdateState.Installing(event.message)
+                        }
+                        is InstallEvent.Installing -> {
+                            _seamlessUpdateState.value = SeamlessUpdateState.Installing(event.message)
+                        }
+                        is InstallEvent.Success -> {
+                            _seamlessUpdateState.value = SeamlessUpdateState.Idle
+                        }
+                        is InstallEvent.Failure -> {
+                            _seamlessUpdateState.value = SeamlessUpdateState.Error(event.message)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _seamlessUpdateState.value = SeamlessUpdateState.Error(
+                    e.message ?: "Installazione non riuscita."
+                )
+            }
+        }
+    }
+
+    fun dismissUpdate() {
+        _seamlessUpdateState.value = SeamlessUpdateState.Dismissed
     }
 
     private suspend fun reconcileInstalledInfo(entry: AppEntry): InstalledAppInfo? {

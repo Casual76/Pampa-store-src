@@ -1,6 +1,6 @@
 package com.pampa.store.ui.screens
 
-import androidx.compose.foundation.border
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -57,8 +58,6 @@ import com.pampa.store.platform.rememberFilePicker
 import com.pampa.store.ui.components.StatusBadge
 import com.pampa.store.ui.theme.AccentGreen
 import com.pampa.store.ui.theme.AccentOrange
-import com.pampa.store.ui.theme.GlassStrokeDark
-import com.pampa.store.ui.theme.GlassStrokeLight
 import com.pampa.store.ui.theme.PrimaryViolet
 import kotlinx.coroutines.launch
 
@@ -193,17 +192,12 @@ private fun SectionCard(
     accent: Color,
     content: @Composable () -> Unit
 ) {
-    val isDarkTheme = MaterialTheme.colorScheme.background.red < 0.3f
-    Card(
-        modifier = Modifier.border(
-            width = 1.dp,
-            color = if (isDarkTheme) GlassStrokeDark else GlassStrokeLight,
-            shape = RoundedCornerShape(22.dp)
+    ElevatedCard(
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isDarkTheme) 0.66f else 0.82f)
-        )
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier.padding(18.dp),

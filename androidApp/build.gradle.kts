@@ -148,8 +148,8 @@ android {
         applicationId = "com.pampa.store"
         minSdk = 26
         targetSdk = 35
-        versionCode = 15
-        versionName = "1.2.0"
+        versionCode = 17
+        versionName = "1.2.2"
     }
 
     signingConfigs {
@@ -224,7 +224,10 @@ val verifyReleaseApk by tasks.registering {
             .start()
         val verifyOutput = verifyProcess.inputStream.bufferedReader().use { it.readText() }
         val verifyExitCode = verifyProcess.waitFor()
-        if (verifyExitCode != 0 || !verifyOutput.contains("Verifies") || !verifyOutput.contains("Signer #1")) {
+        val signerDetected = verifyOutput.contains("Signer #1") ||
+            verifyOutput.contains("Number of signers: 1") ||
+            verifyOutput.contains("V2 Signer:")
+        if (verifyExitCode != 0 || !verifyOutput.contains("Verifies") || !signerDetected) {
             throw GradleException("Release APK signature verification failed.\n$verifyOutput")
         }
     }
