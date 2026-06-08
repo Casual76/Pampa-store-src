@@ -1,83 +1,12 @@
 {
-  "app": {
-    "id": "pampa-store",
-    "name": "Pampa Store",
-    "description": "Store Android per installare e aggiornare le app Pampa.",
-    "packageName": "com.pampa.store",
-    "iconUrl": "",
-    "category": "Tools",
-    "developer": "Pampa",
-    "screenshots": [],
-    "repository": {
+  "apps": [
+    {
+      "id": "il-curatore",
       "repoOwner": "Casual76",
-      "repoName": "Pampa-store-src",
+      "repoName": "4F-explorer",
       "manifestPath": "manifest.json",
       "ref": ""
-    },
-    "stable": {
-      "version": "1.2.2",
-      "releaseDate": "2026-05-15",
-      "changelog": "v1.2.2: Restyling completo Material 3, fix scorrimento portrait, aggiornamenti seamless automatici.",
-      "releaseTag": "stable-pampa-store-v1.2.2",
-      "apkAsset": "pampa-store-1.2.2.apk",
-      "exeAsset": "pampa-store-1.1.7-installer.exe",
-      "sizeBytes": 2682062
-    },
-    "beta": {
-      "version": "1.2.2",
-      "releaseDate": "2026-05-15",
-      "changelog": "v1.2.2: Restyling completo Material 3, fix scorrimento portrait, aggiornamenti seamless automatici.",
-      "releaseTag": "stable-pampa-store-v1.2.2",
-      "apkAsset": "pampa-store-1.2.2.apk",
-      "exeAsset": "pampa-store-1.1.7-installer.exe",
-      "sizeBytes": 2682062
-    },
-    "history": [
-      {
-        "version": "1.2.1",
-        "releaseDate": "2026-05-10",
-        "changelog": "Redesign mobile completo con estetica Material 3 Expressive.",
-        "releaseTag": "stable-pampa-store-v1.2.1",
-        "apkAsset": "pampa-store-1.2.1.apk",
-        "exeAsset": "",
-        "sizeBytes": 2698448
-      },
-      {
-        "version": "1.1.7",
-        "releaseDate": "2026-04-24",
-        "changelog": "Release 1.1.7",
-        "releaseTag": "stable-pampa-store-v1.1.7",
-        "apkAsset": "",
-        "exeAsset": "pampa-store-1.1.7-installer.exe",
-        "sizeBytes": 104344064
-      },
-      {
-        "version": "1.1.6",
-        "releaseDate": "2026-04-24",
-        "changelog": "Release 1.1.6",
-        "releaseTag": "stable-pampa-store-v1.1.6",
-        "apkAsset": "",
-        "exeAsset": "pampa-store-1.1.6-installer.exe",
-        "sizeBytes": 104348160
-      },
-      {
-        "version": "1.2.0",
-        "releaseDate": "2026-04-17",
-        "changelog": "Release 1.2.0",
-        "releaseTag": "stable-pampa-store-v1.2.0",
-        "apkAsset": "pampa-store-1.2.0.apk",
-        "exeAsset": "pampa-store-1.2.0-installer.exe",
-        "sizeBytes": 2681868
-      },
-      {
-        "version": "1.1.5",
-        "releaseDate": "2026-04-17",
-        "changelog": "Release 1.1.5",
-        "releaseTag": "stable-pampa-store-v1.1.5",
-        "apkAsset": "pampa-store-1.1.5.apk",
-        "exeAsset": "pampa-store-1.1.5-installer.exe",
-        "sizeBytes": 2681867
-      }
-    ]
-  }
+    }
+  ],
+  "storeReleases": {}
 }
