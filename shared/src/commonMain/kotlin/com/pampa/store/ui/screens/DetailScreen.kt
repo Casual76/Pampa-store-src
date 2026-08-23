@@ -67,6 +67,9 @@ import com.pampa.store.ui.theme.AccentGreen
 import com.pampa.store.ui.theme.AccentOrange
 import com.pampa.store.ui.theme.getCategoryColor
 import com.pampa.store.viewmodel.StoreViewModel
+import com.pampa.store.ui.theme.rememberFluidOverscroll
+import com.pampa.store.ui.theme.fluidOverscroll
+import com.pampa.store.ui.theme.fluidOverscrollContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -278,8 +281,12 @@ fun DetailScreen(
             }
         }
     ) { innerPadding ->
+        val overscroll = rememberFluidOverscroll()
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .fluidOverscroll(overscroll)
+                .fluidOverscrollContent(overscroll),
             contentPadding = PaddingValues(
                 start = 20.dp,
                 end = 20.dp,

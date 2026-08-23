@@ -53,6 +53,9 @@ import com.pampa.store.ui.components.StatusBadge
 import com.pampa.store.ui.theme.AccentGreen
 import com.pampa.store.ui.theme.AccentOrange
 import com.pampa.store.viewmodel.StoreViewModel
+import com.pampa.store.ui.theme.rememberFluidOverscroll
+import com.pampa.store.ui.theme.fluidOverscroll
+import com.pampa.store.ui.theme.fluidOverscrollContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -171,8 +174,12 @@ fun HomeScreen(
                     )
 
                     compactLayout -> {
+                        val overscroll = rememberFluidOverscroll()
                         LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .fluidOverscroll(overscroll)
+                                .fluidOverscrollContent(overscroll),
                             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -233,7 +240,11 @@ fun HomeScreen(
                     }
 
                     else -> {
+                        val overscroll = rememberFluidOverscroll()
                         LazyVerticalGrid(
+                            modifier = Modifier
+                                .fluidOverscroll(overscroll)
+                                .fluidOverscrollContent(overscroll),
                             columns = GridCells.Adaptive(minSize = 260.dp),
                             contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 0.dp, bottom = 28.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),

@@ -65,6 +65,12 @@ import com.pampa.store.ui.theme.AccentOrange
 import com.pampa.store.ui.theme.AccentPink
 import com.pampa.store.viewmodel.StoreViewModel
 import kotlinx.coroutines.launch
+import com.pampa.store.ui.theme.FluidSectionHeader
+import com.pampa.store.ui.theme.FluidListGroup
+import androidx.compose.ui.text.style.TextAlign
+import com.pampa.store.ui.theme.rememberFluidOverscroll
+import com.pampa.store.ui.theme.fluidOverscroll
+import com.pampa.store.ui.theme.fluidOverscrollContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,11 +131,16 @@ fun SettingsScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
+        // Il bordo elastico sta sul contenitore, lo spostamento sul contenuto: cosi' il gesto resta
+        // dove e' e a muoversi e' solo il disegno.
+        val overscroll = rememberFluidOverscroll()
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .fluidOverscroll(overscroll)
                 .verticalScroll(rememberScrollState())
+                .fluidOverscrollContent(overscroll)
                 .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -477,6 +488,17 @@ fun SettingsScreen(
     }
 }
 
+/**
+ * Una sezione delle impostazioni, nella grammatica del Fluid Engine.
+ *
+ * Prima era una card con l'icona colorata nell'intestazione. Ora e' un'intestazione in maiuscolo
+ * sopra un gruppo, come una tabella raggruppata: **l'icona scende sulle righe**, dove identifica la
+ * riga invece di etichettare il blocco. E' la regola 2 del design system, e la differenza si vede
+ * appena due sezioni stanno una sotto l'altra.
+ *
+ * [icon] e [iconColor] restano nella firma perche' li usa la riga di apertura quando la sezione ne
+ * ha bisogno; per le sezioni di sola lettura non serve.
+ */
 @Composable
 fun SettingsSection(
     title: String,
@@ -484,48 +506,31 @@ fun SettingsSection(
     iconColor: Color,
     content: @Composable () -> Unit
 ) {
-    ElevatedCard(
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-        ),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Surface(
-                    modifier = Modifier.size(32.dp),
-                    shape = MaterialTheme.shapes.small,
-                    color = iconColor.copy(alpha = 0.12f),
-                    contentColor = iconColor
-                ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp))
-                    }
-                }
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
+    Column(modifier = Modifier.fillMaxWidth()) {
+        FluidSectionHeader(title)
+        FluidListGroup {
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
+                content()
             }
-            Spacer(Modifier.height(14.dp))
-            content()
         }
     }
 }
 
+/**
+ * Etichetta a sinistra, valore a destra.
+ *
+ * Il valore non va a capo prima dell'etichetta e non la schiaccia: `weight` su entrambi con la
+ * priorita' al valore, perche' e' il valore l'informazione. Una riga con "Catalogo" a sinistra e
+ * mezza frase a destra e' il caso che rompeva la versione precedente.
+ */
 @Composable
 fun SettingsInfoRow(
     label: String,
     value: String
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top
     ) {
         Text(
@@ -535,10 +540,11 @@ fun SettingsInfoRow(
         )
         Text(
             text = value,
-            modifier = Modifier.padding(start = 12.dp),
+            modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.End
         )
     }
 }
