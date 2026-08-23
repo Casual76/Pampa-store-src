@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Delete
@@ -56,9 +55,9 @@ import com.pampa.store.data.model.ReleaseAutomationTarget
 import com.pampa.store.data.model.assetsSummary
 import com.pampa.store.platform.rememberFilePicker
 import com.pampa.store.ui.components.StatusBadge
+import com.pampa.store.ui.theme.ContinuousCornerShape
 import com.pampa.store.ui.theme.AccentGreen
 import com.pampa.store.ui.theme.AccentOrange
-import com.pampa.store.ui.theme.PrimaryViolet
 import kotlinx.coroutines.launch
 
 @Composable
@@ -85,7 +84,7 @@ internal fun AutomationOverviewSection(
         SectionCard(
             title = "Automazione release",
             icon = Icons.Filled.AutoAwesome,
-            accent = PrimaryViolet
+            accent = MaterialTheme.colorScheme.primary
         ) {
             Text(
                 text = "Collega una volta le cartelle di output e lascia che Pampa Store prepari da solo le bozze di publish.",
@@ -110,7 +109,7 @@ internal fun AutomationOverviewSection(
                     )
                 },
                 enabled = settingsEnabled,
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryViolet)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text("Nuovo profilo")
             }
@@ -225,7 +224,7 @@ private fun AutomationProfileCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = ContinuousCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
         )
@@ -297,7 +296,7 @@ private fun AutomationDraftCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = ContinuousCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f)
         )
@@ -437,8 +436,8 @@ private fun AutomationProfileDialog(
                         onClick = { targetType = ReleaseAutomationTarget.Store },
                         label = { Text("Store") },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = PrimaryViolet.copy(alpha = 0.18f),
-                            selectedLabelColor = PrimaryViolet
+                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                            selectedLabelColor = MaterialTheme.colorScheme.primary
                         )
                     )
                     FilterChip(
@@ -446,8 +445,8 @@ private fun AutomationProfileDialog(
                         onClick = { targetType = ReleaseAutomationTarget.App(targetAppId) },
                         label = { Text("App") },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = PrimaryViolet.copy(alpha = 0.18f),
-                            selectedLabelColor = PrimaryViolet
+                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                            selectedLabelColor = MaterialTheme.colorScheme.primary
                         )
                     )
                 }
@@ -552,9 +551,9 @@ private fun AutomationTextField(
         modifier = Modifier.fillMaxWidth(),
         label = { Text(label) },
         placeholder = { Text(placeholder) },
-        shape = RoundedCornerShape(14.dp),
+        shape = ContinuousCornerShape(14.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = PrimaryViolet,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
             unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.62f),
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)

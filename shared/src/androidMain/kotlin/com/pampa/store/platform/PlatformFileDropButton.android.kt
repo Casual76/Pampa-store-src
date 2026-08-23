@@ -11,8 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
+import com.pampa.store.ui.theme.ContinuousCornerShape
 
 @Composable
 actual fun PlatformFileDropButton(
@@ -29,7 +29,7 @@ actual fun PlatformFileDropButton(
         onClick = onSelectClick,
         modifier = modifier.heightIn(min = 84.dp),
         enabled = enabled,
-        shape = RoundedCornerShape(14.dp)
+        shape = ContinuousCornerShape(14.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -82,9 +81,9 @@ import com.pampa.store.platform.rememberFilePicker
 import com.pampa.store.ui.components.AppArtwork
 import com.pampa.store.ui.components.EmptyState
 import com.pampa.store.ui.components.StatusBadge
+import com.pampa.store.ui.theme.ContinuousCornerShape
 import com.pampa.store.ui.theme.AccentGreen
 import com.pampa.store.ui.theme.AccentOrange
-import com.pampa.store.ui.theme.PrimaryViolet
 import com.pampa.store.viewmodel.AdminViewModel
 import kotlinx.coroutines.launch
 
@@ -150,8 +149,8 @@ fun AdminScreen(
             if (publishingEnabled && !showEditor) {
                 ExtendedFloatingActionButton(
                     onClick = viewModel::startNewApp,
-                    shape = RoundedCornerShape(16.dp),
-                    containerColor = PrimaryViolet,
+                    shape = ContinuousCornerShape(16.dp),
+                    containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White,
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                     text = { Text("Nuova app") }
@@ -356,8 +355,8 @@ private fun StoreUpdateCard(
                         onClick = { releaseChannel = channel },
                         label = { Text(channel.displayName) },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = PrimaryViolet.copy(alpha = 0.2f),
-                            selectedLabelColor = PrimaryViolet
+                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                            selectedLabelColor = MaterialTheme.colorScheme.primary
                         )
                     )
                 }
@@ -458,7 +457,7 @@ private fun StoreUpdateCard(
                     !isSaving &&
                     !isValidating &&
                     (apkPath == null || apkValidation is ApkValidationResult.Valid),
-                shape = RoundedCornerShape(14.dp),
+                shape = ContinuousCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AccentOrange)
             ) {
                 if (isSaving) {
@@ -480,7 +479,7 @@ private fun StoreUpdateCard(
                 onClick = onPromoteStoreBetaToStable,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = enabled && !isSaving && storeIndex.storeReleases.beta != null,
-                shape = RoundedCornerShape(14.dp)
+                shape = ContinuousCornerShape(14.dp)
             ) {
                 Text("Promuovi beta a stable")
             }
@@ -537,8 +536,8 @@ private fun AdminAppCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     StatusBadge(
                         text = app.category,
-                        background = PrimaryViolet.copy(alpha = 0.12f),
-                        contentColor = PrimaryViolet
+                        background = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                        contentColor = MaterialTheme.colorScheme.primary
                     )
                     app.stable?.version?.let {
                         StatusBadge(
@@ -651,7 +650,7 @@ private fun AdminEditor(
             SettingsSection(
                 title = if (app.id.isBlank()) "Nuova app" else "Modifica app",
                 icon = Icons.Filled.Edit,
-                iconColor = PrimaryViolet
+                iconColor = MaterialTheme.colorScheme.primary
             ) {
                 AdminTextField("ID", id, { id = it }, "es. my-app")
                 Spacer(Modifier.height(12.dp))
@@ -689,7 +688,7 @@ private fun AdminEditor(
                     OutlinedButton(
                         onClick = onCancel,
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(14.dp)
+                        shape = ContinuousCornerShape(14.dp)
                     ) {
                         Text("Annulla")
                     }
@@ -717,8 +716,8 @@ private fun AdminEditor(
                             name.isNotBlank() &&
                             repoOwner.isNotBlank() &&
                             repoName.isNotBlank(),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryViolet)
+                        shape = ContinuousCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
                         if (isSaving) {
                             CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = Color.White)
@@ -763,7 +762,7 @@ private fun AdminEditor(
                     OutlinedButton(
                         onClick = { onPromoteBetaToStable(app.id) },
                         enabled = canPublish && !isSaving && app.beta != null,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = ContinuousCornerShape(12.dp)
                     ) {
                         Text("Promuovi beta a stable")
                     }
@@ -785,8 +784,8 @@ private fun AdminEditor(
                                 onClick = { versionChannel = channel },
                                 label = { Text(channel.displayName) },
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = PrimaryViolet.copy(alpha = 0.18f),
-                                    selectedLabelColor = PrimaryViolet
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                                    selectedLabelColor = MaterialTheme.colorScheme.primary
                                 )
                             )
                         }
@@ -893,7 +892,7 @@ private fun AdminEditor(
                             !isValidating &&
                             (apkFilePath == null || apkValidation is ApkValidationResult.Valid) &&
                             (apkFilePath != null || exeFilePath != null),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = ContinuousCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = AccentOrange)
                     ) {
                         Text("Pubblica release")
@@ -988,9 +987,9 @@ private fun AdminTextField(
         placeholder = { Text(placeholder) },
         singleLine = singleLine,
         minLines = minLines,
-        shape = RoundedCornerShape(14.dp),
+        shape = ContinuousCornerShape(14.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = PrimaryViolet,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
             unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.62f),
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
@@ -1013,7 +1012,7 @@ private fun ApkValidationCard(
     }
 
     Card(
-        shape = RoundedCornerShape(16.dp),
+        shape = ContinuousCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor)
     ) {
         Column(

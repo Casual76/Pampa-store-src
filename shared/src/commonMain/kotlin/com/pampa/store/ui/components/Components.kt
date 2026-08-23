@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Apps
@@ -64,6 +63,7 @@ import com.pampa.store.data.model.AppEntry
 import com.pampa.store.data.model.Channel
 import com.pampa.store.data.model.DownloadState
 import com.pampa.store.data.model.OwnershipFilter
+import com.pampa.store.ui.theme.ContinuousCornerShape
 import com.pampa.store.ui.theme.AccentGreen
 import com.pampa.store.ui.theme.AccentOrange
 import com.pampa.store.ui.theme.getCategoryColor
@@ -307,7 +307,7 @@ fun AppArtwork(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(cornerRadius.dp))
+            .clip(ContinuousCornerShape(cornerRadius.dp))
             .background(
                 Brush.linearGradient(
                     colors = listOf(

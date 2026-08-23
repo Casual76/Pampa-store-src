@@ -1,28 +1,22 @@
 package com.pampa.store.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 
 // ── Brand Colors ──
-val PrimaryViolet = Color(0xFF2F5F7A)
-val PrimaryVioletLight = Color(0xFFC7E7F4)
-val PrimaryVioletDark = Color(0xFF0E344C)
-
-val SecondaryTeal = Color(0xFF2D7B68)
-val SecondaryTealDark = Color(0xFF184E43)
-
+// Colori di stato, non di tema: "installato", "attenzione", "errore" non hanno uno slot in
+// Material, e un ruolo semantico senza slot e' l'unico caso in cui un colore scritto qui e' la
+// risposta giusta. Tutto il resto viene da MaterialTheme.colorScheme, derivato da PampaStoreBrand.
 val AccentPink = Color(0xFFD45872)
 val AccentOrange = Color(0xFFFFA23E)
 val AccentGreen = Color(0xFF82C662)
@@ -41,103 +35,6 @@ fun getCategoryColor(category: String): Color {
     return CategoryColors[category] ?: CategoryColors["General"]!!
 }
 
-// ── Dark Color Scheme ──
-private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF8ECAE6),
-    onPrimary = Color(0xFF003549),
-    primaryContainer = PrimaryVioletDark,
-    onPrimaryContainer = PrimaryVioletLight,
-
-    secondary = Color(0xFF7ED4BC),
-    onSecondary = Color(0xFF003A2D),
-    secondaryContainer = SecondaryTealDark,
-    onSecondaryContainer = Color(0xFFBFF5E2),
-
-    tertiary = AccentOrange,
-    onTertiary = Color(0xFF2A1700),
-    tertiaryContainer = Color(0xFF5C3A00),
-    onTertiaryContainer = Color(0xFFFFDDB3),
-
-    background = Color(0xFF0F1419),
-    onBackground = Color(0xFFE1E3E8),
-
-    surface = Color(0xFF151A20),
-    onSurface = Color(0xFFE1E3E8),
-    surfaceVariant = Color(0xFF1E252D),
-    onSurfaceVariant = Color(0xFFC1C8D0),
-
-    surfaceContainerLowest = Color(0xFF0B0F13),
-    surfaceContainerLow = Color(0xFF121820),
-    surfaceContainer = Color(0xFF1A2028),
-    surfaceContainerHigh = Color(0xFF222830),
-    surfaceContainerHighest = Color(0xFF2A3038),
-
-    outline = Color(0xFF3A4450),
-    outlineVariant = Color(0xFF2A3340),
-
-    error = Color(0xFFFF6B6B),
-    onError = Color.White,
-    errorContainer = Color(0xFF401A1A),
-    onErrorContainer = Color(0xFFFFDAD6),
-
-    inverseSurface = Color(0xFFE1E3E8),
-    inverseOnSurface = Color(0xFF1A1E24),
-    inversePrimary = PrimaryViolet
-)
-
-// ── Light Color Scheme ──
-private val LightColorScheme = lightColorScheme(
-    primary = PrimaryViolet,
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFD6ECF6),
-    onPrimaryContainer = PrimaryVioletDark,
-
-    secondary = SecondaryTeal,
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFFD0F0E4),
-    onSecondaryContainer = SecondaryTealDark,
-
-    tertiary = Color(0xFFD48820),
-    onTertiary = Color.White,
-    tertiaryContainer = Color(0xFFFFE0B2),
-    onTertiaryContainer = Color(0xFF3E2500),
-
-    background = Color(0xFFF8FAFB),
-    onBackground = Color(0xFF191C1E),
-
-    surface = Color(0xFFFCFCFE),
-    onSurface = Color(0xFF191C1E),
-    surfaceVariant = Color(0xFFF0F3F5),
-    onSurfaceVariant = Color(0xFF44474E),
-
-    surfaceContainerLowest = Color.White,
-    surfaceContainerLow = Color(0xFFF5F7F8),
-    surfaceContainer = Color(0xFFEFF1F3),
-    surfaceContainerHigh = Color(0xFFE8EBED),
-    surfaceContainerHighest = Color(0xFFE2E5E7),
-
-    outline = Color(0xFFD0D3D8),
-    outlineVariant = Color(0xFFE0E3E8),
-
-    error = Color(0xFFBA1A1A),
-    onError = Color.White,
-    errorContainer = Color(0xFFFFDAD6),
-    onErrorContainer = Color(0xFF410002),
-
-    inverseSurface = Color(0xFF2E3133),
-    inverseOnSurface = Color(0xFFF0F0F3),
-    inversePrimary = Color(0xFF8ECAE6)
-)
-
-// ── Shapes ──
-private val AppShapes = Shapes(
-    extraSmall = RoundedCornerShape(6.dp),
-    small = RoundedCornerShape(10.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(22.dp),
-    extraLarge = RoundedCornerShape(28.dp)
-)
-
 // ── Typography ──
 internal data class BrandFontFamilies(
     val display: FontFamily,
@@ -147,111 +44,132 @@ internal data class BrandFontFamilies(
 @Composable
 internal expect fun rememberBrandFontFamilies(): BrandFontFamilies
 
+/**
+ * La scala tipografica iOS, sui caratteri del Pampa Store.
+ *
+ * Cambia la **scala**, non la voce: DM Serif Display e Space Grotesk restano, perche' sono
+ * l'identita' dello store. Quello che arriva dal Fluid Engine e' la rampa — 34 / 28 / 22 / 20 / 17 /
+ * 15 / 13 / 11 al posto della 57 / 45 / 36 / 32 di Material, che su un telefono e' enorme — e la
+ * curva di tracking dipendente dalla dimensione: negativa nei titoli, neutra intorno ai 13, positiva
+ * sotto. Un carattere impostato a tracking zero si legge slargato nei titoli e stretto nelle
+ * didascalie, ed e' meta' del motivo per cui un'app "sembra un esempio di Material".
+ */
+private fun tracking(sizeSp: Float): TextUnit {
+    val anchors = listOf(
+        11f to 0.30f,
+        13f to 0.00f,
+        15f to -0.15f,
+        17f to -0.25f,
+        20f to -0.35f,
+        24f to -0.45f,
+        28f to -0.55f,
+        34f to -0.70f,
+    )
+    if (sizeSp <= anchors.first().first) return anchors.first().second.sp
+    if (sizeSp >= anchors.last().first) return anchors.last().second.sp
+    for (index in 0 until anchors.lastIndex) {
+        val (lowSize, lowTrack) = anchors[index]
+        val (highSize, highTrack) = anchors[index + 1]
+        if (sizeSp in lowSize..highSize) {
+            val ratio = (sizeSp - lowSize) / (highSize - lowSize)
+            return (lowTrack + (highTrack - lowTrack) * ratio).sp
+        }
+    }
+    return 0f.sp
+}
+
+/**
+ * Compose centra la prima riga dentro la sua line box solo se glielo si chiede.
+ *
+ * Senza, una riga da 17sp dentro un'interlinea da 22sp si porta tutti e 5 gli sp di spazio sopra, e
+ * un titolo dentro una riga di altezza fissa si legge visivamente basso.
+ */
+private val FluidLineHeightStyle = LineHeightStyle(
+    alignment = LineHeightStyle.Alignment.Center,
+    trim = LineHeightStyle.Trim.None,
+)
+
+private fun fluidStyle(
+    family: FontFamily,
+    sizeSp: Float,
+    lineHeightSp: Float,
+    weight: FontWeight,
+    letterSpacing: TextUnit = tracking(sizeSp),
+): TextStyle = TextStyle(
+    fontFamily = family,
+    fontSize = sizeSp.sp,
+    lineHeight = lineHeightSp.sp,
+    fontWeight = weight,
+    letterSpacing = letterSpacing,
+    lineHeightStyle = FluidLineHeightStyle,
+)
+
 @Composable
 private fun brandTypography(): Typography {
     val brandFonts = rememberBrandFontFamilies()
-    val displayBrand = brandFonts.display
-    val sansBrand = brandFonts.sans
+    val display = brandFonts.display
+    val sans = brandFonts.sans
 
     return Typography(
-        headlineLarge = TextStyle(
-            fontFamily = displayBrand,
-            fontWeight = FontWeight.Bold,
-            fontSize = 32.sp,
-            lineHeight = 40.sp,
-            letterSpacing = 0.sp
-        ),
-        headlineMedium = TextStyle(
-            fontFamily = displayBrand,
-            fontWeight = FontWeight.Bold,
-            fontSize = 28.sp,
-            lineHeight = 36.sp,
-            letterSpacing = 0.sp
-        ),
-        headlineSmall = TextStyle(
-            fontFamily = sansBrand,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            lineHeight = 32.sp,
-            letterSpacing = 0.sp
-        ),
-        titleLarge = TextStyle(
-            fontFamily = sansBrand,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 22.sp,
-            lineHeight = 28.sp,
-            letterSpacing = 0.sp
-        ),
-        titleMedium = TextStyle(
-            fontFamily = sansBrand,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            letterSpacing = 0.15.sp
-        ),
-        titleSmall = TextStyle(
-            fontFamily = sansBrand,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.1.sp
-        ),
-        bodyLarge = TextStyle(
-            fontFamily = sansBrand,
-            fontWeight = FontWeight.Normal,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            letterSpacing = 0.5.sp
-        ),
-        bodyMedium = TextStyle(
-            fontFamily = sansBrand,
-            fontWeight = FontWeight.Normal,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.25.sp
-        ),
-        bodySmall = TextStyle(
-            fontFamily = sansBrand,
-            fontWeight = FontWeight.Normal,
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.4.sp
-        ),
-        labelLarge = TextStyle(
-            fontFamily = sansBrand,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.1.sp
-        ),
-        labelMedium = TextStyle(
-            fontFamily = sansBrand,
-            fontWeight = FontWeight.Medium,
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.5.sp
-        ),
-        labelSmall = TextStyle(
-            fontFamily = sansBrand,
-            fontWeight = FontWeight.Medium,
-            fontSize = 11.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.5.sp
-        )
+        // Titoli grandi. Il serif resta dov'era: in cima, dove lo store si presenta.
+        displayLarge = fluidStyle(display, 34f, 41f, FontWeight.Bold),
+        displayMedium = fluidStyle(display, 34f, 41f, FontWeight.Bold),
+        displaySmall = fluidStyle(display, 30f, 36f, FontWeight.Bold),
+
+        headlineLarge = fluidStyle(display, 28f, 34f, FontWeight.Bold),
+        headlineMedium = fluidStyle(display, 26f, 32f, FontWeight.Bold),
+        headlineSmall = fluidStyle(sans, 22f, 28f, FontWeight.Bold),
+
+        // Titoli. 17sp Semibold e' quello che fa il lavoro: la riga principale di ogni voce.
+        titleLarge = fluidStyle(sans, 20f, 25f, FontWeight.SemiBold),
+        titleMedium = fluidStyle(sans, 17f, 22f, FontWeight.SemiBold),
+        titleSmall = fluidStyle(sans, 15f, 20f, FontWeight.SemiBold),
+
+        // Corpo. 15sp Regular e' la riga secondaria sotto un titolo.
+        bodyLarge = fluidStyle(sans, 17f, 23f, FontWeight.Normal),
+        bodyMedium = fluidStyle(sans, 15f, 21f, FontWeight.Normal),
+        bodySmall = fluidStyle(sans, 13f, 18f, FontWeight.Normal),
+
+        // Etichette. Alle misure piccole il tracking torna positivo per restare leggibili.
+        labelLarge = fluidStyle(sans, 15f, 20f, FontWeight.SemiBold),
+        labelMedium = fluidStyle(sans, 13f, 17f, FontWeight.Medium),
+        labelSmall = fluidStyle(sans, 11f, 14f, FontWeight.SemiBold, letterSpacing = 0.5.sp),
     )
 }
 
+/**
+ * Le forme, tutte ad angolo continuo.
+ *
+ * I raggi sono piu' grandi dei precedenti perche' un angolo continuo dello stesso raggio nominale si
+ * legge piu' stretto: la curva resta piu' a lungo vicino al lato.
+ */
+private val AppShapes = Shapes(
+    extraSmall = ContinuousCornerShape(FluidRadius.Small),
+    small = ContinuousCornerShape(FluidRadius.Control),
+    medium = ContinuousCornerShape(FluidRadius.Card),
+    large = ContinuousCornerShape(FluidRadius.Group),
+    extraLarge = ContinuousCornerShape(FluidRadius.Sheet),
+)
+
+/**
+ * Il tema del Pampa Store, costruito sul look del Fluid Engine.
+ *
+ * La firma resta identica di proposito: l'unico punto di chiamata non sa che sotto e' cambiato
+ * tutto. Al posto delle due palette scritte a mano c'e' [fluidColorScheme], che deriva ogni
+ * superficie da [PampaStoreBrand]: cambiare quella coppia di colori ricolora l'app intera restando
+ * coerente, che e' esattamente quello che le due liste di 30 colori non permettevano.
+ *
+ * Vedi [FLUID_PORT_OF] per il rapporto con l'engine vero.
+ */
 @Composable
 fun PampaStoreTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = fluidColorScheme(brand = PampaStoreBrand, isDark = darkTheme),
         typography = brandTypography(),
         shapes = AppShapes,
-        content = content
+        content = content,
     )
 }
