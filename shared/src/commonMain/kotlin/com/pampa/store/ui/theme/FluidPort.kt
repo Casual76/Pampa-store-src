@@ -43,7 +43,7 @@ import kotlin.math.tan
  * scheme) sono rimasti fuori: il motion scheme espressivo non esiste nel Material 3 di Compose
  * Multiplatform 1.7, e i componenti sarebbero una copia molto piu' grande e molto piu' fragile.
  */
-const val FLUID_PORT_OF: String = "1.1.1"
+const val FLUID_PORT_OF: String = "1.2.1"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Angoli continui

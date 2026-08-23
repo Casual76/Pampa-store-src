@@ -38,7 +38,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 /**
  * I componenti del Fluid Engine che servono al Pampa Store, portati in `commonMain`.
@@ -230,24 +229,41 @@ fun FluidListRow(
 }
 
 /**
- * L'intestazione di una sezione, in maiuscolo.
+ * L'intestazione sopra una lista raggruppata.
  *
- * Il maiuscolo vuole molto piu' tracking di quanto la curva dia da sola, perche' le lettere non
- * hanno piu' ascendenti e discendenti a separarle.
+ * Sobria apposta: un'intestazione etichetta il gruppo che introduce, quindi sta nel colore
+ * secondario e non nell'accento. Le intestazioni colorate competono con il contenuto che
+ * presentano, ed e' il modo piu' rapido per far sembrare affollata una schermata di impostazioni.
+ *
+ * Stessa firma dell'engine, [detail] compreso: un componente portato che diverge nella firma da
+ * quello che copia e' peggio di uno che non c'e'.
  */
 @Composable
 fun FluidSectionHeader(
     title: String,
     modifier: Modifier = Modifier,
+    detail: String? = null,
 ) {
-    Text(
-        text = title.uppercase(),
-        modifier = modifier.padding(start = 4.dp, bottom = 8.dp),
-        style = MaterialTheme.typography.labelMedium,
-        fontWeight = FontWeight.SemiBold,
-        letterSpacing = 0.6.sp,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 4.dp, top = 8.dp, bottom = 2.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Text(
+            text = title.uppercase(),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        detail?.takeIf { it.isNotBlank() }?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
 }
 
 /**
