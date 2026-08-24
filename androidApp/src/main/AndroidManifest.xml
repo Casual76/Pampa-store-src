@@ -6,6 +6,18 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
+    <!--
+        Da Android 11 un'app non vede piu' quali altre app sono installate, se non le dichiara.
+        Senza questa, getPackageInfo solleva NameNotFound per qualunque pacchetto del catalogo, lo
+        store conclude che non e' installato niente, e nessun aggiornamento compare mai: mostra il
+        pulsante di download anche per un'app che hai gia'.
+
+        <queries> con un elenco fisso non basta: il catalogo arriva da remoto e cambia. Un app store
+        e' il caso d'uso per cui QUERY_ALL_PACKAGES esiste. La restrizione di Google Play su questa
+        permission non tocca il Pampa Store, che su Play non c'e'.
+    -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
     <application android:allowBackup="true" android:enableOnBackInvokedCallback="true" android:icon="@mipmap/ic_launcher" android:label="Pampa Store" android:supportsRtl="true" android:theme="@style/Theme.PampaStore" android:usesCleartextTraffic="false">
 
         <activity android:name="com.pampa.store.MainActivity" android:exported="true" android:windowSoftInputMode="adjustResize">
