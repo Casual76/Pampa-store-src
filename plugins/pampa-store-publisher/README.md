@@ -2,6 +2,9 @@
 
 Repo-local MCP plugin that lets an AI agent browse, manage, and publish Android APK releases with the Pampa Store workflow.
 
+The publisher is Android-only. Historical EXE/MSI assets may remain in old GitHub releases for
+archival purposes, but they are unsupported and are never added to new manifests or releases.
+
 ## Tools
 
 - `get_pampa_store_context`
@@ -38,7 +41,7 @@ Repo-local MCP plugin that lets an AI agent browse, manage, and publish Android 
 
 - Claude Code can use the project-level [`.mcp.json`](/C:/ViboCoded%20projects/Pampa%20store/.mcp.json) directly from this repository.
 - Claude Desktop can use [claude-desktop-config.example.json](/C:/ViboCoded%20projects/Pampa%20store/plugins/pampa-store-publisher/claude-desktop-config.example.json) as a ready-made local config snippet.
-- The Windows launcher is [run-pampa-store-publisher.cmd](/C:/ViboCoded%20projects/Pampa%20store/plugins/pampa-store-publisher/run-pampa-store-publisher.cmd).
+- On a Windows development machine, `run-pampa-store-publisher.cmd` starts this Android publisher.
 
 ## Requirements
 

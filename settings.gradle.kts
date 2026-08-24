@@ -7,6 +7,7 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
@@ -15,6 +16,21 @@ dependencyResolutionManagement {
 
 rootProject.name = "PampaStore"
 
-include(":shared")
-include(":androidApp")
-include(":desktopApp")
+include(":app")
+
+val engineDir = file("engine")
+check(engineDir.exists()) {
+    "Fluid Engine non trovato. Esegui git submodule update --init --recursive."
+}
+
+listOf(
+    "engine-foundation",
+    "engine-ui",
+    "engine-storage",
+    "engine-net",
+    "engine-config",
+    "engine-update",
+).forEach { moduleName ->
+    include(":$moduleName")
+    project(":$moduleName").projectDir = engineDir.resolve(moduleName)
+}

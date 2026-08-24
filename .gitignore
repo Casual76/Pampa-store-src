@@ -11,12 +11,15 @@ local.properties
 # Local tools and temp folders
 .tmp-aar/
 .tools/
+__pycache__/
+*.pyc
 
 # Build artifacts
 *.apk
 *.aab
 *.msi
 *.exe
+artifacts/qa/
 
 # Logs
 *.log

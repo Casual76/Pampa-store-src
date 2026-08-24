@@ -1,57 +1,28 @@
-# PampaStore - Project Context
+# Pampa Store - contesto del progetto
 
-PampaStore is a private, cross-platform App Store client and management system built with **Kotlin Multiplatform (KMP)** and **Compose Multiplatform**. It allows users to browse, install, and update Android (APK) and Windows (EXE) applications hosted on GitHub.
+Pampa Store e un catalogo Android nativo scritto con Kotlin, Jetpack Compose, Material 3
+Expressive e Fluid Engine. Permette di scoprire, installare, aprire e aggiornare APK pubblicati
+nei repository GitHub indicizzati da Casual76/Pampa-store.
 
-## 🚀 Quick Start
+## Comandi
 
-### Build and Run
-- **Desktop:** `./gradlew :desktopApp:run`
-- **Android:** `./gradlew :androidApp:installDebug` (requires a connected device)
+- Build debug: ./gradlew :app:assembleDebug
+- Test unitari: ./gradlew :app:testDebugUnitTest
+- Lint: ./gradlew :app:lintDebug
+- Installazione sul dispositivo: ./gradlew :app:installDebug
+- Build release: ./gradlew :app:assembleRelease
 
-### Testing
-- **Desktop Tests:** `./gradlew :shared:desktopTest`
-- **Android Tests:** `./gradlew :shared:androidUnitTest`
+## Architettura
 
-### Packaging
-- **Desktop Distribution:** `./gradlew :desktopApp:packageDistributionForCurrentOS`
-- **Android APK:** `./gradlew :androidApp:assembleRelease`
+- :app contiene applicazione Android, dati, installazione, stato e UI Compose.
+- :engine-* contiene i moduli Fluid Engine caricati dal submodule engine/.
+- plugins/pampa-store-publisher contiene il publisher CLI Android-only per release e manifest.
 
-## 🏗️ Architecture & Modules
+Il package di produzione resta com.pampa.store; la build debug usa com.pampa.store.debug.
+Il catalogo remoto viene memorizzato in DataStore per mantenere l'app utilizzabile offline.
 
-The project follows a modular Kotlin Multiplatform structure:
+## Windows
 
-- **`:shared`**: The core of the application.
-    - `commonMain`: Shared UI components (Compose), ViewModels, Repositories, and Data Models.
-    - `androidMain` / `desktopMain`: Platform-specific implementations for installers, file pickers, and system services.
-- **`:androidApp`**: Android-specific configuration and `MainActivity`.
-- **`:desktopApp`**: Desktop-specific configuration and JVM entry point.
-- **`plugins/pampa-store-publisher`**: A Python-based **MCP (Model Context Protocol)** server that enables AI agents to manage the store catalog, build releases, and publish to GitHub.
-
-## 🛠️ Tech Stack
-
-- **UI:** Compose Multiplatform with Material 3.
-- **Networking:** Ktor Client for catalog fetching and asset downloading.
-- **Serialization:** kotlinx.serialization (JSON).
-- **Persistence:** Jetpack DataStore (Multiplatform) for user preferences.
-- **Images:** Coil3 for async image loading.
-- **Concurrency:** Kotlin Coroutines & Flow.
-
-## 📖 Key Concepts
-
-- **Manifests:** The store is driven by `manifest.json` files. The root `manifest.json` describes PampaStore itself. A central store index (usually in a separate repo) points to individual app manifests.
-- **Channels:** Supports `STABLE` and `BETA` release channels for every app.
-- **Automation:** The `AdminViewModel` and `ReleaseAutomationService` (via the MCP plugin) handle the creation of GitHub releases and manifest updates.
-
-## 📂 Important Files
-
-- `shared/src/commonMain/kotlin/com/pampa/store/data/model/Models.kt`: Central data structures (AppEntry, VersionInfo, etc.).
-- `shared/src/commonMain/kotlin/com/pampa/store/ui/App.kt`: Root Composable and navigation logic.
-- `manifest.json`: Metadata for the PampaStore application.
-- `desktop_tasks.txt`: Development roadmap and pending tasks.
-
-## ⚖️ Development Conventions
-
-- **MVI/MVVM:** Use ViewModels in the `shared` module to manage UI state via `StateFlow`.
-- **Platform Abstraction:** Use `expect`/`actual` or interface-based DI for platform-specific features like APK installation or file system access.
-- **Theme:** Adheres to a custom "Glass" theme defined in `com.pampa.store.ui.theme`.
-- **Automation First:** Prefer using the `pampa-store-publisher` MCP tools for tasks like updating the catalog or publishing new versions.
+La versione Windows e obsoleta e non piu supportata. Gli installer storici possono restare nelle
+vecchie release a scopo archivistico, ma non devono essere generati, pubblicati o referenziati dai
+nuovi manifest.
