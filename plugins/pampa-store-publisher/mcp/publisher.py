@@ -307,6 +307,8 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
         repo_owner=repository["repoOwner"],
         repo_name=repository["repoName"],
         manifest_path=app_manifest_path,
+        channel=channel,
+        version_info=version_info,
     )
 
     summary: dict[str, Any] = {
@@ -334,6 +336,11 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
         "selectedModule": serialize_module(selected_module),
         "appManifestPreview": updated_app_manifest,
         "storeEntryPreview": find_store_entry(updated_store_manifest, app_id),
+        "storeReleasePreview": (
+            deep_copy(updated_store_manifest.get("storeReleases") or {})
+            if app_id == "pampa-store"
+            else None
+        ),
     }
 
     if args.dry_run:
@@ -996,6 +1003,8 @@ def upsert_store_manifest(
     repo_owner: str,
     repo_name: str,
     manifest_path: str,
+    channel: str | None = None,
+    version_info: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     store_manifest = normalize_store_manifest(existing_manifest, store_owner, store_repo)
     apps = list(store_manifest.get("apps") or [])
@@ -1012,7 +1021,14 @@ def upsert_store_manifest(
     elif app_id != "pampa-store":
         apps.append(new_entry)
     store_manifest["apps"] = sorted(apps, key=lambda item: item.get("id", "").lower())
-    store_manifest["storeReleases"] = deep_copy(store_manifest.get("storeReleases") or {})
+    store_releases = deep_copy(store_manifest.get("storeReleases") or {})
+    if app_id == "pampa-store" and version_info:
+        if channel == "stable":
+            store_releases["stable"] = deep_copy(version_info)
+            store_releases["beta"] = deep_copy(version_info)
+        elif channel == "beta":
+            store_releases["beta"] = deep_copy(version_info)
+    store_manifest["storeReleases"] = store_releases
     return store_manifest
 
 
