@@ -58,6 +58,17 @@ class StoreViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    /**
+     * Quello che il catalogo ha da ridire, che non e' un errore.
+     *
+     * Un'app dell'indice con l'id disallineato dal proprio manifest e' una nota di igiene, non un
+     * guasto: le altre si caricano lo stesso. Tenuta separata da [error] perche' finche' stavano
+     * insieme una nota bastava a far comparire "Connessione non disponibile" al posto del catalogo,
+     * ogni volta che un filtro non produceva risultati.
+     */
+    private val _warnings = MutableStateFlow<String?>(null)
+    val warnings: StateFlow<String?> = _warnings.asStateFlow()
+
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
@@ -161,6 +172,7 @@ class StoreViewModel(
         scope.launch {
             _isLoading.value = true
             _error.value = null
+            _warnings.value = null
             refreshInstallPrerequisites()
 
             val service = appRepository
@@ -192,10 +204,12 @@ class StoreViewModel(
 
                     _apps.value = displayApps
                     _categories.value = displayApps.map { it.entry.category }.distinct().sorted()
-                    _error.value = warningMessage
+                    _error.value = null
+                    _warnings.value = warningMessage
                 },
                 onFailure = { error ->
                     _error.value = error.message ?: "Impossibile caricare il catalogo."
+                    _warnings.value = null
                 }
             )
 

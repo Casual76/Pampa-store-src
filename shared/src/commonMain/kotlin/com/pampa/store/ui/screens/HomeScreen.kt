@@ -154,7 +154,10 @@ fun HomeScreen(
             ) {
                 when {
                     isLoading && apps.isEmpty() -> LoadingContent()
-                    error != null && apps.isEmpty() -> EmptyState(
+
+                    // Solo un guasto vero porta qui. Le note del catalogo stanno in `warnings` e
+                    // non fanno sparire le app che si sono caricate benissimo.
+                    error != null && displayApps.isEmpty() -> EmptyState(
                         title = "Connessione non disponibile",
                         subtitle = error ?: "Impossibile caricare il catalogo.",
                         action = {
@@ -165,11 +168,17 @@ fun HomeScreen(
                     )
 
                     apps.isEmpty() -> EmptyState(
-                        title = if (searchQuery.isNotBlank()) "Nessun risultato" else "Catalogo vuoto",
-                        subtitle = if (searchQuery.isNotBlank()) {
-                            "Prova con un termine diverso o cambia filtri."
-                        } else {
-                            "Non ci sono app pubblicate nello store."
+                        title = when {
+                            searchQuery.isNotBlank() -> "Nessun risultato"
+                            displayApps.isNotEmpty() -> "Nessuna app in questo filtro"
+                            else -> "Catalogo vuoto"
+                        },
+                        subtitle = when {
+                            searchQuery.isNotBlank() -> "Prova con un termine diverso o cambia filtri."
+                            // Il caso che prima diceva "Connessione non disponibile": il catalogo
+                            // c'e', semplicemente nessuna app soddisfa il filtro scelto.
+                            displayApps.isNotEmpty() -> "Le app ci sono, ma nessuna rientra in questo filtro."
+                            else -> "Non ci sono app pubblicate nello store."
                         }
                     )
 
