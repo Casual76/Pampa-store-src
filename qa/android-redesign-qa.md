@@ -5,7 +5,7 @@
 - Android-only application rebuilt on Fluid Engine 1.2.3.
 - Device: Samsung SM-S931B (`RFCY61FZDHW`), Android 16 / API 36.
 - Physical display restored after adaptive checks: 1080 x 2340 px, physical density 480 dpi, user override 420 dpi.
-- No Store release was published and no historical installer asset was deleted.
+- Stable release 1.4.0 was published on 2026-08-24; no historical installer asset was deleted.
 
 ## Automated gates
 
@@ -40,6 +40,14 @@
 - Memory snapshot after the exercised flow: total PSS 283,359 KB. This is a single diagnostic sample, not evidence of a leak trend.
 - Raw evidence: `artifacts/qa/performance/gfxinfo-release-run1.txt`, `gfxinfo-release-run2.txt`, and `meminfo-release.txt`.
 
+## Stable release 1.4.0
+
+- Tag: `stable-pampa-store-v1.4.0`.
+- Asset: `pampa-store-1.4.0.apk`, 3,570,367 bytes.
+- SHA-256: `1c0131dad58b41eae7cdb9df104688aaf1b5b0d9008c907608f6cd5a4b94ba11`.
+- GitHub release, app manifest, and central `storeReleases` stable/beta channels were independently verified.
+- The exact public asset was downloaded again, signature/version checked, installed in-place on the SM-S931B, and matched byte-for-byte with the installed base APK.
+
 ## Result
 
-The implemented Android redesign passes the functional, build, signing, visual, adaptive-layout, and physical-device checks recorded above. Release preparation and publication remain a separate activity.
+The Android redesign and its stable 1.4.0 publication pass the functional, build, signing, visual, adaptive-layout, remote-artifact, and physical-device checks recorded above.
