@@ -18,6 +18,7 @@ rootProject.name = "PampaStore"
 
 include(":app")
 
+// fluid-engine (inizio)
 val engineDir = file("engine")
 check(engineDir.exists()) {
     "Fluid Engine non trovato. Esegui git submodule update --init --recursive."
@@ -34,3 +35,4 @@ listOf(
     include(":$moduleName")
     project(":$moduleName").projectDir = engineDir.resolve(moduleName)
 }
+// fluid-engine (fine)
