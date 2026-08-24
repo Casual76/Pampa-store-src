@@ -31,6 +31,7 @@ import dev.antigravity.fluidengine.ui.fluid.FluidButtonStyle
 import dev.antigravity.fluidengine.ui.fluid.FluidChip
 import dev.antigravity.fluidengine.ui.fluid.FluidScreen
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionFootnote
+import dev.antigravity.fluidengine.ui.fluid.fluidLicensesSection
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
 import dev.antigravity.fluidengine.ui.fluid.FluidSegmentedControl
 import dev.antigravity.fluidengine.ui.fluid.FluidSwitch
@@ -227,6 +228,12 @@ fun MoreScreen(
                 "Pampa Store distribuisce esclusivamente app Android. Le vecchie build Windows sono storiche e non più supportate.",
             )
         }
+
+        // Le opere di terze parti che il Fluid Engine porta dentro l'APK — il vetro di Kyant e il
+        // font Inter. Le rispettive licenze chiedono che l'avviso viaggi con la distribuzione, e un
+        // file di licenza dentro un repository non e' la distribuzione. L'elenco vive nell'engine,
+        // cosi' non resta indietro qui mentre viene aggiornato altrove.
+        fluidLicensesSection()
     }
 }
 
