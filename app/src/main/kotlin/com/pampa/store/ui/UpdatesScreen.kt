@@ -23,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -94,7 +93,11 @@ fun UpdatesScreen(
     // Dove sta la riga che ha aperto il pannello. Una mappa e non uno stato per riga: l'origine
     // serve al *portale*, che vive fuori dalla lista, e nel momento in cui il modale chiede "da
     // dove cresco" la riga potrebbe essere già stata riciclata dalla lazy list.
-    val origins = remember { mutableStateMapOf<String, Rect>() }
+    //
+    // Mappa normale e non snapshot state: qui si scrive durante il layout (a ogni spostamento della
+    // riga) e si legge una volta sola, quando il modale parte. Uno stato osservabile scritto dal
+    // layout invaliderebbe la composizione a ogni scorrimento per un valore che nessuno guarda.
+    val origins = remember { mutableMapOf<String, Rect>() }
 
     RequestNotificationPermissionOnce(missing = !state.notificationsEnabled)
 

@@ -62,3 +62,19 @@ fun List<QueueEntry>.clearPending(): List<QueueEntry> = filter(QueueEntry::isRun
 /** Aggiorna lo stato di una voce, se la voce c'è. */
 fun List<QueueEntry>.withState(appId: String, state: DownloadState): List<QueueEntry> =
     map { if (it.appId == appId) it.copy(state = state) else it }
+
+/**
+ * Un fatto che vale un avviso a schermo, e nient'altro.
+ *
+ * Vive nello strato dati con un tono suo invece di prendere quello dell'engine: il ViewModel decide
+ * *cosa* è successo, la composizione decide come si disegna. Il giorno in cui l'engine rinomina i
+ * propri toni, questo file non se ne accorge.
+ */
+data class StoreEvent(
+    val id: String,
+    val title: String,
+    val message: String,
+    val tone: StoreEventTone = StoreEventTone.Info,
+)
+
+enum class StoreEventTone { Info, Success, Warning, Error }

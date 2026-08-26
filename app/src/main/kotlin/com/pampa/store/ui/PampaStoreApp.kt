@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import kotlinx.coroutines.flow.Flow
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -39,11 +40,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.pampa.store.data.StoreEvent
+import com.pampa.store.data.StoreEventTone
 import com.pampa.store.viewmodel.StoreViewModel
 import dev.antigravity.fluidengine.ui.fluid.FluidFoldingTabBar
 import dev.antigravity.fluidengine.ui.fluid.FluidFoldingTabBarDefaults
 import dev.antigravity.fluidengine.ui.fluid.FluidGlassModalHost
+import dev.antigravity.fluidengine.ui.fluid.FluidNotification
 import dev.antigravity.fluidengine.ui.fluid.FluidNotificationHost
+import dev.antigravity.fluidengine.ui.fluid.FluidNotificationTone
 import dev.antigravity.fluidengine.ui.fluid.FluidTabItem
 import dev.antigravity.fluidengine.ui.fluid.FluidTabRail
 import dev.antigravity.fluidengine.ui.fluid.FluidMotion
@@ -227,6 +232,7 @@ fun PampaStoreApp(
                     PampaNavigationSuite(
                         currentRoute = route,
                         visible = showNavigation,
+                        events = viewModel.events,
                         onSelect = { target ->
                             navController.navigate(target) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -360,6 +366,7 @@ fun PampaStoreApp(
 private fun PampaNavigationSuite(
     currentRoute: String?,
     visible: Boolean,
+    events: Flow<StoreEvent>,
     onSelect: (String) -> Unit,
     content: @Composable () -> Unit,
 ) {
@@ -375,6 +382,26 @@ private fun PampaNavigationSuite(
     // su una pagina nuova senza la navigazione che ce l'ha portata: si vede una pastiglia sola,
     // con l'icona della scheda in cui sei, e non c'e' modo di raggiungere le altre senza scorrere.
     LaunchedEffect(currentRoute) { barFold.unfold() }
+
+    // Gli avvisi del ViewModel diventano banner in vetro in cima. La coda del banner e' dell'engine
+    // (deduplica per id e li presenta uno alla volta), quindi qui basta consegnare.
+    LaunchedEffect(events, notificationHost) {
+        events.collect { event ->
+            notificationHost.show(
+                FluidNotification(
+                    id = event.id,
+                    title = event.title,
+                    message = event.message,
+                    tone = when (event.tone) {
+                        StoreEventTone.Success -> FluidNotificationTone.Success
+                        StoreEventTone.Warning -> FluidNotificationTone.Warning
+                        StoreEventTone.Error -> FluidNotificationTone.Error
+                        StoreEventTone.Info -> FluidNotificationTone.Info
+                    },
+                ),
+            )
+        }
+    }
 
     CompositionLocalProvider(
         LocalFluidGlassModalHostState provides modalHost,

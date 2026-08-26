@@ -19,6 +19,8 @@ import com.pampa.store.data.QueueEntry
 import com.pampa.store.data.RepositoryRef
 import com.pampa.store.data.STORE_APP_ID
 import com.pampa.store.data.StoreApp
+import com.pampa.store.data.StoreEvent
+import com.pampa.store.data.StoreEventTone
 import com.pampa.store.data.StorePersistence
 import com.pampa.store.data.StorePreferences
 import com.pampa.store.data.StoreUiState
@@ -39,7 +41,10 @@ import com.pampa.store.util.isVersionNewer
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -55,6 +60,16 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(StoreUiState())
     val uiState: StateFlow<StoreUiState> = _uiState.asStateFlow()
+
+    /**
+     * I fatti che meritano un avviso in cima allo schermo.
+     *
+     * Un flusso e non un campo dello stato: un avviso e' un *evento*, e messo dentro lo stato
+     * sopravvive alla propria utilita' — riappare a ogni ricomposizione finche' qualcuno non si
+     * ricorda di azzerarlo, e quel qualcuno prima o poi se ne dimentica.
+     */
+    private val _events = MutableSharedFlow<StoreEvent>(extraBufferCapacity = 8)
+    val events: SharedFlow<StoreEvent> = _events.asSharedFlow()
 
     /**
      * La coda gira in un job solo, e questo riferimento è come si sa se sta già girando.
@@ -408,10 +423,23 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                         setInstallState(stateId, DownloadState.Installing(event.message))
                     InstallEvent.Success -> {
                         setInstallState(stateId, DownloadState.Installed(version.version))
+                        announce(
+                            id = "installed-$stateId-${version.version}",
+                            title = "Installata la ${version.version}",
+                            message = queueName(stateId),
+                            tone = StoreEventTone.Success,
+                        )
                         refreshInstalledApps()
                     }
-                    is InstallEvent.Failure ->
+                    is InstallEvent.Failure -> {
                         setInstallState(stateId, DownloadState.Error(event.message))
+                        announce(
+                            id = "failed-$stateId-${version.version}",
+                            title = "Installazione non riuscita",
+                            message = event.message,
+                            tone = StoreEventTone.Error,
+                        )
+                    }
                 }
             }
         }.onFailure { error ->
@@ -444,6 +472,16 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
     }
+
+    private fun announce(id: String, title: String, message: String, tone: StoreEventTone) {
+        _events.tryEmit(StoreEvent(id = id, title = title, message = message, tone = tone))
+    }
+
+    /** Il nome che la coda conosce per questo id, o l'id stesso se la coda non ne sa niente. */
+    private fun queueName(appId: String): String =
+        _uiState.value.updateQueue.firstOrNull { it.appId == appId }?.name
+            ?: _uiState.value.apps.firstOrNull { it.entry.id == appId }?.entry?.name
+            ?: appId
 
     private fun checkStoreUpdate() {
         val state = _uiState.value
