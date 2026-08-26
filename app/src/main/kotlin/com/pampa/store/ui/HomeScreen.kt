@@ -114,31 +114,14 @@ fun HomeScreen(
                 }
             }
 
-            // Le prime tre, e poi si va alla scheda. La Home dice *che* c'e' qualcosa; il posto
-            // dove si aggiorna e' uno solo, ed e' quello che la notifica apre.
-            val pending = state.updatableApps
-            if (pending.isNotEmpty()) {
-                item {
-                    FluidSectionHeader(
-                        title = "Aggiornamenti pronti",
-                        detail = if (pending.size > 3) {
-                            "Le prime 3 di ${pending.size}"
-                        } else {
-                            "Tocca per aggiornare"
-                        },
-                    )
-                }
-                item { StoreAppGroup(apps = pending.take(3), onOpenApp = { onShowUpdates() }) }
-            }
-
             if (shownApps.isNotEmpty()) {
                 item {
                     FluidSectionHeader(
                         title = if (installed.isEmpty()) "Da scoprire" else "Le tue app",
-                        detail = if (installed.isEmpty()) {
-                            "Una selezione per iniziare"
-                        } else {
-                            "Installate su questo dispositivo"
+                        detail = when {
+                            installed.isEmpty() -> "Una selezione per iniziare"
+                            state.updateCount > 0 -> "${state.updateCount} da aggiornare"
+                            else -> "Installate su questo dispositivo"
                         },
                     )
                 }

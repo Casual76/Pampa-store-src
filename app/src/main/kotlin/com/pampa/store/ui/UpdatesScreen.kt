@@ -111,10 +111,12 @@ fun UpdatesScreen(
         ),
         isRefreshing = state.isRefreshing,
         onRefresh = onRefresh,
-        // Alert vira il secondario verso l'errore, e `urgent` lo porta a errore pieno: il fondale
-        // si accende solo quando ha davvero qualcosa da segnalare, invece di gridare sempre.
+        // Il colore della pagina significa qualcosa. Con qualcosa da fare e' Alert (il secondario
+        // virato verso l'errore) portato a errore pieno da `urgent`; a coda vuota e' il terziario,
+        // che e' calmo: una pagina rossa che dice "sei all'ultima versione" da' l'allarme sbagliato,
+        // e una pagina che lo da' sempre smette di darlo.
         ambient = FluidAmbient(
-            tone = FluidHeroTone.Alert,
+            tone = if (total > 0) FluidHeroTone.Alert else FluidHeroTone.Tertiary,
             motif = FluidHeroMotif.Ticks,
             urgent = total > 0,
         ),
@@ -146,7 +148,7 @@ fun UpdatesScreen(
 
         item {
             FluidHero(
-                tone = FluidHeroTone.Alert,
+                tone = if (total > 0) FluidHeroTone.Alert else FluidHeroTone.Tertiary,
                 motif = FluidHeroMotif.Ticks,
                 urgent = total > 0,
                 eyebrow = "Le tue app",
