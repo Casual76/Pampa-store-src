@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    L'icona della barra di stato. Android la ridipinge in bianco e ne tiene solo l'alfa, quindi qui
+    conta la silhouette e nient'altro: una freccia verso il basso su una linea, cioe' "c'e' qualcosa
+    da scaricare". Un'icona con dei colori dentro arriverebbe comunque bianca.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="#FFFFFFFF">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M11,3h2v8.17l3.09,-3.08 1.41,1.41 -5.5,5.5 -5.5,-5.5 1.41,-1.41 3.09,3.08z" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M5,18h14v2h-14z" />
+</vector>

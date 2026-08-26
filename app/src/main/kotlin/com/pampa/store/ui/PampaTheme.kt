@@ -13,13 +13,21 @@ import dev.antigravity.fluidengine.foundation.ThemeMode
 import dev.antigravity.fluidengine.ui.theme.AccentPreset
 import dev.antigravity.fluidengine.ui.theme.FluidTheme
 
-val PampaAccentPresets = listOf(
-    AccentPreset("nebula76", "Nebula 76", Color(0xFF6255D9), Color(0xFF968BFF)),
-    AccentPreset("ionBlue", "Ion Blue", Color(0xFF2877D8), Color(0xFF69A7FF)),
-    AccentPreset("auroraMint", "Aurora Mint", Color(0xFF158B73), Color(0xFF58D6B5)),
-    AccentPreset("solarAmber", "Solar Amber", Color(0xFFB96B00), Color(0xFFFFB950)),
-    AccentPreset("coralPulse", "Coral Pulse", Color(0xFFC34F68), Color(0xFFFF8299)),
-)
+/**
+ * I preset, derivati dall'enum invece che riscritti accanto.
+ *
+ * Erano due liste che dovevano restare uguali — l'enum che la preferenza salva e questa che il tema
+ * legge — e due liste di quel tipo divergono al primo preset aggiunto: il nuovo compare fra le
+ * scelte e poi non tinge niente, oppure tinge e non compare.
+ */
+val PampaAccentPresets = AccentPresetId.entries.map { preset ->
+    AccentPreset(
+        preset.storageName,
+        preset.label,
+        Color(preset.lightSeed),
+        Color(preset.darkSeed),
+    )
+}
 
 @Composable
 fun PampaTheme(

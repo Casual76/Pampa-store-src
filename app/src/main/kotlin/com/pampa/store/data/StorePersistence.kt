@@ -57,6 +57,24 @@ class StorePersistence(private val context: Context) {
         }
     }
 
+    /**
+     * Quali versioni sono già state annunciate, per app.
+     *
+     * Il controllo in background gira ogni sei ore e un aggiornamento non installato resta lì per
+     * giorni: senza memoria di cosa è già stato detto, la stessa versione della stessa app
+     * produrrebbe quattro notifiche al giorno.
+     */
+    suspend fun readAnnouncedVersions(): Map<String, String> {
+        val encoded = context.storeDataStore.data.first()[Keys.announcedVersions] ?: return emptyMap()
+        return runCatching { json.decodeFromString<Map<String, String>>(encoded) }.getOrDefault(emptyMap())
+    }
+
+    suspend fun writeAnnouncedVersions(versions: Map<String, String>) {
+        context.storeDataStore.edit { values ->
+            values[Keys.announcedVersions] = json.encodeToString(versions)
+        }
+    }
+
     private object Keys {
         val themeMode = stringPreferencesKey("theme_mode")
         val accentSource = stringPreferencesKey("accent_source")
@@ -66,6 +84,7 @@ class StorePersistence(private val context: Context) {
         val autoCheckStoreUpdates = booleanPreferencesKey("auto_check_store_updates")
         val catalogJson = stringPreferencesKey("catalog_json")
         val catalogSavedAt = longPreferencesKey("catalog_saved_at")
+        val announcedVersions = stringPreferencesKey("announced_versions")
     }
 }
 

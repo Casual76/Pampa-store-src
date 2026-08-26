@@ -12,9 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.OpenInNew
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,11 +37,15 @@ import com.pampa.store.util.formatBytes
 import dev.antigravity.fluidengine.ui.fluid.ContinuousCornerShape
 import dev.antigravity.fluidengine.ui.fluid.FluidButton
 import dev.antigravity.fluidengine.ui.fluid.FluidButtonStyle
+import dev.antigravity.fluidengine.ui.fluid.FluidAmbient
+import dev.antigravity.fluidengine.ui.theme.FluidCard
 import dev.antigravity.fluidengine.ui.fluid.FluidHero
 import dev.antigravity.fluidengine.ui.fluid.FluidHeroMetric
 import dev.antigravity.fluidengine.ui.fluid.FluidHeroMotif
 import dev.antigravity.fluidengine.ui.fluid.FluidHeroTone
 import dev.antigravity.fluidengine.ui.fluid.FluidScreen
+import dev.antigravity.fluidengine.ui.fluid.FluidProgressBar
+import dev.antigravity.fluidengine.ui.fluid.FluidRadius
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
 import dev.antigravity.fluidengine.ui.fluid.FluidSegmentedControl
 import dev.antigravity.fluidengine.ui.theme.FluidEmptyState
@@ -92,6 +94,10 @@ fun DetailScreen(
         horizontalPadding = LocalStoreHorizontalPadding.current,
         onBack = onBack,
         titleFacets = listOf(selectedChannel.label, selectedVersion?.version.orEmpty()),
+        ambient = FluidAmbient(
+            tone = FluidHeroTone.PrimaryToSecondary,
+            motif = FluidHeroMotif.Cards,
+        ),
     ) {
         item {
             FluidHero(
@@ -134,7 +140,7 @@ fun DetailScreen(
                 InlineNotice(
                     title = "Autorizzazione necessaria",
                     message = prerequisites.message.orEmpty(),
-                    isError = false,
+                    tone = FluidTone.Warning,
                     onClick = onOpenInstallSettings,
                 )
             }
@@ -155,7 +161,7 @@ fun DetailScreen(
                             modifier = Modifier
                                 .width(260.dp)
                                 .height(520.dp)
-                                .clip(ContinuousCornerShape(22.dp)),
+                                .clip(ContinuousCornerShape(FluidRadius.Group)),
                             contentScale = ContentScale.Crop,
                         )
                     }
@@ -165,7 +171,7 @@ fun DetailScreen(
 
         item { FluidSectionHeader("Informazioni") }
         item {
-            FluidListGroup {
+            FluidListGroup(glass = true) {
                 FluidListRow(
                     title = "Versione disponibile",
                     subtitle = selectedVersion?.version ?: "Non disponibile",
@@ -190,13 +196,10 @@ fun DetailScreen(
         selectedVersion?.changelog?.takeIf(String::isNotBlank)?.let { changelog ->
             item { FluidSectionHeader("Novità") }
             item {
-                Surface(
-                    shape = ContinuousCornerShape(20.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                ) {
+                FluidCard(glass = true) {
                     Text(
                         text = changelog,
-                        modifier = Modifier.fillMaxWidth().padding(18.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
@@ -206,7 +209,7 @@ fun DetailScreen(
         if (app.entry.history.isNotEmpty()) {
             item { FluidSectionHeader("Cronologia") }
             item {
-                FluidListGroup {
+                FluidListGroup(glass = true) {
                     app.entry.history.take(5).forEachIndexed { index, version ->
                         FluidListRow(
                             title = "Versione ${version.version}",
@@ -229,6 +232,11 @@ private fun DownloadStatusCard(state: DownloadState) {
     val progress: Float?
     when (state) {
         DownloadState.Idle -> return
+        DownloadState.Queued -> {
+            title = "In coda"
+            detail = "Parte appena finisce l'installazione precedente."
+            progress = null
+        }
         is DownloadState.Downloading -> {
             title = "Download ${(state.progress * 100).toInt().coerceIn(0, 100)}%"
             detail = "Sto scaricando l’APK verificato."
@@ -260,26 +268,15 @@ private fun DownloadStatusCard(state: DownloadState) {
             progress = null
         }
     }
-    Surface(
-        modifier = Modifier.fillMaxWidth().testTag("download-status"),
-        shape = ContinuousCornerShape(20.dp),
-        color = if (state is DownloadState.Error) {
-            MaterialTheme.colorScheme.errorContainer
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerLow
-        },
-    ) {
+    FluidCard(glass = true, modifier = Modifier.testTag("download-status")) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(18.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Text(detail, style = MaterialTheme.typography.bodyMedium)
             if (progress != null) {
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier.fillMaxWidth().clip(ContinuousCornerShape(6.dp)),
-                )
+                FluidProgressBar(progress = { progress }, modifier = Modifier.fillMaxWidth())
             }
         }
     }

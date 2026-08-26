@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.pampa.store.data.StoreUiState
+import dev.antigravity.fluidengine.ui.fluid.FluidAmbient
 import dev.antigravity.fluidengine.ui.fluid.FluidHero
 import dev.antigravity.fluidengine.ui.fluid.FluidHeroMetric
 import dev.antigravity.fluidengine.ui.fluid.FluidHeroMotif
@@ -15,6 +16,7 @@ import dev.antigravity.fluidengine.ui.fluid.FluidBarAction
 import dev.antigravity.fluidengine.ui.fluid.FluidLoadingBlock
 import dev.antigravity.fluidengine.ui.fluid.FluidScreen
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
+import dev.antigravity.fluidengine.ui.theme.FluidTone
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -26,6 +28,7 @@ fun HomeScreen(
     onOpenApp: (String) -> Unit,
     onOpenCatalog: () -> Unit,
     onShowUpdates: () -> Unit,
+    onLaunchApp: (String) -> Unit,
 ) {
     val installed = state.apps.filter { it.installedVersion != null }
     val shownApps = installed.ifEmpty { state.apps.take(4) }
@@ -45,6 +48,9 @@ fun HomeScreen(
         titleFacets = listOf("${state.apps.size} app", "${state.updateCount} aggiornamenti"),
         isRefreshing = state.isRefreshing,
         onRefresh = onRefresh,
+        // Il fondale della pagina. Serve perche' il vetro sopra una superficie piatta e' invisibile
+        // per costruzione: una lente che rifrange un grigio uniforme produce un grigio uniforme.
+        ambient = FluidAmbient(tone = FluidHeroTone.Primary, motif = FluidHeroMotif.Ripples),
         actions = {
             FluidBarAction(
                 icon = Icons.Rounded.Refresh,
@@ -81,7 +87,8 @@ fun HomeScreen(
                     InlineNotice(
                         title = "Pampa Store ${update.version.version} è disponibile",
                         message = update.version.changelog.ifBlank { "Nuova versione pronta da installare." },
-                        isError = false,
+                        tone = FluidTone.Primary,
+                        onClick = onShowUpdates,
                     )
                 }
             }
@@ -91,7 +98,7 @@ fun HomeScreen(
                     InlineNotice(
                         title = "Catalogo non disponibile",
                         message = message,
-                        isError = true,
+                        tone = FluidTone.Danger,
                         onClick = onRefresh,
                     )
                 }
@@ -99,12 +106,29 @@ fun HomeScreen(
             state.warning?.takeIf { state.isUsingCache }?.let { message ->
                 item {
                     InlineNotice(
-                        title = if (state.isUsingCache) "Modalità offline" else "Catalogo parziale",
+                        title = "Modalità offline",
                         message = message,
-                        isError = false,
+                        tone = FluidTone.Warning,
                         onClick = onRefresh,
                     )
                 }
+            }
+
+            // Le prime tre, e poi si va alla scheda. La Home dice *che* c'e' qualcosa; il posto
+            // dove si aggiorna e' uno solo, ed e' quello che la notifica apre.
+            val pending = state.updatableApps
+            if (pending.isNotEmpty()) {
+                item {
+                    FluidSectionHeader(
+                        title = "Aggiornamenti pronti",
+                        detail = if (pending.size > 3) {
+                            "Le prime 3 di ${pending.size}"
+                        } else {
+                            "Tocca per aggiornare"
+                        },
+                    )
+                }
+                item { StoreAppGroup(apps = pending.take(3), onOpenApp = { onShowUpdates() }) }
             }
 
             if (shownApps.isNotEmpty()) {
@@ -118,7 +142,13 @@ fun HomeScreen(
                         },
                     )
                 }
-                item { StoreAppGroup(apps = shownApps, onOpenApp = onOpenApp) }
+                item {
+                    StoreAppGroup(
+                        apps = shownApps,
+                        onOpenApp = onOpenApp,
+                        onLaunchApp = onLaunchApp,
+                    )
+                }
             }
         }
     }

@@ -19,7 +19,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pampa.store.data.OwnershipFilter
 import com.pampa.store.data.StoreUiState
+import dev.antigravity.fluidengine.ui.fluid.FluidAmbient
 import dev.antigravity.fluidengine.ui.fluid.FluidBarAction
+import dev.antigravity.fluidengine.ui.fluid.FluidHeroMotif
+import dev.antigravity.fluidengine.ui.fluid.FluidHeroTone
 import dev.antigravity.fluidengine.ui.fluid.FluidChip
 import dev.antigravity.fluidengine.ui.fluid.FluidLoadingBlock
 import dev.antigravity.fluidengine.ui.fluid.FluidScreen
@@ -27,6 +30,7 @@ import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
 import dev.antigravity.fluidengine.ui.fluid.FluidSegmentedControl
 import dev.antigravity.fluidengine.ui.fluid.FluidTextField
 import dev.antigravity.fluidengine.ui.theme.FluidEmptyState
+import dev.antigravity.fluidengine.ui.theme.FluidTone
 
 @Composable
 fun CatalogScreen(
@@ -36,6 +40,7 @@ fun CatalogScreen(
     onCategory: (String?) -> Unit,
     onOwnership: (OwnershipFilter) -> Unit,
     onOpenApp: (String) -> Unit,
+    onLaunchApp: (String) -> Unit,
 ) {
     FluidScreen(
         title = "Catalogo",
@@ -44,6 +49,10 @@ fun CatalogScreen(
         titleFacets = listOf("${state.visibleApps.size} risultati", state.ownershipFilter.label),
         isRefreshing = state.isRefreshing,
         onRefresh = onRefresh,
+        ambient = FluidAmbient(
+            tone = FluidHeroTone.SecondaryToTertiary,
+            motif = FluidHeroMotif.Cards,
+        ),
         actions = {
             FluidBarAction(
                 icon = Icons.Rounded.Refresh,
@@ -101,7 +110,7 @@ fun CatalogScreen(
                 InlineNotice(
                     title = "Il catalogo non si è caricato",
                     message = state.error,
-                    isError = true,
+                    tone = FluidTone.Danger,
                     onClick = onRefresh,
                 )
             }
@@ -124,6 +133,7 @@ fun CatalogScreen(
                     apps = state.visibleApps,
                     onOpenApp = onOpenApp,
                     modifier = Modifier.testTag("catalog-app-list"),
+                    onLaunchApp = onLaunchApp,
                 )
             }
         }

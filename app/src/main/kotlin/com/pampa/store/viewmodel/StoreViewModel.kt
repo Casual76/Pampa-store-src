@@ -15,20 +15,30 @@ import com.pampa.store.data.Channel
 import com.pampa.store.data.DownloadState
 import com.pampa.store.data.InstallEvent
 import com.pampa.store.data.OwnershipFilter
+import com.pampa.store.data.QueueEntry
 import com.pampa.store.data.RepositoryRef
+import com.pampa.store.data.STORE_APP_ID
 import com.pampa.store.data.StoreApp
 import com.pampa.store.data.StorePersistence
 import com.pampa.store.data.StorePreferences
 import com.pampa.store.data.StoreUiState
 import com.pampa.store.data.StoreUpdate
+import com.pampa.store.data.VersionInfo
+import com.pampa.store.data.clearPending
+import com.pampa.store.data.enqueue
 import com.pampa.store.data.enumOrDefault
 import com.pampa.store.data.releaseAssetUrl
+import com.pampa.store.data.resolveStoreApps
+import com.pampa.store.data.retryFailed
 import com.pampa.store.data.versionFor
+import com.pampa.store.data.withState
 import com.pampa.store.platform.AndroidAppService
 import com.pampa.store.platform.AppInstaller
+import com.pampa.store.platform.StoreNotifications
 import com.pampa.store.util.isVersionNewer
 import java.io.File
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,9 +51,19 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private val catalogClient = CatalogClient()
     private val appService = AndroidAppService(application)
     private val installer = AppInstaller(application)
+    private val notifications = StoreNotifications(application)
 
     private val _uiState = MutableStateFlow(StoreUiState())
     val uiState: StateFlow<StoreUiState> = _uiState.asStateFlow()
+
+    /**
+     * La coda gira in un job solo, e questo riferimento è come si sa se sta già girando.
+     *
+     * Non è un dettaglio di implementazione: due job che pescano dalla stessa coda consegnerebbero
+     * due APK al PackageInstaller nello stesso istante, e il secondo prompt di sistema copre il
+     * primo. Chi accoda chiama [pumpQueue], che parte solo se non c'è già qualcuno a pompare.
+     */
+    private var queueJob: Job? = null
 
     init {
         BuildVersion.name = BuildConfig.VERSION_NAME
@@ -62,6 +82,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             applyCatalog(cached, usingCache = true)
             _uiState.update { it.copy(isLoading = false) }
         }
+        refreshNotificationPermission()
         refreshCatalog(initial = cached == null)
     }
 
@@ -123,25 +144,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         checkStoreUpdate()
     }
 
-    private fun resolveInstalledApps(entries: List<AppEntry>): List<StoreApp> = entries
-        .filterNot { it.id == com.pampa.store.data.STORE_APP_ID }
-        .map { entry ->
-            val installedVersion = appService.installedVersion(entry.packageName)
-            val installedChannel = when (installedVersion) {
-                entry.beta?.version -> Channel.BETA
-                null -> null
-                else -> Channel.STABLE
-            }
-            val latest = installedChannel?.let(entry::versionFor)
-            StoreApp(
-                entry = entry,
-                installedVersion = installedVersion,
-                installedChannel = installedChannel,
-                hasUpdate = installedVersion != null && latest != null &&
-                    isVersionNewer(latest.version, installedVersion),
-            )
-        }
-        .sortedBy { it.entry.name.lowercase() }
+    private fun resolveInstalledApps(entries: List<AppEntry>): List<StoreApp> =
+        resolveStoreApps(entries, appService::installedVersion)
 
     fun refreshInstalledApps() {
         viewModelScope.launch {
@@ -166,11 +170,18 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 )
             }
             checkStoreUpdate()
+            // Quello che è stato appena installato non è più un aggiornamento in attesa, e la
+            // notifica che lo annunciava non ha più niente da dire.
+            notifications.syncWithUpdates(_uiState.value.updatableApps)
         }
     }
 
     fun refreshPrerequisites() {
         _uiState.update { it.copy(prerequisites = appService.installPrerequisites()) }
+    }
+
+    fun refreshNotificationPermission() {
+        _uiState.update { it.copy(notificationsEnabled = notifications.canPost()) }
     }
 
     fun app(appId: String): StoreApp? = _uiState.value.apps.firstOrNull { it.entry.id == appId }
@@ -208,102 +219,229 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     fun openInstallSettings() = appService.openInstallSettings()
 
+    fun openNotificationSettings() = notifications.openSettings()
+
     fun openApp(packageName: String) {
         if (!appService.launch(packageName)) {
             _uiState.update { it.copy(warning = "L’app non espone un’attività avviabile.") }
         }
     }
 
-    fun installApp(appId: String, channel: Channel) {
+    // ---------------------------------------------------------------------------------------
+    // Installazioni. Tutto passa dalla coda, anche quando la coda ha una voce sola.
+    // ---------------------------------------------------------------------------------------
+
+    /** Installa o aggiorna una singola app. `channel` null significa "quello da cui è installata". */
+    fun installApp(appId: String, channel: Channel?) {
         val app = app(appId) ?: return
-        val version = app.entry.versionFor(channel) ?: run {
-            updateDownloadState(appId, DownloadState.Error("Nessuna versione disponibile."))
+        val target = channel
+            ?: app.installedChannel
+            ?: enumOrDefault(_uiState.value.preferences.defaultChannel, Channel.STABLE)
+        val version = app.entry.versionFor(target) ?: run {
+            setInstallState(appId, DownloadState.Error("Nessuna versione disponibile."))
             return
         }
-        installRelease(
-            stateId = appId,
-            expectedPackageName = app.entry.packageName,
-            repository = app.entry.repository,
-            version = version,
+        enqueueAll(
+            listOf(
+                QueueEntry(
+                    appId = appId,
+                    name = app.entry.name,
+                    channel = target,
+                    targetVersion = version.version,
+                ),
+            ),
         )
+    }
+
+    /** Aggiorna una sola app sul canale da cui è installata. */
+    fun updateOne(appId: String) = installApp(appId, channel = null)
+
+    /**
+     * Accoda tutto quello che è aggiornabile.
+     *
+     * Lo Store va per ultimo di proposito: installare se stessi termina il processo, e qualunque
+     * cosa fosse ancora in coda dietro non partirebbe mai.
+     */
+    fun updateAll() {
+        val state = _uiState.value
+        val apps = state.updatableApps.mapNotNull { app ->
+            val channel = app.installedChannel ?: return@mapNotNull null
+            val version = app.entry.versionFor(channel) ?: return@mapNotNull null
+            QueueEntry(
+                appId = app.entry.id,
+                name = app.entry.name,
+                channel = channel,
+                targetVersion = version.version,
+            )
+        }
+        val store = state.storeUpdate?.let { update ->
+            QueueEntry(
+                appId = STORE_APP_ID,
+                name = "Pampa Store",
+                channel = enumOrDefault(state.preferences.storeUpdateChannel, Channel.STABLE),
+                targetVersion = update.version.version,
+            )
+        }
+        enqueueAll(apps + listOfNotNull(store))
     }
 
     fun installStoreUpdate() {
-        val update = _uiState.value.storeUpdate ?: return
-        installRelease(
-            stateId = com.pampa.store.data.STORE_APP_ID,
-            expectedPackageName = "com.pampa.store",
-            repository = update.repository,
-            version = update.version,
+        val state = _uiState.value
+        val update = state.storeUpdate ?: return
+        enqueueAll(
+            listOf(
+                QueueEntry(
+                    appId = STORE_APP_ID,
+                    name = "Pampa Store",
+                    channel = enumOrDefault(state.preferences.storeUpdateChannel, Channel.STABLE),
+                    targetVersion = update.version.version,
+                ),
+            ),
         )
     }
 
-    private fun installRelease(
+    fun retryFailed() {
+        _uiState.update { it.copy(updateQueue = it.updateQueue.retryFailed()) }
+        pumpQueue()
+    }
+
+    fun clearQueue() {
+        _uiState.update { state ->
+            val dropped = state.updateQueue.filterNot(QueueEntry::isRunning).map(QueueEntry::appId)
+            state.copy(
+                updateQueue = state.updateQueue.clearPending(),
+                apps = state.apps.map { app ->
+                    if (app.entry.id in dropped) app.copy(downloadState = DownloadState.Idle) else app
+                },
+            )
+        }
+    }
+
+    private fun enqueueAll(candidates: List<QueueEntry>) {
+        if (candidates.isEmpty()) return
+        _uiState.update { state ->
+            val queue = state.updateQueue.enqueue(candidates)
+            val queued = queue.filter(QueueEntry::isWaiting).map(QueueEntry::appId).toSet()
+            state.copy(
+                updateQueue = queue,
+                apps = state.apps.map { app ->
+                    if (app.entry.id in queued) app.copy(downloadState = DownloadState.Queued) else app
+                },
+            )
+        }
+        pumpQueue()
+    }
+
+    private fun pumpQueue() {
+        if (queueJob?.isActive == true) return
+        queueJob = viewModelScope.launch {
+            while (true) {
+                val next = _uiState.value.updateQueue.firstOrNull(QueueEntry::isWaiting) ?: break
+                runQueueEntry(next)
+            }
+        }
+    }
+
+    private suspend fun runQueueEntry(entry: QueueEntry) {
+        val state = _uiState.value
+        if (entry.appId == STORE_APP_ID) {
+            val update = state.storeUpdate
+            if (update == null) {
+                setInstallState(entry.appId, DownloadState.Error("L’aggiornamento non è più disponibile."))
+                return
+            }
+            runInstall(entry.appId, "com.pampa.store", update.repository, update.version)
+            return
+        }
+        val app = state.apps.firstOrNull { it.entry.id == entry.appId }
+        val version = app?.entry?.versionFor(entry.channel)
+        if (app == null || version == null) {
+            setInstallState(entry.appId, DownloadState.Error("L’app non è più nel catalogo."))
+            return
+        }
+        runInstall(entry.appId, app.entry.packageName, app.entry.repository, version)
+    }
+
+    /**
+     * Scarica, verifica e installa, e **attende** l'esito.
+     *
+     * Attendere è tutto il punto: la coda ha bisogno di sapere quando la voce corrente è finita per
+     * poter cominciare la prossima, e un'installazione lanciata e dimenticata non lo dice mai.
+     */
+    private suspend fun runInstall(
         stateId: String,
         expectedPackageName: String,
         repository: RepositoryRef,
-        version: com.pampa.store.data.VersionInfo,
+        version: VersionInfo,
     ) {
         if (!appService.installPrerequisites().canInstallPackages) {
-            updateDownloadState(
+            refreshPrerequisites()
+            setInstallState(
                 stateId,
                 DownloadState.Error("Autorizza l’installazione da Pampa Store e riprova."),
             )
             return
         }
         if (version.apkAsset.isBlank() || version.releaseTag.isBlank()) {
-            updateDownloadState(stateId, DownloadState.Error("Questa release non contiene un APK."))
+            setInstallState(stateId, DownloadState.Error("Questa release non contiene un APK."))
             return
         }
 
-        viewModelScope.launch {
-            val safeName = version.apkAsset.substringAfterLast('/').replace(Regex("[^A-Za-z0-9._-]"), "_")
-            val destination = File(appService.downloadsDirectory(), safeName)
-            runCatching {
-                withContext(Dispatchers.IO) {
-                    catalogClient.download(repository.releaseAssetUrl(version), destination) { done, total ->
-                        val progress = if (total > 0) done.toFloat() / total else 0f
-                        updateDownloadState(stateId, DownloadState.Downloading(progress, done, total))
-                    }
-                    updateDownloadState(stateId, DownloadState.Verifying("Controllo del pacchetto…"))
-                    appService.validateApk(destination, expectedPackageName).getOrThrow()
+        val safeName = version.apkAsset.substringAfterLast('/').replace(Regex("[^A-Za-z0-9._-]"), "_")
+        val destination = File(appService.downloadsDirectory(), safeName)
+        runCatching {
+            withContext(Dispatchers.IO) {
+                catalogClient.download(repository.releaseAssetUrl(version), destination) { done, total ->
+                    val progress = if (total > 0) done.toFloat() / total else 0f
+                    setInstallState(stateId, DownloadState.Downloading(progress, done, total))
                 }
-                installer.install(destination, expectedPackageName).collect { event ->
-                    when (event) {
-                        InstallEvent.Preparing ->
-                            updateDownloadState(stateId, DownloadState.Verifying("Preparazione…"))
-                        is InstallEvent.AwaitingUserAction ->
-                            updateDownloadState(stateId, DownloadState.AwaitingUser(event.message))
-                        is InstallEvent.Installing ->
-                            updateDownloadState(stateId, DownloadState.Installing(event.message))
-                        InstallEvent.Success -> {
-                            updateDownloadState(stateId, DownloadState.Installed(version.version))
-                            refreshInstalledApps()
-                        }
-                        is InstallEvent.Failure ->
-                            updateDownloadState(stateId, DownloadState.Error(event.message))
-                    }
-                }
-            }.onFailure { error ->
-                updateDownloadState(
-                    stateId,
-                    DownloadState.Error(error.message ?: "Download o installazione non riusciti."),
-                )
+                setInstallState(stateId, DownloadState.Verifying("Controllo del pacchetto…"))
+                appService.validateApk(destination, expectedPackageName).getOrThrow()
             }
+            installer.install(destination, expectedPackageName).collect { event ->
+                when (event) {
+                    InstallEvent.Preparing ->
+                        setInstallState(stateId, DownloadState.Verifying("Preparazione…"))
+                    is InstallEvent.AwaitingUserAction ->
+                        setInstallState(stateId, DownloadState.AwaitingUser(event.message))
+                    is InstallEvent.Installing ->
+                        setInstallState(stateId, DownloadState.Installing(event.message))
+                    InstallEvent.Success -> {
+                        setInstallState(stateId, DownloadState.Installed(version.version))
+                        refreshInstalledApps()
+                    }
+                    is InstallEvent.Failure ->
+                        setInstallState(stateId, DownloadState.Error(event.message))
+                }
+            }
+        }.onFailure { error ->
+            setInstallState(
+                stateId,
+                DownloadState.Error(error.message ?: "Download o installazione non riusciti."),
+            )
         }
     }
 
-    private fun updateDownloadState(appId: String, downloadState: DownloadState) {
+    /**
+     * Un solo posto in cui lo stato di un'installazione si scrive.
+     *
+     * Riga dell'app e voce della coda mostrano lo stesso fatto, e tenerli allineati da due chiamanti
+     * diversi è il modo in cui la coda finisce per dire "in attesa" accanto a una barra di
+     * avanzamento che si sta muovendo.
+     */
+    private fun setInstallState(appId: String, downloadState: DownloadState) {
         _uiState.update { state ->
-            if (appId == com.pampa.store.data.STORE_APP_ID) {
-                state.copy(warning = (downloadState as? DownloadState.Error)?.message)
-            } else {
-                state.copy(
-                    apps = state.apps.map { app ->
-                        if (app.entry.id == appId) app.copy(downloadState = downloadState) else app
-                    },
-                )
-            }
+            state.copy(
+                updateQueue = state.updateQueue.withState(appId, downloadState),
+                apps = state.apps.map { app ->
+                    if (app.entry.id == appId) app.copy(downloadState = downloadState) else app
+                },
+                warning = if (appId == STORE_APP_ID && downloadState is DownloadState.Error) {
+                    downloadState.message
+                } else {
+                    state.warning
+                },
+            )
         }
     }
 

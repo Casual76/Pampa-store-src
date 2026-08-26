@@ -6,6 +6,13 @@
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!--
+        Da Android 13 pubblicare una notifica richiede il consenso. Non si chiede all'avvio: si
+        chiede quando la persona apre la scheda Aggiornamenti, cioe' nel momento in cui la richiesta
+        ha un contesto invece di essere il primo dialogo di un'app appena installata.
+    -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
         Da Android 11 un'app non vede piu' quali altre app sono installate, se non le dichiara.
         Senza questa, getPackageInfo solleva NameNotFound per qualunque pacchetto del catalogo, lo
         store conclude che non e' installato niente, e nessun aggiornamento compare mai: mostra il
@@ -28,9 +35,14 @@
         android:theme="@style/Theme.PampaStore"
         android:usesCleartextTraffic="false">
 
+        <!--
+            singleTask: toccare la notifica deve riportare allo Store che e' gia' aperto, non
+            impilarne una seconda copia sopra quella in cui si stava gia' guardando il catalogo.
+        -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:screenOrientation="unspecified"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

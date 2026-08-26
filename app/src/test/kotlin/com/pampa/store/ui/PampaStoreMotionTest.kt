@@ -16,6 +16,26 @@ class PampaStoreMotionTest {
         )
     }
 
+    /**
+     * La scheda Aggiornamenti sta fra Catalogo e Altro, e la direzione deve saperlo: una pagina che
+     * entra dal lato sbagliato dice che sei tornato indietro quando stai andando avanti.
+     */
+    @Test
+    fun updatesSitsBetweenCatalogAndMore() {
+        assertEquals(
+            StoreRouteMotionDecision(StoreRouteMotionKind.TopLevelSwitch, direction = 1),
+            decideStoreRouteMotion("catalog", "updates"),
+        )
+        assertEquals(
+            StoreRouteMotionDecision(StoreRouteMotionKind.TopLevelSwitch, direction = 1),
+            decideStoreRouteMotion("updates", "more"),
+        )
+        assertEquals(
+            StoreRouteMotionDecision(StoreRouteMotionKind.TopLevelSwitch, direction = -1),
+            decideStoreRouteMotion("updates", "home"),
+        )
+    }
+
     @Test
     fun detailOpenAndPopUseHierarchicalMotion() {
         assertEquals(

@@ -12,6 +12,7 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.Icon
@@ -26,9 +27,10 @@ import com.pampa.store.data.AppThemeMode
 import com.pampa.store.data.Channel
 import com.pampa.store.data.StoreUiState
 import com.pampa.store.data.enumOrDefault
-import dev.antigravity.fluidengine.ui.fluid.FluidButton
-import dev.antigravity.fluidengine.ui.fluid.FluidButtonStyle
+import dev.antigravity.fluidengine.ui.fluid.FluidAmbient
 import dev.antigravity.fluidengine.ui.fluid.FluidChip
+import dev.antigravity.fluidengine.ui.fluid.FluidHeroMotif
+import dev.antigravity.fluidengine.ui.fluid.FluidHeroTone
 import dev.antigravity.fluidengine.ui.fluid.FluidScreen
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionFootnote
 import dev.antigravity.fluidengine.ui.fluid.fluidLicensesSection
@@ -38,6 +40,7 @@ import dev.antigravity.fluidengine.ui.fluid.FluidSwitch
 import dev.antigravity.fluidengine.ui.theme.FluidListDivider
 import dev.antigravity.fluidengine.ui.theme.FluidListGroup
 import dev.antigravity.fluidengine.ui.theme.FluidListRow
+import dev.antigravity.fluidengine.ui.theme.FluidStatusBadge
 import dev.antigravity.fluidengine.ui.theme.FluidTone
 
 @Composable
@@ -51,7 +54,7 @@ fun MoreScreen(
     onStoreChannel: (Channel) -> Unit,
     onAutoCheck: (Boolean) -> Unit,
     onOpenInstallSettings: () -> Unit,
-    onInstallStoreUpdate: () -> Unit,
+    onOpenNotificationSettings: () -> Unit,
 ) {
     val preferences = state.preferences
     val themeMode = enumOrDefault(preferences.themeMode, AppThemeMode.SYSTEM)
@@ -66,10 +69,11 @@ fun MoreScreen(
         titleFacets = listOf(themeMode.label, selectedAccentLabel(state)),
         isRefreshing = state.isRefreshing,
         onRefresh = onRefresh,
+        ambient = FluidAmbient(tone = FluidHeroTone.Secondary, motif = FluidHeroMotif.Dots),
     ) {
         item { FluidSectionHeader(title = "Aspetto", detail = "Tema, accento e colori dinamici") }
         item {
-            FluidListGroup(modifier = Modifier.testTag("appearance-settings")) {
+            FluidListGroup(modifier = Modifier.testTag("appearance-settings"), glass = true) {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     FluidListRow(
                         title = "Tema",
@@ -122,7 +126,7 @@ fun MoreScreen(
 
         item { FluidSectionHeader(title = "Installazione", detail = "Canali e autorizzazioni Android") }
         item {
-            FluidListGroup {
+            FluidListGroup(glass = true) {
                 FluidListRow(
                     title = "Canale predefinito",
                     subtitle = "Usato quando apri una nuova app dal catalogo.",
@@ -148,9 +152,9 @@ fun MoreScreen(
                     tone = if (state.prerequisites.canInstallPackages) FluidTone.Success else FluidTone.Warning,
                     leading = { Icon(Icons.Rounded.Security, contentDescription = null) },
                     badge = {
-                        StatusPill(
+                        FluidStatusBadge(
                             if (state.prerequisites.canInstallPackages) "Attiva" else "Configura",
-                            if (state.prerequisites.canInstallPackages) FluidTone.Success else FluidTone.Warning,
+                            tone = if (state.prerequisites.canInstallPackages) FluidTone.Success else FluidTone.Warning,
                         )
                     },
                     onClick = onOpenInstallSettings,
@@ -160,7 +164,7 @@ fun MoreScreen(
 
         item { FluidSectionHeader(title = "Pampa Store", detail = "Aggiornamenti e diagnostica") }
         item {
-            FluidListGroup {
+            FluidListGroup(glass = true) {
                 FluidListRow(
                     title = "Controllo automatico",
                     subtitle = "Cerca una nuova versione dello Store all’avvio.",
@@ -189,6 +193,27 @@ fun MoreScreen(
                 }
                 FluidListDivider()
                 FluidListRow(
+                    title = "Notifiche",
+                    subtitle = if (state.notificationsEnabled) {
+                        "Ti avviso quando un’app installata ha una versione nuova."
+                    } else {
+                        "Disattivate: il controllo continua, ma nessun avviso arriva."
+                    },
+                    meta = "Controllo ogni 6 ore",
+                    tone = if (state.notificationsEnabled) FluidTone.Success else FluidTone.Warning,
+                    leading = { Icon(Icons.Rounded.NotificationsActive, contentDescription = null) },
+                    badge = {
+                        FluidStatusBadge(
+                            if (state.notificationsEnabled) "Attive" else "Configura",
+                            tone = if (state.notificationsEnabled) FluidTone.Success else FluidTone.Warning,
+                        )
+                    },
+                    // Il permesso si concede una volta sola: dopo un rifiuto Android non mostra piu'
+                    // il dialogo, e l'unica strada che resta sono le impostazioni di sistema.
+                    onClick = onOpenNotificationSettings,
+                )
+                FluidListDivider()
+                FluidListRow(
                     title = "Versione installata",
                     subtitle = BuildConfig.VERSION_NAME,
                     tone = FluidTone.Neutral,
@@ -201,24 +226,6 @@ fun MoreScreen(
                     meta = if (state.isUsingCache) "Cache offline attiva" else "Sincronizzazione online",
                     tone = if (state.isUsingCache) FluidTone.Warning else FluidTone.Success,
                     leading = { Icon(Icons.Rounded.CheckCircle, contentDescription = null) },
-                )
-            }
-        }
-
-        state.storeUpdate?.let { update ->
-            item {
-                InlineNotice(
-                    title = "Versione ${update.version.version} disponibile",
-                    message = update.version.changelog.ifBlank { "Aggiornamento pronto da installare." },
-                    isError = false,
-                )
-            }
-            item {
-                FluidButton(
-                    text = "Scarica e installa",
-                    onClick = onInstallStoreUpdate,
-                    style = FluidButtonStyle.Filled,
-                    fillWidth = true,
                 )
             }
         }

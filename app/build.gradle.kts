@@ -35,8 +35,8 @@ android {
         applicationId = "com.pampa.store"
         minSdk = 26
         targetSdk = 36
-        versionCode = 22
-        versionName = "1.5.0"
+        versionCode = 23
+        versionName = "1.6.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -129,6 +129,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.work.runtime.ktx)
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)

@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import com.pampa.store.data.AppEntry
+import com.pampa.store.data.Channel
 import com.pampa.store.data.InstallPrerequisites
 import com.pampa.store.data.StoreApp
 import com.pampa.store.data.StorePreferences
@@ -28,6 +29,7 @@ class StoreScreensTest {
                     onOpenApp = {},
                     onOpenCatalog = {},
                     onShowUpdates = {},
+                    onLaunchApp = {},
                 )
             }
         }
@@ -48,6 +50,7 @@ class StoreScreensTest {
                     onCategory = {},
                     onOwnership = {},
                     onOpenApp = {},
+                    onLaunchApp = {},
                 )
             }
         }
@@ -91,11 +94,61 @@ class StoreScreensTest {
                     onCategory = {},
                     onOwnership = {},
                     onOpenApp = {},
+                    onLaunchApp = {},
                 )
             }
         }
         composeRule.onNodeWithText("Il catalogo non si è caricato").assertIsDisplayed()
         composeRule.onNodeWithText("Rete non disponibile").assertIsDisplayed()
+    }
+
+    /**
+     * La scheda che la notifica apre. Il caso che vale la pena tenere fermo e' che la riga
+     * dell'app dica *da dove a dove* si aggiorna: e' l'unica informazione che questa pagina ha e
+     * che il Catalogo non ha gia'.
+     */
+    @Test
+    fun updatesListsWhatIsBehindAndWhereItGoes() {
+        composeRule.setContent {
+            PampaTheme(StorePreferences()) {
+                UpdatesScreen(
+                    state = fixtureState(),
+                    onRefresh = {},
+                    onUpdateAll = {},
+                    onUpdateOne = {},
+                    onInstallStoreUpdate = {},
+                    onRetryFailed = {},
+                    onClearQueue = {},
+                    onOpenApp = {},
+                    onOpenCatalog = {},
+                    onOpenInstallSettings = {},
+                )
+            }
+        }
+        composeRule.onNodeWithTag("updates-hero").assertIsDisplayed()
+        composeRule.onNodeWithTag("updatable-apps").assertIsDisplayed()
+        composeRule.onNodeWithText("2.0.0 → 2.1.0").assertIsDisplayed()
+    }
+
+    @Test
+    fun updatesSaysSoWhenThereIsNothingToDo() {
+        composeRule.setContent {
+            PampaTheme(StorePreferences()) {
+                UpdatesScreen(
+                    state = StoreUiState(isLoading = false),
+                    onRefresh = {},
+                    onUpdateAll = {},
+                    onUpdateOne = {},
+                    onInstallStoreUpdate = {},
+                    onRetryFailed = {},
+                    onClearQueue = {},
+                    onOpenApp = {},
+                    onOpenCatalog = {},
+                    onOpenInstallSettings = {},
+                )
+            }
+        }
+        composeRule.onNodeWithText("Tutto aggiornato").assertIsDisplayed()
     }
 
     @Test
@@ -114,7 +167,7 @@ class StoreScreensTest {
                     onStoreChannel = {},
                     onAutoCheck = {},
                     onOpenInstallSettings = {},
-                    onInstallStoreUpdate = {},
+                    onOpenNotificationSettings = {},
                 )
             }
         }
@@ -135,6 +188,8 @@ class StoreScreensTest {
                     stable = VersionInfo("2.1.0", apkAsset = "keyvoice.apk"),
                 ),
                 installedVersion = "2.0.0",
+                installedChannel = Channel.STABLE,
+                availableVersion = "2.1.0",
                 hasUpdate = true,
             ),
         ),

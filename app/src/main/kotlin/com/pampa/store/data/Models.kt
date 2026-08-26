@@ -112,12 +112,30 @@ enum class AccentSource(val label: String) {
     DYNAMIC("Material You"),
 }
 
-enum class AccentPresetId(val storageName: String, val label: String) {
-    NEBULA_76("nebula76", "Nebula 76"),
-    ION_BLUE("ionBlue", "Ion Blue"),
-    AURORA_MINT("auroraMint", "Aurora Mint"),
-    SOLAR_AMBER("solarAmber", "Solar Amber"),
-    CORAL_PULSE("coralPulse", "Coral Pulse"),
+/**
+ * I preset dell'accento, semi compresi.
+ *
+ * I colori stanno qui e non accanto al tema perche' la lista esisteva in due posti — l'enum che la
+ * preferenza salva e la lista che il tema legge — e due liste che devono restare uguali sono una
+ * lista che diverge al primo preset aggiunto. Sono `Long` e non `Color` di proposito: questo strato
+ * non conosce Compose, e non e' il momento di fargliela conoscere per cinque costanti.
+ *
+ * `FluidTheme` deriva l'intera palette dal seme, quindi alzare la croma alza la saturazione di tutta
+ * l'app senza toccare i rapporti di contrasto, che li garantisce la scala tonale.
+ */
+enum class AccentPresetId(
+    val storageName: String,
+    val label: String,
+    val lightSeed: Long,
+    val darkSeed: Long,
+) {
+    NEBULA_76("nebula76", "Nebula 76", 0xFF5B3FF0, 0xFFA98CFF),
+    ION_BLUE("ionBlue", "Ion Blue", 0xFF0A6BFF, 0xFF5FB0FF),
+    AURORA_MINT("auroraMint", "Aurora Mint", 0xFF00A383, 0xFF3BEFC0),
+    SOLAR_AMBER("solarAmber", "Solar Amber", 0xFFE07800, 0xFFFFC44D),
+    CORAL_PULSE("coralPulse", "Coral Pulse", 0xFFE83F5E, 0xFFFF7A93),
+    PLASMA_MAGENTA("plasmaMagenta", "Plasma Magenta", 0xFFD10F86, 0xFFFF6ED0),
+    CYAN_TIDE("cyanTide", "Cyan Tide", 0xFF0093B8, 0xFF3FDCF5),
 }
 
 @Serializable
@@ -137,6 +155,15 @@ data class InstallPrerequisites(
 
 sealed interface DownloadState {
     data object Idle : DownloadState
+
+    /**
+     * Accodata, in attesa del proprio turno.
+     *
+     * Esiste perche' gli aggiornamenti si eseguono uno alla volta: il PackageInstaller non
+     * privilegiato apre un prompt di sistema per ogni APK, e due prompt sovrapposti sono
+     * un'installazione persa. Un'app in attesa non e' [Idle] — la differenza si vede sulla riga.
+     */
+    data object Queued : DownloadState
     data class Downloading(val progress: Float, val downloaded: Long, val total: Long) : DownloadState
     data class Verifying(val message: String) : DownloadState
     data class AwaitingUser(val message: String) : DownloadState
@@ -157,6 +184,15 @@ data class StoreApp(
     val entry: AppEntry,
     val installedVersion: String? = null,
     val installedChannel: Channel? = null,
+    /**
+     * L'ultima versione sul canale da cui l'app e' installata.
+     *
+     * Ricavabile da [entry] e [installedChannel], ma ricavarla ogni volta significa che la
+     * schermata degli aggiornamenti, la notifica di sistema e la coda la ricalcolano ognuna per
+     * conto suo — e la definizione di "a cosa aggiorno" e' precisamente la cosa che non deve
+     * esistere in tre copie.
+     */
+    val availableVersion: String? = null,
     val hasUpdate: Boolean = false,
     val downloadState: DownloadState = DownloadState.Idle,
 )
@@ -181,11 +217,15 @@ data class StoreUiState(
     val selectedCategory: String? = null,
     val ownershipFilter: OwnershipFilter = OwnershipFilter.ALL,
     val storeUpdate: StoreUpdate? = null,
+    val updateQueue: List<QueueEntry> = emptyList(),
+    val notificationsEnabled: Boolean = true,
 ) {
     val installedCount: Int get() = apps.count { it.installedVersion != null }
     val updateCount: Int get() = apps.count(StoreApp::hasUpdate)
     val betaCount: Int get() = apps.count { it.entry.beta != null }
     val categories: List<String> get() = apps.map { it.entry.category }.distinct().sorted()
+
+    val updatableApps: List<StoreApp> get() = apps.filter(StoreApp::hasUpdate)
 
     val visibleApps: List<StoreApp>
         get() = apps.filter { app ->

@@ -14,10 +14,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -31,8 +28,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,19 +39,28 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.pampa.store.data.OwnershipFilter
 import com.pampa.store.viewmodel.StoreViewModel
-import dev.antigravity.fluidengine.ui.fluid.FluidTabBar
-import dev.antigravity.fluidengine.ui.fluid.FluidTabBarDefaults
+import dev.antigravity.fluidengine.ui.fluid.FluidFoldingTabBar
+import dev.antigravity.fluidengine.ui.fluid.FluidFoldingTabBarDefaults
+import dev.antigravity.fluidengine.ui.fluid.FluidGlassModalHost
+import dev.antigravity.fluidengine.ui.fluid.FluidNotificationHost
 import dev.antigravity.fluidengine.ui.fluid.FluidTabItem
 import dev.antigravity.fluidengine.ui.fluid.FluidTabRail
 import dev.antigravity.fluidengine.ui.fluid.FluidMotion
+import dev.antigravity.fluidengine.ui.fluid.LocalFluidGlassModalHostState
+import dev.antigravity.fluidengine.ui.fluid.LocalFluidNotificationHostState
 import dev.antigravity.fluidengine.ui.fluid.ProvideFluidChrome
 import dev.antigravity.fluidengine.ui.fluid.FluidMotionPolicyProvider
 import dev.antigravity.fluidengine.ui.fluid.FluidScrollToTopBus
+import dev.antigravity.fluidengine.ui.fluid.fluidGlassModalObscured
+import dev.antigravity.fluidengine.ui.fluid.rememberFluidBarFold
 import dev.antigravity.fluidengine.ui.fluid.rememberFluidChromeController
-import dev.antigravity.fluidengine.ui.fluid.rememberFluidChromeScrollConnection
+import dev.antigravity.fluidengine.ui.fluid.rememberFluidGlassModalHostState
+import dev.antigravity.fluidengine.ui.fluid.rememberFluidNotificationHostState
 import dev.antigravity.fluidengine.ui.fluid.rememberGlassBackdrop
+import dev.antigravity.fluidengine.ui.fluidphysics.FluidMorphMenuHost
+import dev.antigravity.fluidengine.ui.fluidphysics.FluidMorphMenuState
+import dev.antigravity.fluidengine.ui.fluidphysics.rememberFluidMorphMenuState
 import dev.antigravity.fluidengine.ui.theme.FluidRouteMotion
 import dev.antigravity.fluidengine.ui.theme.FluidRouteMotionHost
 import dev.antigravity.fluidengine.ui.theme.FluidScreenSurface
@@ -66,6 +70,7 @@ import dev.antigravity.fluidengine.ui.theme.RouteMotionSignals
 import dev.antigravity.fluidengine.ui.theme.rememberRouteMotionSignals
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Tune
 import kotlin.math.roundToInt
@@ -73,6 +78,7 @@ import kotlin.math.roundToInt
 private object Routes {
     const val Home = "home"
     const val Catalog = "catalog"
+    const val Updates = "updates"
     const val More = "more"
     const val Detail = "detail/{appId}"
     fun detail(appId: String) = "detail/${Uri.encode(appId)}"
@@ -81,10 +87,20 @@ private object Routes {
 private val topLevelItems = listOf(
     FluidTabItem(Routes.Home, "Home", Icons.Rounded.Home),
     FluidTabItem(Routes.Catalog, "Catalogo", Icons.Rounded.Apps),
+    FluidTabItem(Routes.Updates, "Aggiornamenti", Icons.Rounded.Download),
     FluidTabItem(Routes.More, "Altro", Icons.Rounded.Tune),
 )
 
 private val topLevelRouteOrder = topLevelItems.map(FluidTabItem::route)
+
+/**
+ * Una rotta chiesta da fuori, se è una che esiste.
+ *
+ * Il filtro non è difensivo per abitudine: un PendingIntent sopravvive agli aggiornamenti dell'app,
+ * quindi una notifica pubblicata da una versione precedente può nominare una scheda che nel
+ * frattempo è stata rinominata o tolta.
+ */
+private fun topLevelRouteFor(route: String): String? = topLevelRouteOrder.firstOrNull { it == route }
 
 internal enum class StoreRouteMotionKind { TopLevelSwitch, Detail }
 
@@ -171,8 +187,22 @@ private fun storeRouteExitTransition(
 
 internal val LocalStoreHorizontalPadding = staticCompositionLocalOf { 20.dp }
 
+/**
+ * Il menù che nasce da un tasto, per la schermata che ne ha uno.
+ *
+ * L'host vive alla radice — è l'unico posto da cui una superficie può uscire *sopra* la barra di
+ * navigazione — ma il tasto sta dentro una pagina, e fra i due non c'è una gerarchia di parametri da
+ * attraversare. L'engine non espone un CompositionLocal per questo stato, quindi lo tiene l'app.
+ */
+internal val LocalStoreMorphMenu = staticCompositionLocalOf<FluidMorphMenuState?> { null }
+
 @Composable
-fun PampaStoreApp(viewModel: StoreViewModel) {
+fun PampaStoreApp(
+    viewModel: StoreViewModel,
+    /** Una rotta chiesta da fuori — oggi solo il tocco sulla notifica degli aggiornamenti. */
+    pendingRoute: String? = null,
+    onRouteConsumed: () -> Unit = {},
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     PampaTheme(preferences = state.preferences) {
         FluidMotionPolicyProvider {
@@ -182,6 +212,16 @@ fun PampaStoreApp(viewModel: StoreViewModel) {
                 val backStackEntry by navController.currentBackStackEntryAsState()
                 val route = backStackEntry?.destination?.route
                 val showNavigation = route != Routes.Detail
+
+                LaunchedEffect(pendingRoute) {
+                    val target = pendingRoute?.let(::topLevelRouteFor) ?: return@LaunchedEffect
+                    navController.navigate(target) {
+                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                    onRouteConsumed()
+                }
 
                 CompositionLocalProvider(LocalRouteMotionSignals provides routeMotionSignals) {
                     PampaNavigationSuite(
@@ -233,10 +273,8 @@ fun PampaStoreApp(viewModel: StoreViewModel) {
                                     onRefresh = viewModel::refreshCatalog,
                                     onOpenApp = { navController.navigate(Routes.detail(it)) },
                                     onOpenCatalog = { navController.navigate(Routes.Catalog) },
-                                    onShowUpdates = {
-                                        viewModel.setOwnershipFilter(OwnershipFilter.UPDATABLE)
-                                        navController.navigate(Routes.Catalog)
-                                    },
+                                    onShowUpdates = { navController.navigate(Routes.Updates) },
+                                    onLaunchApp = viewModel::openApp,
                                 )
                             }
                         }
@@ -249,6 +287,23 @@ fun PampaStoreApp(viewModel: StoreViewModel) {
                                     onCategory = viewModel::setCategory,
                                     onOwnership = viewModel::setOwnershipFilter,
                                     onOpenApp = { navController.navigate(Routes.detail(it)) },
+                                    onLaunchApp = viewModel::openApp,
+                                )
+                            }
+                        }
+                        composable(Routes.Updates) {
+                            FluidRouteMotionHost(this@composable) {
+                                UpdatesScreen(
+                                    state = state,
+                                    onRefresh = viewModel::refreshCatalog,
+                                    onUpdateAll = viewModel::updateAll,
+                                    onUpdateOne = viewModel::updateOne,
+                                    onInstallStoreUpdate = viewModel::installStoreUpdate,
+                                    onRetryFailed = viewModel::retryFailed,
+                                    onClearQueue = viewModel::clearQueue,
+                                    onOpenApp = { navController.navigate(Routes.detail(it)) },
+                                    onOpenCatalog = { navController.navigate(Routes.Catalog) },
+                                    onOpenInstallSettings = viewModel::openInstallSettings,
                                 )
                             }
                         }
@@ -264,7 +319,7 @@ fun PampaStoreApp(viewModel: StoreViewModel) {
                                     onStoreChannel = viewModel::setStoreUpdateChannel,
                                     onAutoCheck = viewModel::setAutoCheckStoreUpdates,
                                     onOpenInstallSettings = viewModel::openInstallSettings,
-                                    onInstallStoreUpdate = viewModel::installStoreUpdate,
+                                    onOpenNotificationSettings = viewModel::openNotificationSettings,
                                 )
                             }
                         }
@@ -293,6 +348,14 @@ fun PampaStoreApp(viewModel: StoreViewModel) {
     }
 }
 
+/**
+ * Il guscio, nella forma che ha un'app vera.
+ *
+ * Barra, host dei modali, host del menù che si trasforma e host delle notifiche sono tutti fratelli
+ * del contenuto e leggono tutti lo stesso backdrop. È l'unico montaggio in cui un pop-up esce
+ * *sopra* la capsula di navigazione, e il motivo per cui serve: un pannello su cui la barra può
+ * appoggiarsi non è un modale.
+ */
 @Composable
 private fun PampaNavigationSuite(
     currentRoute: String?,
@@ -303,61 +366,89 @@ private fun PampaNavigationSuite(
     val controller = rememberFluidChromeController()
     val fallbackBackdrop = rememberGlassBackdrop()
     val scrollToTop = remember { FluidScrollToTopBus() }
-    val bottomTravel = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-        FluidTabBarDefaults.Height + FluidTabBarDefaults.BottomMargin
-    val bottomTravelPx = with(LocalDensity.current) { bottomTravel.toPx() }
-    LaunchedEffect(controller, bottomTravelPx) { controller.updateBottomBarTravel(bottomTravelPx) }
-    val scrollConnection = rememberFluidChromeScrollConnection(controller, visible)
+    val modalHost = rememberFluidGlassModalHostState()
+    val notificationHost = rememberFluidNotificationHostState()
+    val morphMenu = rememberFluidMorphMenuState()
+    val barFold = rememberFluidBarFold()
 
-    BoxWithConstraints(
-        modifier = Modifier.fillMaxSize().nestedScroll(scrollConnection),
+    // Cambiare scheda riapre la barra. Restare ripiegati dopo un cambio di rotta lascia la persona
+    // su una pagina nuova senza la navigazione che ce l'ha portata: si vede una pastiglia sola,
+    // con l'icona della scheda in cui sei, e non c'e' modo di raggiungere le altre senza scorrere.
+    LaunchedEffect(currentRoute) { barFold.unfold() }
+
+    CompositionLocalProvider(
+        LocalFluidGlassModalHostState provides modalHost,
+        LocalFluidNotificationHostState provides notificationHost,
+        LocalStoreMorphMenu provides morphMenu,
     ) {
-        val useRail = maxWidth >= 600.dp
-        val bottomInset = if (visible && !useRail) FluidTabBarDefaults.ContentInset else 0.dp
-        val screenHorizontalPadding = if (visible && useRail) 108.dp else 20.dp
-        val backdrop = controller.activeBackdrop.value ?: fallbackBackdrop
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val useRail = maxWidth >= 600.dp
+            val bottomInset = if (visible && !useRail) FluidFoldingTabBarDefaults.ContentInset else 0.dp
+            val screenHorizontalPadding = if (visible && useRail) 108.dp else 20.dp
+            val backdrop = controller.activeBackdrop.value ?: fallbackBackdrop
 
-        ProvideFluidChrome(controller = controller, bottomInset = bottomInset, scrollToTop = scrollToTop) {
-            CompositionLocalProvider(LocalStoreHorizontalPadding provides screenHorizontalPadding) {
-                Box(modifier = Modifier.fillMaxSize()) { content() }
+            ProvideFluidChrome(controller = controller, bottomInset = bottomInset, scrollToTop = scrollToTop) {
+                CompositionLocalProvider(LocalStoreHorizontalPadding provides screenHorizontalPadding) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            // Il rail non si ripiega: sul tablet ha una colonna sua e non toglie
+                            // spazio al contenuto, quindi non c'e' niente da recuperare scorrendo.
+                            .then(if (useRail) Modifier else Modifier.nestedScroll(barFold.connection))
+                            .fluidGlassModalObscured(),
+                    ) { content() }
+                }
             }
-        }
 
-        if (useRail) {
-            AnimatedVisibility(
-                visible = visible,
-                enter = slideInHorizontally { -it },
-                exit = slideOutHorizontally { -it },
-                modifier = Modifier.align(Alignment.CenterStart).systemBarsPadding().padding(start = 14.dp),
-            ) {
-                FluidTabRail(
-                    items = topLevelItems,
-                    selectedRoute = currentRoute,
-                    onSelect = { onSelect(it.route) },
-                    backdrop = backdrop,
-                )
+            if (useRail) {
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = slideInHorizontally { -it },
+                    exit = slideOutHorizontally { -it },
+                    modifier = Modifier.align(Alignment.CenterStart).systemBarsPadding().padding(start = 14.dp),
+                ) {
+                    FluidTabRail(
+                        items = topLevelItems,
+                        selectedRoute = currentRoute,
+                        onSelect = { onSelect(it.route) },
+                        onReselect = { scrollToTop.request() },
+                        backdrop = backdrop,
+                    )
+                }
+            } else {
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = slideInVertically { it },
+                    exit = slideOutVertically { it },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .padding(
+                            horizontal = FluidFoldingTabBarDefaults.HorizontalMargin,
+                            vertical = FluidFoldingTabBarDefaults.BottomMargin,
+                        ),
+                ) {
+                    FluidFoldingTabBar(
+                        items = topLevelItems,
+                        selectedRoute = currentRoute,
+                        onSelect = { onSelect(it.route) },
+                        onReselect = { scrollToTop.request() },
+                        onExpandRequest = barFold::unfold,
+                        backdrop = backdrop,
+                        fold = { barFold.progress.value },
+                    )
+                }
             }
-        } else {
-            AnimatedVisibility(
-                visible = visible,
-                enter = slideInVertically { it },
-                exit = slideOutVertically { it },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .graphicsLayer { translationY = controller.bottomBarOffsetPx.value }
-                    .navigationBarsPadding()
-                    .padding(
-                        horizontal = FluidTabBarDefaults.HorizontalMargin,
-                        vertical = FluidTabBarDefaults.BottomMargin,
-                    ),
-            ) {
-                FluidTabBar(
-                    items = topLevelItems,
-                    selectedRoute = currentRoute,
-                    onSelect = { onSelect(it.route) },
-                    backdrop = backdrop,
-                )
-            }
+
+            // Sopra la barra, ed e' esattamente il motivo per cui questi tre host stanno qui alla
+            // radice invece che dentro la pagina che li usa.
+            FluidGlassModalHost(state = modalHost, backdrop = backdrop)
+            FluidMorphMenuHost(state = morphMenu, backdrop = backdrop)
+            FluidNotificationHost(
+                state = notificationHost,
+                backdrop = backdrop,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
         }
     }
 }
