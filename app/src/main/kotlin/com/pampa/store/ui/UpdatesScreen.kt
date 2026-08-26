@@ -94,10 +94,14 @@ fun UpdatesScreen(
     // serve al *portale*, che vive fuori dalla lista, e nel momento in cui il modale chiede "da
     // dove cresco" la riga potrebbe essere già stata riciclata dalla lazy list.
     //
-    // Mappa normale e non snapshot state: qui si scrive durante il layout (a ogni spostamento della
-    // riga) e si legge una volta sola, quando il modale parte. Uno stato osservabile scritto dal
-    // layout invaliderebbe la composizione a ogni scorrimento per un valore che nessuno guarda.
+    // Mappa normale: qui si scrive durante il layout, a ogni spostamento della riga.
     val origins = remember { mutableMapOf<String, Rect>() }
+
+    // Il rettangolo su cui il pannello torna, fissato al tocco e **non azzerato** alla chiusura.
+    // L'host legge `origin` mentre l'uscita e' in corso: se in quel momento la lambda non sa piu'
+    // da dove era partita, il pannello si richiude al centro dello schermo invece che dentro la
+    // riga. Questo e' snapshot state, che e' anche cio' che il contratto di `origin` chiede.
+    var pickedOrigin by remember { mutableStateOf<Rect?>(null) }
 
     RequestNotificationPermissionOnce(missing = !state.notificationsEnabled)
 
@@ -241,7 +245,10 @@ fun UpdatesScreen(
                             app = app,
                             isExpanded = { expandedId == app.entry.id },
                             onMeasured = { origins[app.entry.id] = it },
-                            onExpand = { expandedId = app.entry.id },
+                            onExpand = {
+                                pickedOrigin = origins[app.entry.id]
+                                expandedId = app.entry.id
+                            },
                             onUpdate = { onUpdateOne(app.entry.id) },
                             onOpenDetail = { onOpenApp(app.entry.id) },
                         )
@@ -277,7 +284,7 @@ fun UpdatesScreen(
     FluidGlassModalPortal(
         item = expanded,
         onDismissRequest = { expandedId = null },
-        origin = { expandedId?.let(origins::get) },
+        origin = { pickedOrigin },
         presentation = FluidGlassModalPresentation.Popover,
         paneTitle = expanded?.entry?.name,
     ) { app ->

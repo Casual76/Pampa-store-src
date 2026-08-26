@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
@@ -16,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -27,6 +29,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.pampa.store.data.Channel
@@ -54,10 +58,13 @@ import dev.antigravity.fluidengine.ui.fluid.FluidRadius
 import dev.antigravity.fluidengine.ui.fluid.FluidGlassModalPortal
 import dev.antigravity.fluidengine.ui.fluid.FluidGlassModalPresentation
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
+import dev.antigravity.fluidengine.ui.fluid.LocalFluidItemSpacing
 import dev.antigravity.fluidengine.ui.fluid.FluidSegmentedControl
 import dev.antigravity.fluidengine.ui.fluid.fluidExpandOrigin
 import dev.antigravity.fluidengine.ui.theme.FluidEmptyState
 import dev.antigravity.fluidengine.ui.theme.FluidListDivider
+import dev.antigravity.fluidengine.ui.theme.FluidGroupOpenEdge
+import dev.antigravity.fluidengine.ui.theme.FluidGroupSegment
 import dev.antigravity.fluidengine.ui.theme.FluidListGroup
 import dev.antigravity.fluidengine.ui.theme.FluidListRow
 import dev.antigravity.fluidengine.ui.theme.FluidStatusBadge
@@ -81,11 +88,19 @@ fun DetailScreen(
         return
     }
 
-    var historyPick by rememberSaveable(app.entry.id) { mutableStateOf<String?>(null) }
-    val pickedVersion = app.entry.history.firstOrNull { it.version == historyPick }
-    // Vedi la nota gemella in UpdatesScreen: mappa normale e non snapshot state, perché qui si
-    // scrive dal layout e si legge una volta sola, quando il pannello parte.
-    val historyOrigins = remember { mutableMapOf<String, Rect>() }
+    // L'indice, non la stringa di versione: la cronologia di ClasseViva ha due 4.1.4 e due 4.0.0, e
+    // con la versione come chiave i due gemelli si sovrascrivevano il rettangolo a vicenda, si
+    // nascondevano insieme, e il pannello mostrava sempre il primo dei due.
+    var historyPick by rememberSaveable(app.entry.id) { mutableIntStateOf(-1) }
+    val pickedVersion = app.entry.history.getOrNull(historyPick)
+    val historyOrigins = remember(app.entry.id) { mutableMapOf<Int, Rect>() }
+
+    // Dove torna il pannello quando si chiude.
+    //
+    // Snapshot state, e soprattutto **non azzerato** alla chiusura: l'host legge `origin` mentre
+    // l'uscita e' in corso, e una lambda che smette di sapere da dove era partita fa collassare il
+    // pannello al centro dello schermo invece che dentro la riga che l'aveva aperto.
+    var pickedOrigin by remember(app.entry.id) { mutableStateOf<Rect?>(null) }
 
     val defaultChannel = enumOrDefault(preferences.defaultChannel, Channel.STABLE)
     var selectedChannel by rememberSaveable(app.entry.id) {
@@ -229,38 +244,16 @@ fun DetailScreen(
                     detail = "Tocca una versione per rimetterla",
                 )
             }
-            item {
-                FluidListGroup(glass = true, modifier = Modifier.testTag("detail-history")) {
-                    app.entry.history.forEachIndexed { index, version ->
-                        val installable = version.apkAsset.isNotBlank() &&
-                            version.releaseTag.isNotBlank()
-                        val isCurrent = version.version == app.installedVersion
-                        FluidListRow(
-                            title = "Versione ${version.version}",
-                            subtitle = version.releaseDate.ifBlank { "Release precedente" },
-                            meta = version.changelog.takeIf(String::isNotBlank),
-                            tone = if (isCurrent) FluidTone.Success else FluidTone.Neutral,
-                            badge = {
-                                when {
-                                    isCurrent -> FluidStatusBadge("Installata", tone = FluidTone.Success)
-                                    installable -> FluidStatusBadge("Installa", tone = FluidTone.Primary)
-                                    else -> FluidStatusBadge("Senza APK", tone = FluidTone.Neutral)
-                                }
-                            },
-                            onClick = if (installable && !isCurrent) {
-                                { historyPick = version.version }
-                            } else {
-                                null
-                            },
-                            modifier = Modifier.fluidExpandOrigin(
-                                open = { historyPick == version.version },
-                                onMeasured = { historyOrigins[version.version] = it },
-                            ),
-                        )
-                        if (index != app.entry.history.lastIndex) FluidListDivider()
-                    }
-                }
-            }
+            versionHistory(
+                history = app.entry.history,
+                installedVersion = app.installedVersion,
+                pickedIndex = { historyPick },
+                onMeasured = { index, rect -> historyOrigins[index] = rect },
+                onPick = { index ->
+                    pickedOrigin = historyOrigins[index]
+                    historyPick = index
+                },
+            )
         }
     }
 
@@ -269,8 +262,8 @@ fun DetailScreen(
     // di installarla.
     FluidGlassModalPortal(
         item = pickedVersion,
-        onDismissRequest = { historyPick = null },
-        origin = { historyPick?.let(historyOrigins::get) },
+        onDismissRequest = { historyPick = -1 },
+        origin = { pickedOrigin },
         presentation = FluidGlassModalPresentation.Popover,
         paneTitle = pickedVersion?.let { "Versione ${it.version}" },
     ) { version ->
@@ -280,10 +273,100 @@ fun DetailScreen(
             appName = app.entry.name,
             onInstall = {
                 onInstallVersion(version)
-                historyPick = null
+                historyPick = -1
             },
         )
     }
+}
+
+/**
+ * La cronologia, tagliata in piu' pannelli.
+ *
+ * Non e' un'ottimizzazione: e' cio' che rende toccabili le righe in fondo. ClasseViva ha
+ * settantotto release, e settantotto righe con le loro note dentro **un solo** gruppo dentro **un
+ * solo** item della lista fanno un nodo alto decine di migliaia di pixel — che smette di ricevere i
+ * tocchi molto prima di smettere di disegnarsi. Le versioni vecchie si vedevano benissimo e non
+ * rispondevano al dito: nessun errore, nessun pannello, niente.
+ *
+ * A vedersi resta un gruppo solo. [FluidGroupSegment] arrotonda soltanto gli angoli che sono
+ * davvero l'inizio e la fine e toglie il bordo speculare dai lati aperti; ogni pezzo tranne
+ * l'ultimo dichiara meno altezza di quella che disegna, cosi' il successivo gli sale addosso e
+ * richiude l'aria che la lista mette fra un item e l'altro.
+ */
+private fun LazyListScope.versionHistory(
+    history: List<VersionInfo>,
+    installedVersion: String?,
+    pickedIndex: () -> Int,
+    onMeasured: (Int, Rect) -> Unit,
+    onPick: (Int) -> Unit,
+) {
+    val chunks = history.chunked(HistoryChunk)
+    chunks.forEachIndexed { chunkIndex, chunk ->
+        val first = chunkIndex == 0
+        val last = chunkIndex == chunks.lastIndex
+        val segment = when {
+            first && last -> FluidGroupSegment.Whole
+            first -> FluidGroupSegment.First
+            last -> FluidGroupSegment.Last
+            else -> FluidGroupSegment.Middle
+        }
+        item(key = "history-$chunkIndex") {
+            val seam = LocalFluidItemSpacing.current + FluidGroupOpenEdge * 2
+            FluidListGroup(
+                glass = true,
+                segment = segment,
+                modifier = Modifier
+                    .then(if (last) Modifier else Modifier.closeSeam(seam))
+                    .then(if (first) Modifier.testTag("detail-history") else Modifier),
+            ) {
+                chunk.forEachIndexed { rowIndex, version ->
+                    val index = chunkIndex * HistoryChunk + rowIndex
+                    val installable = version.apkAsset.isNotBlank() &&
+                        version.releaseTag.isNotBlank()
+                    val isCurrent = version.version == installedVersion
+                    FluidListRow(
+                        title = "Versione ${version.version}",
+                        subtitle = version.releaseDate.ifBlank { "Release precedente" },
+                        meta = version.changelog.takeIf(String::isNotBlank),
+                        tone = if (isCurrent) FluidTone.Success else FluidTone.Neutral,
+                        badge = {
+                            when {
+                                isCurrent -> FluidStatusBadge("Installata", tone = FluidTone.Success)
+                                installable -> FluidStatusBadge("Installa", tone = FluidTone.Primary)
+                                else -> FluidStatusBadge("Senza APK", tone = FluidTone.Neutral)
+                            }
+                        },
+                        onClick = if (installable && !isCurrent) {
+                            { onPick(index) }
+                        } else {
+                            null
+                        },
+                        modifier = Modifier.fluidExpandOrigin(
+                            open = { pickedIndex() == index },
+                            onMeasured = { onMeasured(index, it) },
+                        ),
+                    )
+                    if (rowIndex != chunk.lastIndex) FluidListDivider()
+                }
+            }
+        }
+    }
+}
+
+/** Quante release per pannello. Otto e' quanto ne sta comodamente dentro un solo nodo. */
+private const val HistoryChunk = 8
+
+/**
+ * Dichiara meno altezza di quella che disegna, cosi' il pezzo successivo sale a chiudere il vuoto.
+ *
+ * E' il meccanismo che [FluidGroupSegment] si aspetta da chi taglia: i lati aperti non disegnano il
+ * bordo, ma l'aria fra un item e l'altro della lista resta, e senza richiuderla la giuntura si vede
+ * come una fessura.
+ */
+private fun Modifier.closeSeam(amount: Dp): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val closed = (placeable.height - amount.roundToPx()).coerceAtLeast(0)
+    layout(placeable.width, closed) { placeable.place(0, 0) }
 }
 
 /**
@@ -315,9 +398,15 @@ private fun HistoryVersionPane(
                 color = MaterialTheme.colorScheme.primary,
             )
         }
-        version.releaseDate.takeIf(String::isNotBlank)?.let { date ->
+        // Il peso solo quando si sa: quindici delle settantotto release di ClasseViva non lo
+        // dichiarano, e `formatBytes` per zero restituisce un trattino — che accanto alla data si
+        // legge come un dato mancante messo in mostra invece che taciuto.
+        listOfNotNull(
+            version.releaseDate.takeIf(String::isNotBlank)?.let { "Pubblicata il $it" },
+            version.sizeBytes.takeIf { it > 0L }?.let(::formatBytes),
+        ).takeIf(List<String>::isNotEmpty)?.let { parts ->
             Text(
-                text = "Pubblicata il $date  •  ${formatBytes(version.sizeBytes)}",
+                text = parts.joinToString("  •  "),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
