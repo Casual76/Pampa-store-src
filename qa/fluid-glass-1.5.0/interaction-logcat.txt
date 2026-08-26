@@ -1,0 +1,301 @@
+
+08-24 14:42:42.734  3664  3664 I adbd    : adbd service requested 'shell,v2,TERM=dumb,raw:dumpsys gfxinfo com.pampa.store reset'
+08-24 14:42:42.767 17282 17282 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.775  3188  3188 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.782 11011 11011 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.787  6978  6978 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.791 31850 31850 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.796 19419 19419 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.798 10311 10311 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.805 20206 20206 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.810  9100  9100 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.812 31850 31850 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.813   745   745 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.824 17511 17511 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.825  6096  6096 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.825 22504 22504 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.789 10283 10283 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.837 31850 31850 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.839 15958 15958 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.840  7786  7786 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.842  7786  7786 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.842  7786  7786 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.842  7786  7786 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.842 14266 14266 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.842  7786  7786 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.844  7786  7786 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.845 16462 16462 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.846 10311 10311 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.848 22506 22506 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.849  8995  8995 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.850 17282 17282 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.852  3188  3188 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.852  9100  9100 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.854 10311 10311 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.855 17282 17282 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.856  9100  9100 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.856  3188  3188 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.856  6978  6978 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.859 17282 17282 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.859  9100  9100 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.859  3188  3188 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.860 11011 11011 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.861  3188  3188 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.861  9100  9100 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.862  6978  6978 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.862 17282 17282 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.864  3188  3188 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.865  9100  9100 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.865 17282 17282 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.866 11011 11011 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.868  6096  6096 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.869  6978  6978 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.869  8995  8995 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.870  6096  6096 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.871 22506 22506 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.871  8995  8995 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.872 22506 22506 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.871  8995  8995 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.873 15958 15958 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.874  8995  8995 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.875 14266 14266 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.875  8995  8995 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.876 15958 15958 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.876 16462 16462 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.880 16367 16367 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.881  6978  6978 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.881 16462 16462 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.881 14266 14266 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.882 22745 22745 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.884 16462 16462 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.884   745   745 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.885  6978  6978 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.886 16462 16462 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.887 16462 16462 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.888 20206 20206 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.889   745   745 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.889 17511 17511 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.890 10283 10283 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.890 16367 16367 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.890 19419 19419 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.890   745   745 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.890 20206 20206 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.890 17511 17511 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.890   745   745 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.890 10283 10283 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.890   745   745 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891  6096  6096 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891  6096  6096 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891  6096  6096 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891 14266 14266 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891  6096  6096 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891 14266 14266 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891 19419 19419 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891 22745 22745 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891 16367 16367 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891  6096  6096 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891 14266 14266 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891 22745 22745 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891  6096  6096 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891 14266 14266 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891 22745 22745 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891 16367 16367 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891 14266 14266 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891 22745 22745 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.891 16367 16367 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.892 14266 14266 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.892 22745 22745 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.895 16367 16367 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.896 22504 22504 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.896 22504 22504 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.905  5655  5655 I [SC]SyncRuntimeActionReceiver: onReceive: android.intent.action.PACKAGE_REMOVED, com.pampa.store
+08-24 14:42:42.905  5655  5655 I [SC]SyncRuntimeActionReceiver: onReceive: android.intent.action.PACKAGE_ADDED, com.pampa.store
+08-24 14:42:42.905  5655  5655 I [SC]SyncAuthority: com.pampa.store: authority not found!
+08-24 14:42:42.910  5655 24028 I [SC]PackageAddRemoveMonitorReceiverImpl: Handling android.intent.action.PACKAGE_ADDED for: com.pampa.store
+08-24 14:42:42.912  5655 24027 I [SC]PackageAddRemoveMonitorReceiverImpl: Handling android.intent.action.PACKAGE_REMOVED for: com.pampa.store
+08-24 14:42:42.913  5655 24027 I [SC]PackageAddRemoveMonitorReceiverImpl: onReceive: com.pampa.store false
+08-24 14:42:42.916 17305 17305 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.917 17305 17305 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.917 17305 17305 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.917 17305 17305 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.917 17305 17305 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.917 17305 17305 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.924 31580  2926 D SGM:GameManager: identifyForegroundApp. com.pampa.store, mCurrentUserId: 0, callerUserId: 0
+08-24 14:42:42.929  5655 24028 I [SC]ExternalAppInfoReader: load: Can't load package: com.pampa.store
+08-24 14:42:42.932  5655  5831 I [SC]SyncAuthority: com.pampa.store: authority not found!
+08-24 14:42:42.935  5655  5831 I [SC]SyncAuthority: com.pampa.store: authority not found!
+08-24 14:42:42.938 20947 20947 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.939 20947 20947 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.939 17564 17564 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.940 20947 20947 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.942 32221 32221 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.946 32221 32221 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.948 32221 32221 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.950 32221 32221 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.952 32221 32221 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.953 32221 32221 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.960 17564 17564 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.960 17564 17564 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.962 17564 17564 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.962 17564 17564 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.962 17564 17564 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.969  7951  7951 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.969  1971  1971 I SurfaceFlinger: [com.pampa.store/com.pampa.store.MainActivity$_23196#424424] setFrameRateCategory: HighHint
+08-24 14:42:42.972 17843 17843 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.972  7951  7951 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.973  7951  7951 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.973  7951  7951 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.973  7951  7951 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.973  7951  7951 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.975 17843 17843 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.976 17843 17843 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.977 17843 17843 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.978 17843 17843 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.978 17843 17843 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:42.980 31580  2702 D CoreBackPreview: Window{96c2f37 u0 com.pampa.store/com.pampa.store.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@cf332dc, mPriority=0, mIsAnimationCallback=true, mOverrideBehavior=0}
+08-24 14:42:43.004 17299 17299 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:43.007 17299 17299 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:43.008 17299 17299 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:43.008 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:42:43.008 17299 17299 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:43.008 17299 17299 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:43.008 17299 17299 D ActivityThread: Package [com.pampa.store] reported as REPLACED, but missing application info. Assuming REMOVED.
+08-24 14:42:43.012 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:42:43.015 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:42:43.020 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:42:43.022 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:42:43.027 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:42:43.032 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:42:43.035 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:42:44.385 24303 24303 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+08-24 14:42:44.393 24303 24303 I AndroidRuntime: Using default boot image
+08-24 14:42:44.393 24303 24303 I AndroidRuntime: Leaving lock profiling enabled
+08-24 14:42:44.393 24303 24303 D AndroidRuntime: addProductProperty not brand or 7
+08-24 14:42:44.491 24303 24303 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+08-24 14:42:44.859 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:42:44.859 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:42:45.520 24303 24303 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@af0d; boundsInParent: Rect(0, 0 - 0, 0); boundsInScreen: Rect(53, 230 - 1027, 338); boundsInWindow: Rect(53, 230 - 1027, 338); packageName: com.pampa.store; className: android.widget.TextView; text: Catalogo; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; granularScrollingSupported: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_NEXT_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SET_SELECTION - null]; isTextSelectable: false
+08-24 14:42:45.533 24303 24303 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@c593; boundsInParent: Rect(0, 0 - 0, 0); boundsInScreen: Rect(221, 2384 - 463, 2414); boundsInWindow: Rect(221, 2384 - 463, 2414); packageName: com.pampa.store; className: android.widget.TextView; text: Gioco arcade; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; granularScrollingSupported: false; importantForAccessibility: true; visible: false; actions: [AccessibilityAction: ACTION_NEXT_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SET_SELECTION - null]; isTextSelectable: false
+08-24 14:42:45.534 24303 24303 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@c6c9; boundsInParent: Rect(0, 0 - 0, 0); boundsInScreen: Rect(728, 2344 - 917, 2414); boundsInWindow: Rect(728, 2344 - 917, 2414); packageName: com.pampa.store; className: android.view.View; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; granularScrollingSupported: false; importantForAccessibility: true; visible: false; actions: [AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null]; isTextSelectable: false
+08-24 14:42:45.534 24303 24303 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@ac82; boundsInParent: Rect(0, 0 - 0, 0); boundsInScreen: Rect(478, 224 - 604, 282); boundsInWindow: Rect(478, 224 - 604, 282); packageName: com.pampa.store; className: android.view.View; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; granularScrollingSupported: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null]; isTextSelectable: false
+08-24 14:42:45.557 24303 24303 D AndroidRuntime: Shutting down VM
+08-24 14:42:45.621  1971  1971 D SurfaceFlinger:        DEVICE |           99626061398016 | 00002102 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |    0    0 1080 2340 | com.pampa.store/com.pampa.store.MainActivity$_23196#424424 (176)
+08-24 14:42:45.969  1971  1971 I SurfaceFlinger: [com.pampa.store/com.pampa.store.MainActivity$_23196#424424] setFrameRateCategory: NoPreference
+08-24 14:42:46.561  1971  2387 I SurfaceFlinger: Capture layer list: 	 com.pampa.store/com.pampa.store.MainActivity$_23196#424424(preserveDisplayColors:0)
+08-24 14:42:46.562  1971  2043 D SurfaceFlinger: [SEC_SF_EFFECTS] drawLayersInternal,1337, Rendering layer com.pampa.store/com.pampa.store.MainActivity$_23196#424424 at index 1
+08-24 14:42:47.106 24388 24388 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+08-24 14:42:47.111 24388 24388 I AndroidRuntime: Using default boot image
+08-24 14:42:47.111 24388 24388 I AndroidRuntime: Leaving lock profiling enabled
+08-24 14:42:47.112 24388 24388 D AndroidRuntime: addProductProperty not brand or 7
+08-24 14:42:47.204 24388 24388 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+08-24 14:42:47.239  1971  1971 D SurfaceFlinger:        DEVICE |           99626061398016 | 00002102 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |    0    0 1080 2340 | com.pampa.store/com.pampa.store.MainActivity$_23196#424424 (176)
+08-24 14:42:47.875 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:42:47.875 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:42:48.242 24388 24388 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@af0d; boundsInParent: Rect(0, 0 - 0, 0); boundsInScreen: Rect(53, 230 - 1027, 338); boundsInWindow: Rect(53, 230 - 1027, 338); packageName: com.pampa.store; className: android.widget.TextView; text: Catalogo; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; granularScrollingSupported: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_NEXT_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SET_SELECTION - null]; isTextSelectable: false
+08-24 14:42:48.255 24388 24388 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@c593; boundsInParent: Rect(0, 0 - 0, 0); boundsInScreen: Rect(221, 2384 - 463, 2414); boundsInWindow: Rect(221, 2384 - 463, 2414); packageName: com.pampa.store; className: android.widget.TextView; text: Gioco arcade; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; granularScrollingSupported: false; importantForAccessibility: true; visible: false; actions: [AccessibilityAction: ACTION_NEXT_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SET_SELECTION - null]; isTextSelectable: false
+08-24 14:42:48.255 24388 24388 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@c6c9; boundsInParent: Rect(0, 0 - 0, 0); boundsInScreen: Rect(728, 2344 - 917, 2414); boundsInWindow: Rect(728, 2344 - 917, 2414); packageName: com.pampa.store; className: android.view.View; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; granularScrollingSupported: false; importantForAccessibility: true; visible: false; actions: [AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null]; isTextSelectable: false
+08-24 14:42:48.256 24388 24388 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@ac82; boundsInParent: Rect(0, 0 - 0, 0); boundsInScreen: Rect(478, 224 - 604, 282); boundsInWindow: Rect(478, 224 - 604, 282); packageName: com.pampa.store; className: android.view.View; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; granularScrollingSupported: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null]; isTextSelectable: false
+08-24 14:42:48.281 24388 24388 D AndroidRuntime: Shutting down VM
+08-24 14:42:48.338  1971  1971 D SurfaceFlinger:        DEVICE |           99626061398016 | 00002102 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |    0    0 1080 2340 | com.pampa.store/com.pampa.store.MainActivity$_23196#424424 (176)
+08-24 14:42:49.887 31580 32616 D SGM:GameManager: identifyForegroundApp. com.pampa.store, mCurrentUserId: 0, callerUserId: 0
+08-24 14:42:50.879 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:42:50.879 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:42:51.443  1971  1971 D SurfaceFlinger:        DEVICE |           99626061398016 | 00002102 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |    0    0 1080 2340 | com.pampa.store/com.pampa.store.MainActivity$_23196#424424 (176)
+08-24 14:42:53.891 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:42:53.891 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:42:56.896 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:42:56.896 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:42:57.539 31580  2701 D SGM:GameManager: identifyForegroundApp. com.pampa.store, mCurrentUserId: 0, callerUserId: 0
+08-24 14:42:59.908 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:42:59.908 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:02.919 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:02.919 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:05.927 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:05.927 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:08.934 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:08.934 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:11.946 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:11.946 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:12.615  1971  2024 I SurfaceFlinger: Capture layer list: 	 com.pampa.store/com.pampa.store.MainActivity$_23196#424424(preserveDisplayColors:0)
+08-24 14:43:12.615  1971  2043 D SurfaceFlinger: [SEC_SF_EFFECTS] drawLayersInternal,1337, Rendering layer com.pampa.store/com.pampa.store.MainActivity$_23196#424424 at index 1
+08-24 14:43:14.953 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:14.953 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:17.960 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:17.960 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:20.357  1971  1971 I SurfaceFlinger: [com.pampa.store/com.pampa.store.MainActivity$_23196#424424] setFrameRateCategory: HighHint
+08-24 14:43:20.969 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:20.969 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:21.589 24598 24598 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+08-24 14:43:21.594 24598 24598 I AndroidRuntime: Using default boot image
+08-24 14:43:21.594 24598 24598 I AndroidRuntime: Leaving lock profiling enabled
+08-24 14:43:21.595 24598 24598 D AndroidRuntime: addProductProperty not brand or 7
+08-24 14:43:21.685 24598 24598 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+08-24 14:43:22.737 24598 24598 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@d1ed; boundsInParent: Rect(0, 0 - 0, 0); boundsInScreen: Rect(53, 230 - 1027, 338); boundsInWindow: Rect(53, 230 - 1027, 338); packageName: com.pampa.store; className: android.widget.TextView; text: ClasseViva Expressive; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; granularScrollingSupported: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_NEXT_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SET_SELECTION - null]; isTextSelectable: false
+08-24 14:43:22.771 24598 24598 D AndroidRuntime: Shutting down VM
+08-24 14:43:22.842  1971  1971 D SurfaceFlinger:        DEVICE |           99626061398017 | 00002102 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |    0    0 1080 2340 | com.pampa.store/com.pampa.store.MainActivity$_23196#424424 (199)
+08-24 14:43:23.357  1971  1971 I SurfaceFlinger: [com.pampa.store/com.pampa.store.MainActivity$_23196#424424] setFrameRateCategory: NoPreference
+08-24 14:43:23.773  1971  2387 I SurfaceFlinger: Capture layer list: 	 com.pampa.store/com.pampa.store.MainActivity$_23196#424424(preserveDisplayColors:0)
+08-24 14:43:23.774  1971  2043 D SurfaceFlinger: [SEC_SF_EFFECTS] drawLayersInternal,1337, Rendering layer com.pampa.store/com.pampa.store.MainActivity$_23196#424424 at index 1
+08-24 14:43:23.973 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:23.973 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:24.282 24649 24649 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+08-24 14:43:24.287 24649 24649 I AndroidRuntime: Using default boot image
+08-24 14:43:24.287 24649 24649 I AndroidRuntime: Leaving lock profiling enabled
+08-24 14:43:24.287 24649 24649 D AndroidRuntime: addProductProperty not brand or 7
+08-24 14:43:24.368 24649 24649 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+08-24 14:43:24.410  1971  1971 D SurfaceFlinger:        DEVICE |           99626061398017 | 00002102 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |    0    0 1080 2340 | com.pampa.store/com.pampa.store.MainActivity$_23196#424424 (199)
+08-24 14:43:25.396 24649 24649 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@d1ed; boundsInParent: Rect(0, 0 - 0, 0); boundsInScreen: Rect(53, 230 - 1027, 338); boundsInWindow: Rect(53, 230 - 1027, 338); packageName: com.pampa.store; className: android.widget.TextView; text: ClasseViva Expressive; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; granularScrollingSupported: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_NEXT_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SET_SELECTION - null]; isTextSelectable: false
+08-24 14:43:25.412 24649 24649 D AndroidRuntime: Shutting down VM
+08-24 14:43:25.476  1971  1971 D SurfaceFlinger:        DEVICE |           99626061398017 | 00002102 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |    0    0 1080 2340 | com.pampa.store/com.pampa.store.MainActivity$_23196#424424 (199)
+08-24 14:43:26.985 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:26.985 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:27.627 31580 32616 D SGM:GameManager: identifyForegroundApp. com.pampa.store, mCurrentUserId: 0, callerUserId: 0
+08-24 14:43:28.532  1971  1971 D SurfaceFlinger:        DEVICE |           99626061398017 | 00002102 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |    0    0 1080 2340 | com.pampa.store/com.pampa.store.MainActivity$_23196#424424 (199)
+08-24 14:43:29.998 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:29.998 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:33.010 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:33.010 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:34.753 31580  2014 D SGM:GameManager: identifyForegroundApp. com.pampa.store, mCurrentUserId: 0, callerUserId: 0
+08-24 14:43:36.024 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:36.024 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:39.032 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:39.032 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:42.051 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:42.051 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:42.672  1971  2388 I SurfaceFlinger: Capture layer list: 	 com.pampa.store/com.pampa.store.MainActivity$_23196#424424(preserveDisplayColors:0)
+08-24 14:43:42.674  1971  2043 D SurfaceFlinger: [SEC_SF_EFFECTS] drawLayersInternal,1337, Rendering layer com.pampa.store/com.pampa.store.MainActivity$_23196#424424 at index 1
+08-24 14:43:45.059 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:45.059 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:48.072 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:48.072 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:49.161  1971  1971 I SurfaceFlinger: [com.pampa.store/com.pampa.store.MainActivity$_23196#424424] setFrameRateCategory: HighHint
+08-24 14:43:49.209 21857 24810 I [SSM]WearDataClientManager: checkPreCondition() : false (isInteractive : true (com.pampa.store.MainActivity), SsmState : Idle, serviceType : Unknown, isWatchPermissionsOk : true)
+08-24 14:43:51.078 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:51.078 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:51.828  1971  2024 I SurfaceFlinger: Capture layer list: 	 com.pampa.store/com.pampa.store.MainActivity$_23196#424424(preserveDisplayColors:0)
+08-24 14:43:51.829  1971  2043 D SurfaceFlinger: [SEC_SF_EFFECTS] drawLayersInternal,1337, Rendering layer com.pampa.store/com.pampa.store.MainActivity$_23196#424424 at index 1
+08-24 14:43:52.283 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:43:52.289 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:43:52.292 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:43:52.297 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:43:52.300 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:43:52.305 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:43:52.310 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:43:52.312 23196 23196 I Kumiho-Kumiho: getPackageName: com.pampa.store
+08-24 14:43:54.091 31580 32135 D SGM:GameManager: identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+08-24 14:43:54.091 31580 32135 D SGM:SemGameManager: isGamePackage(), pkgName=com.pampa.store, ret=false
+08-24 14:43:54.234 24877 24877 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+08-24 14:43:54.242 24877 24877 I AndroidRuntime: Using default boot image
+08-24 14:43:54.242 24877 24877 I AndroidRuntime: Leaving lock profiling enabled
+08-24 14:43:54.242 24877 24877 D AndroidRuntime: addProductProperty not brand or 7
+08-24 14:43:54.331 24877 24877 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+08-24 14:43:55.141 31580 31628 D SGM:GameManager: identifyForegroundApp. com.pampa.store, mCurrentUserId: 0, callerUserId: 0
+08-24 14:43:55.365 24877 24877 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@10d43; boundsInParent: Rect(0, 0 - 0, 0); boundsInScreen: Rect(53, 230 - 1027, 338); boundsInWindow: Rect(53, 230 - 1027, 338); packageName: com.pampa.store; className: android.widget.TextView; text: Altro; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; granularScrollingSupported: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_NEXT_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SET_SELECTION - null]; isTextSelectable: false
+08-24 14:43:55.372 24877 24877 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@10b15; boundsInParent: Rect(0, 0 - 0, 0); boundsInScreen: Rect(478, 224 - 604, 282); boundsInWindow: Rect(478, 224 - 604, 282); packageName: com.pampa.store; className: android.view.View; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; containerTitle: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; granularScrollingSupported: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null]; isTextSelectable: false
+08-24 14:43:55.387 24877 24877 D AndroidRuntime: Shutting down VM
+08-24 14:43:55.446  1971  1971 D SurfaceFlinger:        DEVICE |           99626061398016 | 00002102 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |    0    0 1080 2340 | com.pampa.store/com.pampa.store.MainActivity$_23196#424424 (544)
+08-24 14:43:56.152  1971  1971 I SurfaceFlinger: [com.pampa.store/com.pampa.store.MainActivity$_23196#424424] setFrameRateCategory: NoPreference
+08-24 14:43:56.373  1971  2024 I SurfaceFlinger: Capture layer list: 	 com.pampa.store/com.pampa.store.MainActivity$_23196#424424(preserveDisplayColors:0)
+08-24 14:43:56.374  1971  2043 D SurfaceFlinger: [SEC_SF_EFFECTS] drawLayersInternal,1337, Rendering layer com.pampa.store/com.pampa.store.MainActivity$_23196#424424 at index 1
+08-24 14:43:56.696  3664  3664 I adbd    : adbd service requested 'shell,v2,TERM=dumb,raw:dumpsys gfxinfo com.pampa.store framestats'
+

@@ -1,0 +1,120 @@
+D/SGM:FgCheckThread(31580):   handleTaskFocused(), pkgName: com.pampa.store, userID:0
+D/SGM:FgCheckThread(31580):   handleResume(). pkgName: com.pampa.store, userId: 0, category: non-game
+D/SGM:FgCheckThread(31580): notifyFocusInOut(). of pkg: com.pampa.store, type: 4, isSecGameFamily: false, userId: 0
+D/vulkan  (23196): searching for layers in '/data/app/~~B_r_3w5Ix2XlsACH1NNAIA==/com.pampa.store-4xeqQMpfRu9cmXlgvMfmPQ==/lib/arm64'
+D/vulkan  (23196): searching for layers in '/data/app/~~B_r_3w5Ix2XlsACH1NNAIA==/com.pampa.store-4xeqQMpfRu9cmXlgvMfmPQ==/base.apk!/lib/arm64-v8a'
+D/SurfaceFlinger( 1971):        CLIENT |            1455993949015 | 00002100 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |   78  170 1002 2170 | Splash Screen com.pampa.store$_339#424418 (1)
+D/SGM:GameManager(31580): identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+D/SGM:SemGameManager(31580): isGamePackage(), pkgName=com.pampa.store, ret=false
+I/HoneySpace.EdgePanel.EdgePanelContainerViewModel(16410): cocktailHostRepository.edgePanelOperation NoteResumeComponent(componentName=ComponentInfo{com.pampa.store/com.pampa.store.MainActivity})
+I/HoneySpace.EdgePanel.ActivityUtils(16410): HomePackage : com.sec.android.app.launcher, resumePackageName : com.pampa.store, className : com.pampa.store.MainActivity
+D/SGM:FgCheckThread(31580): noteResumeComponent(), received pkgName: com.pampa.store, userId: 0
+D/SGM:FgCheckThread(31580): onLooperPrepared(), msg: MSG_APP_RESUME, pkgName: com.pampa.store, userid: 0
+D/SGM:FgCheckThread(31580):   handleResume(). pkgName: com.pampa.store, userId: 0, category: non-game
+D/SGM:FgCheckThread(31580): notifyFocusInOut(). of pkg: com.pampa.store, type: 4, isSecGameFamily: false, userId: 0
+D/SurfaceFlinger( 1971):        CLIENT |            1455993949015 | 00002100 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |   71  154 1009 2186 | Splash Screen com.pampa.store$_339#424418 (1)
+I/SDHMS:k ( 3054): handleResumeComponent : put = com.pampa.store, userid = 0 instanceid =261435880
+I/AdrenoVK-0(23196): Process Name        : com.pampa.store
+I/SurfaceFlinger( 1971): id=424423 createSurf, flag=84004, 96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423
+I/InsetsController(23196): onStateChanged: host=com.pampa.store/com.pampa.store.MainActivity, from=android.view.ViewRootImpl.onInsetsStateChanged:3038, state=InsetsState: {mDisplayFrame=Rect(0, 0 - 1080, 2340), mDisplayCutout=DisplayCutout{insets=Rect(0, 103 - 0, 0) waterfall=Insets{left=0, top=0, right=0, bottom=0} boundingRect={Bounds=[Rect(0, 0 - 0, 0), Rect(511, 0 - 569, 103), Rect(0, 0 - 0, 0), Rect(0, 0 - 0, 0)]} cutoutPathParserInfo={CutoutPathParserInfo{displayWidth=1080 displayHeight=2340 physicalDisplayWidth=1080 physicalDisplayHeight=2340 density={3.0} cutoutSpec={M 0,0 H -9.666666666666667 V 34.33333333333333 H 9.666666666666667 V 0 H 0 Z @dp} rotation={0} scale={1.0} physicalPixelDisplaySizeRatio={1.0}}} sideOverrides={}}, mRoundedCorners=RoundedCorners{[RoundedCorner{position=TopLeft, radius=68, center=Point(68, 68)}, RoundedCorner{position=TopRight, radius=68, center=Point(1012, 68)}, RoundedCorner{position=BottomRight, radius=68, center=Point(1012, 2272)}, RoundedCorner{position=BottomLeft, radius=68, center=Point(68, 2272)}]}  mRoundedCornerFrame=Rect(0, 0 - 1080, 2340), mPrivacyIndicatorBounds=PrivacyIndicatorBounds {static bounds=Rect(964, 0 - 1080, 103) rotation=0}, mDisplayShape=DisplayShape{ spec=-311912193 displayWidth=1080 displayHeight=2340 physicalPixelDisplaySizeRatio=1.0 rotation=0 offsetX=0 offsetY=0 scale=1.0}, mSources= { InsetsSource: {95540001 mType=navigationBars mFrame=[0,0][0,0] mAttachedInsets=null mVisible=true mFlags=SUPPRESS_SCRIM mSideHint=NONE mBoundingRects=null}, InsetsSource: {95540004 mType=systemGestures mFrame=[0,0][104,2340] mAttachedInsets=null mVisible=true mFlags= mSideHint=LEFT mBoundingRects=null}, InsetsSource: {95540005 mType=mandatorySystemGestures mFrame=[0,2256][1080,2340] mAttachedInsets=null mVisible=true mFlags= mSideHint=BOTTOM mBoundingRects=null}, InsetsSource: {95540006 mType=tappableElement mFrame=[0,0][0,0] mAttachedInsets=null mVisible=true mFlags= mSideHint=NONE mBoundingRects=null}, InsetsSource: {95540024 mType=systemGestures mFrame=[976,0][1080,2340] mAttachedInsets=null mVisible=true mFlags= mSideHint=RIGHT mBoundingRects=null}, InsetsSource: {ff0b0000 mType=statusBars mFrame=[0,0][1080,103] mAttachedInsets=null mVisible=true mFlags= mSideHint=TOP mBoundingRects=null}, InsetsSource: {ff0b0005 mType=mandatorySystemGestures mFrame=[0,0][1080,135] mAttachedInsets=null mVisible=true mFlags= mSideHint=TOP mBoundingRects=null}, InsetsSource: {ff0b0006 mType=tappableElement mFrame=[0,0][1080,103] mAttachedInsets=null mVisible=true mFlags= mSideHint=TOP mBoundingRects=null}, InsetsSource: {3 mType=ime mFrame=[0,0][0,0] mAttachedInsets=null mVisible=false mFlags=INVALID mSideHint=NONE mBoundingRects=null}, InsetsSource: {27 mType=displayCutout mFrame=[0,0][1080,103] mAttachedInsets=null mVisible=true mFlags= mSideHint=TOP mBoundingRects=null} }
+I/SurfaceFlinger( 1971): [96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423] attach to parent LayerHierarchy{RequestedLayerState{ActivityRecord{93646554 u0 com.pampa.store/.MainActivity t9949}#424416 parentId=424415} 3 children}
+D/CoreBackPreview(31580): Window{96c2f37 u0 com.pampa.store/com.pampa.store.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@8a8ba09, mPriority=-1, mIsAnimationCallback=false, mOverrideBehavior=0}
+I/SurfaceFlinger( 1971): RequestedLayer [96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423] hidden!! flag  from(1) --> to(0)
+I/WindowManager(31580): Relayout Window{96c2f37 u0 com.pampa.store/com.pampa.store.MainActivity}: viewVisibility=0 req=1080x2340 ty=1 d0
+I/SurfaceFlinger( 1971): id=424424 createSurf, flag=44004, com.pampa.store/com.pampa.store.MainActivity$_23196#424424
+D/WindowManager(31580): makeSurface duration=0 name=com.pampa.store/com.pampa.store.MainActivity$_23196
+I/SurfaceFlinger( 1971): [com.pampa.store/com.pampa.store.MainActivity$_23196#424424] attach to parent LayerHierarchy{RequestedLayerState{96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423 parentId=424416} 1 children}
+D/WindowManager(31580): Changing focus from null to Window{96c2f37 u0 com.pampa.store/com.pampa.store.MainActivity} displayId=0 Callers=com.android.server.wm.WindowManagerService.relayoutWindow:1350 com.android.server.wm.Session.relayout:30 android.view.IWindowSession$Stub.onTransact:840 com.android.server.wm.Session.onTransact:1 
+D/InsetsSourceProvider(31580): updateControlForTarget: control=InsetsSourceControl: {ff0b0000 mType=statusBars initiallyVisible mSurfacePosition=Point(0, 0) mInsetsHint=Insets{left=0, top=103, right=0, bottom=0}}, target=Window{96c2f37 u0 com.pampa.store/com.pampa.store.MainActivity}, from=com.android.server.wm.InsetsStateController.onControlTargetChanged:82 com.android.server.wm.InsetsPolicy.updateBarControlTarget:203 com.android.server.wm.DisplayPolicy.updateSystemBarAttributes:439 com.android.server.wm.WindowManagerService.updateFocusedWindowLocked:358 com.android.server.wm.WindowManagerService.relayoutWindow:1350 
+D/InsetsSourceProvider(31580): updateControlForTarget: control=InsetsSourceControl: {95540001 mType=navigationBars initiallyVisible mSurfacePosition=Point(0, 2214) mInsetsHint=Insets{left=0, top=0, right=0, bottom=0}}, target=Window{96c2f37 u0 com.pampa.store/com.pampa.store.MainActivity}, from=com.android.server.wm.InsetsStateController.onControlTargetChanged:82 com.android.server.wm.InsetsPolicy.updateBarControlTarget:216 com.android.server.wm.DisplayPolicy.updateSystemBarAttributes:439 com.android.server.wm.WindowManagerService.updateFocusedWindowLocked:358 com.android.server.wm.WindowManagerService.relayoutWindow:1350 
+V/SystemKeyManager(31580): updateFocusedWindow() is called, com.pampa.store/com.pampa.store.MainActivity
+E/com.pampa.store(23196): Unable to open libpenguin.so: dlopen failed: library "libpenguin.so" not found.
+I/SurfaceControl(31580): apply, lowDebugName=Focus request: 96c2f37 com.pampa.store/com.pampa.store.MainActivity, caller=android.view.SurfaceControl$Transaction.apply:3569 android.view.SurfaceControl$Transaction.apply:3519 com.android.server.wm.WindowAnimator.animate:468 com.android.server.wm.WindowAnimator$$ExternalSyntheticLambda1.doFrame:14 android.view.Choreographer$CallbackRecord.run:1959 android.view.Choreographer$CallbackRecord.run:1970 
+D/SurfaceFlinger( 1971): [input] setFocusedWindow: 96c2f37 com.pampa.store/com.pampa.store.MainActivity
+D/InputDispatcher(31580): Once focus requested (0): 96c2f37 com.pampa.store/com.pampa.store.MainActivity
+D/InputDispatcher(31580): Focus request (0): 96c2f37 com.pampa.store/com.pampa.store.MainActivity but waiting because NO_WINDOW
+D/MdnieScenarioControlService(31580):  packageName : com.pampa.store    className : com.pampa.store.MainActivity
+I/SurfaceFlinger( 1971): [com.pampa.store/com.pampa.store.MainActivity$_23196#424424] setTransactionState with the first frame. bufferData(ID: 99626061398019, frameNumber: 1)
+D/WindowManager(31580): finishDrawingWindow: Window{96c2f37 u0 com.pampa.store/com.pampa.store.MainActivity} mDrawState=DRAW_PENDING seqId=0
+V/WindowManager(31580): Finish starting ActivityRecord{93646554 u0 com.pampa.store/.MainActivity t9949}: first real window is shown, no animation
+V/WindowManager(31580): Schedule remove starting ActivityRecord{93646554 u0 com.pampa.store/.MainActivity t9949} startingWindow=Window{2f7c1d7 u0 Splash Screen com.pampa.store} animate=true Callers=com.android.server.wm.ActivityRecord.removeStartingWindow:178 com.android.server.wm.WindowState.performShowLocked:146 com.android.server.wm.WindowStateAnimator.commitFinishDrawingLocked:73 com.android.server.wm.DisplayContent$$ExternalSyntheticLambda1.accept:350 com.android.server.wm.WindowContainer$ForAllWindowsConsumerWrapper.apply:5 
+D/TaskOrganizerController(31580): applyStartingWindowAnimation, window=Window{96c2f37 u0 com.pampa.store/com.pampa.store.MainActivity}, caller=com.android.server.wm.TaskOrganizerController.getStartingWindowRemovalInfo:135 com.android.server.wm.StartingSurfaceController$StartingSurface.remove:39 com.android.server.wm.ActivityRecord.removeStartingWindowAnimation:167 
+I/WindowManager(31580): Reparenting to leash, surface=Surface(name=96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423)/@0x4571aff, leashParent=Surface(name=ActivityRecord{93646554 u0 com.pampa.store/.MainActivity t9949}#424416)/@0x38a60cc
+I/SurfaceFlinger( 1971): id=424427 createSurf, flag=24000, Surface(name=96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423)/@0x4571aff - animation-leash of starting_reveal#424427
+D/WindowManager(31580): makeSurface duration=1 leash=Surface(name=Surface(name=96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423)/@0x4571aff - animation-leash of starting_reveal#424427)/@0x5318f15
+I/ActivityTaskManager(31580): done cause=notifyWindowsDrawn timestamp=1804469387362299 info=TransitionInfo{562bdb8 a=ActivityRecord{93646554 u0 com.pampa.store/.MainActivity t9949} r=null d=true}
+V/WindowManager(31580): performShowLocked: mDrawState=HAS_DRAWN in Window{96c2f37 u0 com.pampa.store/com.pampa.store.MainActivity}
+I/PkgPredictorService-SecIpmManagerServiceImpl(31580): reportToNAP uid:10532 com.pampa.store/com.pampa.store.MainActivity thisTime:188
+I/ActivityTaskManager(31580): Displayed com.pampa.store/.MainActivity for user 0: +188ms
+I/Pageboost(31580): Launch time gathered : pid 23196 com.pampa.store 188
+I/SurfaceFlinger( 1971): [LayerHierarchy{RequestedLayerState{96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423 parentId=424427} 1 children}] reparent to LayerHierarchy{RequestedLayerState{Surface(name=96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423)/@0x4571aff - animation-leash of starting_reveal#424427 parentId=424416} 1 children}
+I/SurfaceFlinger( 1971): [Surface(name=96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423)/@0x4571aff - animation-leash of starting_reveal#424427] attach to parent LayerHierarchy{RequestedLayerState{ActivityRecord{93646554 u0 com.pampa.store/.MainActivity t9949}#424416 parentId=424415} 3 children}
+I/InsetsSourceConsumer(23196): applyRequestedVisibilityToControl: visible=true, type=statusBars, host=com.pampa.store/com.pampa.store.MainActivity
+I/InsetsSourceConsumer(23196): applyRequestedVisibilityToControl: visible=true, type=navigationBars, host=com.pampa.store/com.pampa.store.MainActivity
+I/SurfaceFlinger( 1971): RequestedLayer [com.pampa.store/com.pampa.store.MainActivity$_23196#424424] hidden!! flag  from(1) --> to(0)
+D/SurfaceFlinger( 1971):        CLIENT |           99626061398018 | 00002102 | RGBA_8888    |    0.0    0.0 1080.0 2287.0 |   20   93 1060 2298 | com.pampa.store/com.pampa.store.MainActivity$_23196#424424 (2)
+D/SurfaceFlinger( 1971):        CLIENT |            1455993949014 | 00002100 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |   20   42 1060 2298 | Splash Screen com.pampa.store$_339#424418 (2)
+D/InputDispatcher(31580): Focus entered window (0): 96c2f37 com.pampa.store/com.pampa.store.MainActivity
+D/NetdEventListenerService(31580): DNS Requested by 298, 10532(com.pampa.store), SUCCESS, 1ms
+I/Kumiho-Kumiho(23196): getPackageName: com.pampa.store
+I/Kumiho-Kumiho(23196): getPackageName: com.pampa.store
+I/Kumiho-Kumiho(23196): getPackageName: com.pampa.store
+I/Kumiho-Kumiho(23196): getPackageName: com.pampa.store
+I/Kumiho-Kumiho(23196): getPackageName: com.pampa.store
+I/Kumiho-Kumiho(23196): getPackageName: com.pampa.store
+I/Kumiho-Kumiho(23196): getPackageName: com.pampa.store
+I/Kumiho-Kumiho(23196): getPackageName: com.pampa.store
+I/WindowManager(31580): Relayout Window{2f7c1d7 u0 Splash Screen com.pampa.store}: viewVisibility=8 req=1080x2340 ty=3 d0
+D/SGM:GameManager(31580): identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.IGameManagerService$Stub.onTransact(IGameManagerService.java:247)
+D/WindowManager(31580): Starting window removed Window{2f7c1d7 u0 Splash Screen com.pampa.store}
+I/WindowManager(31580): Cancelling animation restarting=false, leash=Surface(name=Surface(name=96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423)/@0x4571aff - animation-leash of starting_reveal#424427)/@0x5318f15
+I/WindowManager(31580): Reparenting to original parent: Surface(name=ActivityRecord{93646554 u0 com.pampa.store/.MainActivity t9949}#424416)/@0x38a60cc, destroy=false, surface=Surface(name=96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423)/@0x4571aff
+V/WindowManager(31580): Remove Window{2f7c1d7 u0 Splash Screen com.pampa.store}: mSurfaceControl=Surface(name=Splash Screen com.pampa.store$_339#424418)/@0x23a2b42 mAnimatingExit=false mRemoveOnExit=false mHasSurface=true surfaceShowing=false animating=false app-animation=false callers=com.android.server.wm.Session.remove:15 android.view.IWindowSession$Stub.onTransact:813 com.android.server.wm.Session.onTransact:1 android.os.Binder.execTransactInternal:1514 android.os.Binder.execTransact:1454 <bottom of call stack> 
+I/SurfaceFlinger( 1971): RequestedLayer [Splash Screen com.pampa.store$_339#424418] hidden!! flag  from(0) --> to(1)
+D/SurfaceFlinger( 1971):        CLIENT |           99626061398016 | 00002102 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |    7   16 1073 2324 | com.pampa.store/com.pampa.store.MainActivity$_23196#424424 (4)
+I/ImeTracker(31580): com.pampa.store:cfdd6bd1: onRequestHide at ORIGIN_SERVER reason HIDE_UNSPECIFIED_WINDOW fromUser false
+I/SurfaceFlinger( 1971): [LayerHierarchy{RequestedLayerState{2f7c1d7 Splash Screen com.pampa.store#424417 z=2147483647} 1 children}] reparent to OffscreenRoot
+I/SurfaceFlinger( 1971): [LayerHierarchy{RequestedLayerState{2f7c1d7 Splash Screen com.pampa.store#424417 z=2147483647} 1 children}] RelativeParent to null
+I/SurfaceFlinger( 1971): [LayerHierarchy{RequestedLayerState{Splash Screen com.pampa.store$_339#424418} no children}] reparent to OffscreenRoot
+I/SurfaceFlinger( 1971): [LayerHierarchy{RequestedLayerState{Splash Screen com.pampa.store$_339#424418} no children}] RelativeParent to null
+I/SurfaceFlinger( 1971): [LayerHierarchy{RequestedLayerState{96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423 parentId=424416} 1 children}] reparent to LayerHierarchy{RequestedLayerState{ActivityRecord{93646554 u0 com.pampa.store/.MainActivity t9949}#424416 parentId=424415} 3 children}
+I/SurfaceFlinger( 1971): [LayerHierarchy{RequestedLayerState{Surface(name=96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423)/@0x4571aff - animation-leash of starting_reveal#424427} no children}] reparent to OffscreenRoot
+I/SurfaceFlinger( 1971): [LayerHierarchy{RequestedLayerState{Surface(name=96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423)/@0x4571aff - animation-leash of starting_reveal#424427} no children}] RelativeParent to null
+I/SurfaceFlinger( 1971): id=424427 Removed Surface(name=96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423)/@0x4571aff - animation-leash of starting_reveal#424427 (309)
+I/SurfaceFlinger( 1971): destroyed Surface(name=96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423)/@0x4571aff - animation-leash of starting_reveal#424427 form LifecycleManager
+I/SurfaceFlinger( 1971): id=424427 onLayerDestroyed from LayerHierarchyBuilder(RequestedLayerState{Surface(name=96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423)/@0x4571aff - animation-leash of starting_reveal#424427 !handle})
+I/SurfaceFlinger( 1971): id=424427 Destroyed Surface(name=96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423)/@0x4571aff - animation-leash of starting_reveal#424427
+I/ImeTracker(23196): com.pampa.store:cfdd6bd1: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+I/GoogleInputMethodService(14506): GoogleInputMethodService.onStartInput():1532 onStartInput(EditorInfo{EditorInfo{packageName=com.pampa.store, inputType=0, inputTypeString=NULL, enableLearning=false, autoCorrection=false, autoComplete=false, imeOptions=0, privateImeOptions=null, actionName=UNSPECIFIED, actionLabel=null, initialSelStart=-1, initialSelEnd=-1, initialCapsMode=0, label=null, fieldId=0, fieldName=null, extras=Bundle[{appShowRequested=false, isTextEditor=false, hasInputConnection=false, displayId=0}], hintText=null, hintLocales=[]}}, false)
+W/PackageConfigPersister(31580): App-specific configuration not found for packageName: com.pampa.store and userId: 0
+D/InsetsSourceProvider(31580): updateControlForTarget: control=InsetsSourceControl: {3 mType=ime mSurfacePosition=Point(0, 133) mInsetsHint=Insets{left=0, top=0, right=0, bottom=805}}, target=Window{96c2f37 u0 com.pampa.store/com.pampa.store.MainActivity}, from=com.android.server.wm.ImeInsetsSourceProvider.updateControlForTarget:23 com.android.server.wm.InsetsStateController.onControlTargetChanged:82 com.android.server.wm.DisplayContent.updateImeControlTarget:48 com.android.server.wm.DisplayContent.updateImeInputAndControlTarget:273 com.android.server.wm.WindowManagerService$LocalService.updateImeTargetWindow:81 
+I/{OngoingActivityDataHelper}(  339): setBaseActivityComponentName:ComponentInfo{com.pampa.store/com.pampa.store.MainActivity}
+I/SurfaceFlinger( 1971): [LayerHierarchy{RequestedLayerState{ImeContainer#340115 parentId=424416 relativeParentId=424423 z=1} 1 children}] reparent to LayerHierarchy{RequestedLayerState{ActivityRecord{93646554 u0 com.pampa.store/.MainActivity t9949}#424416 parentId=424415} 3 children}
+I/SurfaceFlinger( 1971): [LayerHierarchy{RequestedLayerState{ImeContainer#340115 parentId=424416 relativeParentId=424423 z=1} 1 children}] RelativeParent to LayerHierarchy{RequestedLayerState{96c2f37 com.pampa.store/com.pampa.store.MainActivity#424423 parentId=424416} 2 children}
+V/WindowManager(31580):    ChangeInfo{c6ace39 container=ActivityRecord{93646554 u0 com.pampa.store/.MainActivity t9949} flags=0x0}
+V/WindowManager(31580):    ChangeInfo{dcaf5df container=Task{7cc4f0b #9949 type=standard A=10532:com.pampa.store} flags=0x10}
+I/SurfaceFlinger( 1971): id=424418 Removed Splash Screen com.pampa.store$_339#424418 (308)
+D/PersonaActivityHelper(31580): token.toString()  Token{f9531e8 ActivityRecord{93646554 u0 com.pampa.store/.MainActivity t9949}}
+D/ChangeTransitionController(31580):    ChangeInfo{c6ace39 container=ActivityRecord{93646554 u0 com.pampa.store/.MainActivity t9949} flags=0x0}
+D/ChangeTransitionController(31580):    ChangeInfo{dcaf5df container=Task{7cc4f0b #9949 type=standard A=10532:com.pampa.store} flags=0x10}
+I/SurfaceFlinger( 1971): destroyed Splash Screen com.pampa.store$_339#424418 form LifecycleManager
+I/SurfaceFlinger( 1971): id=424418 onLayerDestroyed from LayerHierarchyBuilder(RequestedLayerState{Splash Screen com.pampa.store$_339#424418 !handle})
+I/SurfaceFlinger( 1971): id=424418 Destroyed Splash Screen com.pampa.store$_339#424418
+I/SurfaceFlinger( 1971): id=424417 Removed 2f7c1d7 Splash Screen com.pampa.store#424417 (307)
+D/SurfaceFlinger( 1971):        DEVICE |           99626061398017 | 00002102 | RGBA_8888    |    0.0    0.0 1080.0 2340.0 |    0    0 1080 2340 | com.pampa.store/com.pampa.store.MainActivity$_23196#424424 (19)
+I/SurfaceFlinger( 1971): destroyed 2f7c1d7 Splash Screen com.pampa.store#424417 form LifecycleManager
+I/SurfaceFlinger( 1971): id=424417 onLayerDestroyed from LayerHierarchyBuilder(RequestedLayerState{2f7c1d7 Splash Screen com.pampa.store#424417 !handle z=2147483647})
+I/SurfaceFlinger( 1971): id=424417 Destroyed 2f7c1d7 Splash Screen com.pampa.store#424417
+D/SGM:FgCheckThread(31580): getForegroundApp(), foregroundPkgName=com.pampa.store
+D/SGM:FgCheckThread(31580): noteStopComponent(), received pkgName: com.sec.android.app.launcher, focusedPkgName: com.pampa.store, userId: 0
+D/SGM:GameManager(31580): identifyForegroundApp. com.pampa.store, mCurrentUserId: 0, callerUserId: 0
+D/SGM:GameManager(31580): identifyForegroundApp. com.pampa.store, mCurrentUserId: 0, callerUserId: 0
+D/ScreenCurtainController(31580): ForegroundPackageObserver update: com.pampa.store
+I/SAMSUNGWALLET(11639): [Hint_SimpleHintProcessMonitor] isHomePackageRunning topPkgName = com.pampa.store, topClsName = com.pampa.store.MainActivity, return false , se : false
+D/MdnieScenarioControlService(31580):  packageName : com.pampa.store    className : com.pampa.store.MainActivity
+D/SGM:GameManager(31580): identifyForegroundApp. com.pampa.store, mCurrentUserId: 0, callerUserId: 0
+D/SGM:GameManager(31580): identifyGamePackage. com.pampa.store, mCurrentUserId: 0, callingMethodInfo: com.samsung.android.game.SemGameManager.isGamePackage(SemGameManager.java:106)
+D/SGM:SemGameManager(31580): isGamePackage(), pkgName=com.pampa.store, ret=false
+I/SurfaceFlinger( 1971): Capture layer list: 	 com.pampa.store/com.pampa.store.MainActivity$_23196#424424(preserveDisplayColors:0)
+D/SurfaceFlinger( 1971): [SEC_SF_EFFECTS] drawLayersInternal,1337, Rendering layer com.pampa.store/com.pampa.store.MainActivity$_23196#424424 at index 1
+D/ProfileInstaller(23196): Installing profile for com.pampa.store

@@ -1,0 +1,55 @@
+--------- beginning of main
+E/pageboostd( 5734): Received HALT command code 2
+E/HoneySpace.HotseatPot@180920168(16410): Illegal access
+E/SurfaceFlinger( 1971): alpha changed 1.000 -> 0.000 - Task=9948#424369
+E/SurfaceFlinger( 1971): alpha changed 0.000 -> 0.000 - Task=9948#424369
+E/SurfaceFlinger( 1971): alpha changed 0.000 -> 0.080 - Task=9948#424369
+E/NativeCustomFrequencyManager( 1971): [NativeCFMS] BpCustomFrequencyManager::acquire()
+E/Adreno-AppProfiles(19574): QSPM AIDL service doesn't exist
+E/ashmem  (19574): Pinning is deprecated since Android Q. Please use trim or other methods.
+--------- beginning of system
+E/WindowManager(31580): win=Window{da9e0a2 u0 com.samsung.android.spay.pay.HintService} destroySurfaces: appStopped=true cleanupOnResume=false win.mWindowRemovalAllowed=false win.mRemoveOnExit=false win.mViewVisibility=8 caller=com.android.server.wm.WindowManagerService.tryStartExitingAnimation:128 com.android.server.wm.WindowManagerService.relayoutWindow:1121 com.android.server.wm.Session.relayout:30 android.view.IWindowSession$Stub.onTransact:840 com.android.server.wm.Session.onTransact:1 android.os.Binder.execTransactInternal:1514 android.os.Binder.execTransact:1454 
+E/BufferQueueProducer(19574): Unable to open libpenguin.so: dlopen failed: library "libpenguin.so" not found.
+E/com.pampa.store(19574): Unable to open libpenguin.so: dlopen failed: library "libpenguin.so" not found.
+E/pageboostd( 5734): Received HALT command code 2
+E/Kumiho-Kumiho(19574): updateList - failed to retrieve policy '/data/system/Kumiho/Kumiho.policy' retrying with default
+E/SurfaceFlinger( 1971): alpha changed 1.000 -> 0.000 - Surface(name=5e17498 InputMethod#340251)/@0xf433757 - animation-leash of insets_animation#424382
+E/AccessibilityService(24425): bindInput must be paired with unbindInput.
+E/WindowManager(31580): win=Window{a68bb70 u0 GoogleDiscoverWindow} destroySurfaces: appStopped=true cleanupOnResume=false win.mWindowRemovalAllowed=false win.mRemoveOnExit=false win.mViewVisibility=8 caller=com.android.server.wm.ActivityRecord.destroySurfaces:24 com.android.server.wm.ActivityRecord.activityStopped:209 com.android.server.wm.ActivityClientController.activityStopped:102 android.app.IActivityClientController$Stub.onTransact:829 com.android.server.wm.ActivityClientController.onTransact:1 android.os.Binder.execTransactInternal:1514 android.os.Binder.execTransact:1454 
+E/WindowManager(31580): win=Window{ab4e4fa u0 com.sec.android.app.launcher/com.sec.android.app.launcher.activities.LauncherActivity} destroySurfaces: appStopped=true cleanupOnResume=false win.mWindowRemovalAllowed=false win.mRemoveOnExit=false win.mViewVisibility=8 caller=com.android.server.wm.ActivityRecord.destroySurfaces:24 com.android.server.wm.ActivityRecord.activityStopped:209 com.android.server.wm.ActivityClientController.activityStopped:102 android.app.IActivityClientController$Stub.onTransact:829 com.android.server.wm.ActivityClientController.onTransact:1 android.os.Binder.execTransactInternal:1514 android.os.Binder.execTransact:1454 
+E/DeviceHalAidl(31294): Function: parseAndSetVendorParameters Line: 414 Failed 
+E/DeviceHalAidl(31294): Function: parseAndSetVendorParameters Line: 414 Failed 
+E/DeviceHalAidl(31294): Function: parseAndSetVendorParameters Line: 414 Failed 
+E/DeviceHalAidl(31294): Function: parseAndSetVendorParameters Line: 414 Failed 
+E/Pageboost(31580): ioinfo read failed
+E/GlassesApi(18844): Unable to load GlassesApi implementation.
+E/GlassesApi(18844): com.google.android.glasses.sdk.ApiFactory$ClassLoadException: java.lang.ClassNotFoundException: GlassesCore is a stub.
+E/GlassesApi(18844): 	at com.google.android.glasses.sdk.ApiFactory.getObjectByApiMethodName(PG:41)
+E/GlassesApi(18844): 	at com.google.android.glasses.sdk.ApiFactory.getGlassesApi(PG:16)
+E/GlassesApi(18844): 	at com.google.android.glasses.sdk.GlassesApi$-CC.create(PG:4)
+E/GlassesApi(18844): 	at csrt.e(PG:161)
+E/GlassesApi(18844): 	at csrs.invokeSuspend(PG:29)
+E/GlassesApi(18844): 	at csrs.a(PG:14)
+E/GlassesApi(18844): 	at csrl.invokeSuspend(PG:42)
+E/GlassesApi(18844): 	at csrl.invoke(PG:13)
+E/GlassesApi(18844): 	at gqws.g(PG:3)
+E/GlassesApi(18844): 	at gqwo.b(PG:57)
+E/GlassesApi(18844): 	at grbj.invokeSuspend(PG:20)
+E/GlassesApi(18844): 	at gqhy.resumeWith(PG:11)
+E/GlassesApi(18844): 	at gqry.run(PG:115)
+E/GlassesApi(18844): 	at fjju.run(PG:3)
+E/GlassesApi(18844): 	at flac.run(PG:17)
+E/GlassesApi(18844): 	at dfvq.run(PG:5)
+E/GlassesApi(18844): 	at fubf.run(PG:46)
+E/GlassesApi(18844): 	at dfvc.run(PG:81)
+E/GlassesApi(18844): 	at java.lang.Thread.run(Thread.java:1572)
+E/GlassesApi(18844): 	at dfwv.run(PG:62)
+E/GlassesApi(18844): Caused by: java.lang.ClassNotFoundException: GlassesCore is a stub.
+E/GlassesApi(18844): 	at com.google.android.glasses.sdk.ApiFactory.getApiFactoryClass(PG:45)
+E/GlassesApi(18844): 	at com.google.android.glasses.sdk.ApiFactory.getObjectByApiMethodName(PG:1)
+E/GlassesApi(18844): 	... 19 more
+E/SemDvfsManager_JNI(19736): SemDvfsManager: registerfunction enter
+E/SemAffinityControl(19736): SemAffinityControl: registerfunction enter
+E/FeatureFlagsImplExport(19736): android.os.flagging.AconfigStorageReadException: ERROR_PACKAGE_NOT_FOUND: package android.xr cannot be found on the device
+E/BatteryDump( 1883): !@new_battery_dump : 4149,-30,900,1800,79,394,367,432,394,0,394,422,0,Not-charging,NO_CHARGING,Normal,Good,USB,1,Normal,0,0,9300,0x8000,0x11010000,0x0,0,0,818,v0002,0000,0000,00000000,0,0,0,0,318,4152,7895,990,0,
+E/MetricsTransporter( 8816): Exception getting the OAuth Token: java.lang.Exception: WEBLAB: use unauthenticated endpoint
