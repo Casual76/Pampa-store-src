@@ -53,6 +53,29 @@ class AndroidAppService(private val context: Context) {
         return true
     }
 
+    fun isInstalled(packageName: String): Boolean = installedVersion(packageName) != null
+
+    /**
+     * Chiede ad Android di disinstallare un pacchetto.
+     *
+     * `ACTION_DELETE` e non `PackageInstaller.uninstall`: il secondo pretende che lo Store sia
+     * l'installer di record del pacchetto, cioè funziona solo per le app che ha installato lui e
+     * lancia `SecurityException` per tutte le altre. Questo intent apre lo stesso dialogo di sistema
+     * e vale per qualunque pacchetto.
+     *
+     * Non torna un esito: la conferma è del sistema e la risposta arriva dal fatto che, al rientro
+     * in primo piano, il pacchetto non c'è più.
+     */
+    fun requestUninstall(packageName: String): Boolean {
+        if (packageName.isBlank()) return false
+        return runCatching {
+            context.startActivity(
+                Intent(Intent.ACTION_DELETE, Uri.parse("package:$packageName"))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
+        }.isSuccess
+    }
+
     fun downloadsDirectory(): File = File(
         context.getExternalFilesDir(null) ?: context.filesDir,
         "downloads",

@@ -73,6 +73,7 @@ class StoreScreensTest {
                     ),
                     onBack = {},
                     onInstall = {},
+                    onInstallVersion = {},
                     onOpen = {},
                     onOpenInstallSettings = {},
                 )

@@ -114,4 +114,26 @@ class CatalogResolverTest {
 
         assertEquals(setOf("beta"), after.keys)
     }
+
+    // --- tornare indietro ---------------------------------------------------------------
+
+    @Test
+    fun `una versione piu vecchia di quella installata vuole la disinstallazione`() {
+        assertTrue(requiresUninstallFirst(installedVersion = "1.6.0", targetVersion = "1.3.0"))
+    }
+
+    @Test
+    fun `risalire e una installazione qualunque`() {
+        assertFalse(requiresUninstallFirst(installedVersion = "1.3.0", targetVersion = "1.6.0"))
+    }
+
+    @Test
+    fun `reinstallare la stessa versione non disinstalla niente`() {
+        assertFalse(requiresUninstallFirst(installedVersion = "1.6.0", targetVersion = "1.6.0"))
+    }
+
+    @Test
+    fun `un app non installata non ha niente da disinstallare`() {
+        assertFalse(requiresUninstallFirst(installedVersion = null, targetVersion = "1.3.0"))
+    }
 }

@@ -202,6 +202,22 @@ data class StoreUpdate(
     val version: VersionInfo,
 )
 
+/**
+ * Un'installazione che aspetta che l'app venga tolta di mezzo.
+ *
+ * Android rifiuta di sovrascrivere un pacchetto con uno di versione inferiore
+ * (`INSTALL_FAILED_VERSION_DOWNGRADE`), e la deroga è riservata al sistema: per un installer come
+ * questo l'unica strada verso una versione precedente passa dalla disinstallazione. Quindi il
+ * ritorno indietro è **due** operazioni, con in mezzo un dialogo di sistema e i dati dell'app che se
+ * ne vanno — e questo è ciò che se lo ricorda mentre la persona è dentro quel dialogo.
+ */
+data class PendingReinstall(
+    val appId: String,
+    val appName: String,
+    val packageName: String,
+    val version: VersionInfo,
+)
+
 data class StoreUiState(
     val apps: List<StoreApp> = emptyList(),
     val storeReleases: StoreReleaseChannels = StoreReleaseChannels(),
@@ -219,6 +235,7 @@ data class StoreUiState(
     val storeUpdate: StoreUpdate? = null,
     val updateQueue: List<QueueEntry> = emptyList(),
     val notificationsEnabled: Boolean = true,
+    val pendingReinstall: PendingReinstall? = null,
 ) {
     val installedCount: Int get() = apps.count { it.installedVersion != null }
     val updateCount: Int get() = apps.count(StoreApp::hasUpdate)

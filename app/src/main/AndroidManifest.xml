@@ -6,6 +6,15 @@
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!--
+        Serve per aprire il dialogo di disinstallazione, che e' l'unica strada verso una versione
+        precedente: Android riserva al sistema la deroga a INSTALL_FAILED_VERSION_DOWNGRADE, quindi
+        rimettere una vecchia release significa togliere l'app e reinstallarla. Senza questa
+        permission startActivity(ACTION_DELETE) non solleva niente e non apre niente: fallisce in
+        silenzio, che e' il modo peggiore in cui poteva fallire.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+    <!--
         Da Android 13 pubblicare una notifica richiede il consenso. Non si chiede all'avvio: si
         chiede quando la persona apre la scheda Aggiornamenti, cioe' nel momento in cui la richiesta
         ha un contesto invece di essere il primo dialogo di un'app appena installata.

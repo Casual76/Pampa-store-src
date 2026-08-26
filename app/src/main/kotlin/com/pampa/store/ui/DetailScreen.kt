@@ -17,13 +17,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.pampa.store.data.Channel
@@ -31,9 +34,11 @@ import com.pampa.store.data.DownloadState
 import com.pampa.store.data.InstallPrerequisites
 import com.pampa.store.data.StoreApp
 import com.pampa.store.data.StorePreferences
+import com.pampa.store.data.VersionInfo
 import com.pampa.store.data.enumOrDefault
 import com.pampa.store.data.versionFor
 import com.pampa.store.util.formatBytes
+import com.pampa.store.data.requiresUninstallFirst
 import dev.antigravity.fluidengine.ui.fluid.ContinuousCornerShape
 import dev.antigravity.fluidengine.ui.fluid.FluidButton
 import dev.antigravity.fluidengine.ui.fluid.FluidButtonStyle
@@ -46,12 +51,16 @@ import dev.antigravity.fluidengine.ui.fluid.FluidHeroTone
 import dev.antigravity.fluidengine.ui.fluid.FluidScreen
 import dev.antigravity.fluidengine.ui.fluid.FluidProgressBar
 import dev.antigravity.fluidengine.ui.fluid.FluidRadius
+import dev.antigravity.fluidengine.ui.fluid.FluidGlassModalPortal
+import dev.antigravity.fluidengine.ui.fluid.FluidGlassModalPresentation
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
 import dev.antigravity.fluidengine.ui.fluid.FluidSegmentedControl
+import dev.antigravity.fluidengine.ui.fluid.fluidExpandOrigin
 import dev.antigravity.fluidengine.ui.theme.FluidEmptyState
 import dev.antigravity.fluidengine.ui.theme.FluidListDivider
 import dev.antigravity.fluidengine.ui.theme.FluidListGroup
 import dev.antigravity.fluidengine.ui.theme.FluidListRow
+import dev.antigravity.fluidengine.ui.theme.FluidStatusBadge
 import dev.antigravity.fluidengine.ui.theme.FluidTone
 
 @Composable
@@ -61,6 +70,7 @@ fun DetailScreen(
     prerequisites: InstallPrerequisites,
     onBack: () -> Unit,
     onInstall: (Channel) -> Unit,
+    onInstallVersion: (VersionInfo) -> Unit,
     onOpen: (String) -> Unit,
     onOpenInstallSettings: () -> Unit,
 ) {
@@ -70,6 +80,12 @@ fun DetailScreen(
         }
         return
     }
+
+    var historyPick by rememberSaveable(app.entry.id) { mutableStateOf<String?>(null) }
+    val pickedVersion = app.entry.history.firstOrNull { it.version == historyPick }
+    // Vedi la nota gemella in UpdatesScreen: mappa normale e non snapshot state, perché qui si
+    // scrive dal layout e si legge una volta sola, quando il pannello parte.
+    val historyOrigins = remember { mutableMapOf<String, Rect>() }
 
     val defaultChannel = enumOrDefault(preferences.defaultChannel, Channel.STABLE)
     var selectedChannel by rememberSaveable(app.entry.id) {
@@ -207,21 +223,130 @@ fun DetailScreen(
         }
 
         if (app.entry.history.isNotEmpty()) {
-            item { FluidSectionHeader("Cronologia") }
             item {
-                FluidListGroup(glass = true) {
-                    app.entry.history.take(5).forEachIndexed { index, version ->
+                FluidSectionHeader(
+                    title = "Cronologia",
+                    detail = "Tocca una versione per rimetterla",
+                )
+            }
+            item {
+                FluidListGroup(glass = true, modifier = Modifier.testTag("detail-history")) {
+                    app.entry.history.forEachIndexed { index, version ->
+                        val installable = version.apkAsset.isNotBlank() &&
+                            version.releaseTag.isNotBlank()
+                        val isCurrent = version.version == app.installedVersion
                         FluidListRow(
                             title = "Versione ${version.version}",
                             subtitle = version.releaseDate.ifBlank { "Release precedente" },
                             meta = version.changelog.takeIf(String::isNotBlank),
-                            tone = FluidTone.Neutral,
+                            tone = if (isCurrent) FluidTone.Success else FluidTone.Neutral,
+                            badge = {
+                                when {
+                                    isCurrent -> FluidStatusBadge("Installata", tone = FluidTone.Success)
+                                    installable -> FluidStatusBadge("Installa", tone = FluidTone.Primary)
+                                    else -> FluidStatusBadge("Senza APK", tone = FluidTone.Neutral)
+                                }
+                            },
+                            onClick = if (installable && !isCurrent) {
+                                { historyPick = version.version }
+                            } else {
+                                null
+                            },
+                            modifier = Modifier.fluidExpandOrigin(
+                                open = { historyPick == version.version },
+                                onMeasured = { historyOrigins[version.version] = it },
+                            ),
                         )
-                        if (index != app.entry.history.take(5).lastIndex) FluidListDivider()
+                        if (index != app.entry.history.lastIndex) FluidListDivider()
                     }
                 }
             }
         }
+    }
+
+    // La release scelta dalla cronologia cresce dalla propria riga, come fa un aggiornamento nella
+    // scheda Aggiornamenti: stesso gesto per la stessa cosa, cioè una versione che si guarda prima
+    // di installarla.
+    FluidGlassModalPortal(
+        item = pickedVersion,
+        onDismissRequest = { historyPick = null },
+        origin = { historyPick?.let(historyOrigins::get) },
+        presentation = FluidGlassModalPresentation.Popover,
+        paneTitle = pickedVersion?.let { "Versione ${it.version}" },
+    ) { version ->
+        HistoryVersionPane(
+            version = version,
+            installedVersion = app.installedVersion,
+            appName = app.entry.name,
+            onInstall = {
+                onInstallVersion(version)
+                historyPick = null
+            },
+        )
+    }
+}
+
+/**
+ * Cosa succede davvero se rimetti questa versione.
+ *
+ * La distinzione che il pannello deve far capire *prima* del tocco: risalire è un aggiornamento
+ * qualunque, tornare indietro no. Android riserva al sistema il permesso di sovrascrivere un
+ * pacchetto con uno più vecchio, quindi per un installer come questo l'unica strada è disinstallare
+ * — e con l'app se ne vanno i suoi dati. Scoprirlo dopo aver toccato sarebbe scoprirlo troppo tardi.
+ */
+@Composable
+private fun HistoryVersionPane(
+    version: VersionInfo,
+    installedVersion: String?,
+    appName: String,
+    onInstall: () -> Unit,
+) {
+    val isDowngrade = requiresUninstallFirst(installedVersion, version.version)
+    // fillMaxWidth + padding come nella galleria dell'engine: il pannello e' una card di larghezza
+    // fissa, e un contenuto che non la riempie le lascia decidere la propria misura su niente.
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        if (installedVersion != null) {
+            Text(
+                text = "$installedVersion → ${version.version}",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        version.releaseDate.takeIf(String::isNotBlank)?.let { date ->
+            Text(
+                text = "Pubblicata il $date  •  ${formatBytes(version.sizeBytes)}",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(
+            text = version.changelog.takeIf(String::isNotBlank) ?: "Questa release non porta note.",
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 10,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (isDowngrade) {
+            InlineNotice(
+                title = "Tornare indietro disinstalla l’app",
+                message = "Android non lascia sovrascrivere una versione con una più vecchia. " +
+                    "Ti chiedo di rimuovere $appName, e i suoi dati se ne vanno con lei; " +
+                    "subito dopo installo la ${version.version}.",
+                tone = FluidTone.Warning,
+            )
+        }
+        FluidButton(
+            text = if (isDowngrade) {
+                "Disinstalla e installa la ${version.version}"
+            } else {
+                "Installa la ${version.version}"
+            },
+            onClick = onInstall,
+            style = FluidButtonStyle.Filled,
+            fillWidth = true,
+        )
     }
 }
 

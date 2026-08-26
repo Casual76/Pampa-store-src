@@ -80,3 +80,15 @@ fun updatesToAnnounce(
  */
 fun announcedVersions(updatable: List<StoreApp>): Map<String, String> =
     updatable.mapNotNull { app -> app.availableVersion?.let { app.entry.id to it } }.toMap()
+
+/**
+ * Se rimettere questa release richiede prima di disinstallare l'app.
+ *
+ * Android rifiuta di sovrascrivere un pacchetto con uno di `versionCode` inferiore e la deroga è
+ * riservata al sistema, quindi tornare a una versione precedente è un'operazione diversa
+ * dall'installarne una: costa i dati dell'app. Sta qui, e non nel ViewModel, perché la decisione ha
+ * due lettori — chi la esegue e il pannello che la annuncia prima del tocco — e se divergono uno dei
+ * due mente.
+ */
+fun requiresUninstallFirst(installedVersion: String?, targetVersion: String): Boolean =
+    installedVersion != null && isVersionNewer(installedVersion, targetVersion)

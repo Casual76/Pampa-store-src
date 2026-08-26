@@ -130,6 +130,7 @@ fun UpdatesScreen(
         overlay = { backdrop ->
             if (total > 0) {
                 UpdateAllCapsule(
+                    onRecheck = onRefresh,
                     hasFailures = queue.any(QueueEntry::isFailed),
                     hasPending = queue.any { it.isWaiting || it.isFinished },
                     onUpdateAll = onUpdateAll,
@@ -268,11 +269,16 @@ fun UpdatesScreen(
     // Il pannello che nasce dalla riga toccata: cresce dal suo rettangolo con la rifrazione addosso
     // e ci ritorna dentro. Sta fuori dalla lista perché l'host dei modali vive alla radice — un
     // pop-up su cui la barra di navigazione può appoggiarsi non è un pop-up.
+    //
+    // Popover con un'origine, non Expand: dalla 1.9.5 è l'ancora a fare il viaggio con la
+    // rifrazione addosso, quindi il morph dalla riga si ha comunque. Expand è invece la
+    // presentazione del *menù di azioni* — l'host disegna la lista di FluidContextAction e ignora
+    // in silenzio il `content` che gli passi, quindi il pannello uscirebbe vuoto.
     FluidGlassModalPortal(
         item = expanded,
         onDismissRequest = { expandedId = null },
         origin = { expandedId?.let(origins::get) },
-        presentation = FluidGlassModalPresentation.Expand,
+        presentation = FluidGlassModalPresentation.Popover,
         paneTitle = expanded?.entry?.name,
     ) { app ->
         UpdateDetailPane(
@@ -345,7 +351,10 @@ private fun QueueRow(entry: QueueEntry) {
 @Composable
 private fun UpdateDetailPane(app: StoreApp, onUpdate: () -> Unit, onOpenDetail: () -> Unit) {
     val version = app.installedChannel?.let(app.entry::versionFor)
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
         Text(
             text = "${app.installedVersion.orEmpty()} → ${app.availableVersion.orEmpty()}",
             style = MaterialTheme.typography.titleMedium,
@@ -391,6 +400,7 @@ private fun UpdateDetailPane(app: StoreApp, onUpdate: () -> Unit, onOpenDetail: 
  */
 @Composable
 private fun UpdateAllCapsule(
+    onRecheck: () -> Unit,
     hasFailures: Boolean,
     hasPending: Boolean,
     onUpdateAll: () -> Unit,
@@ -425,7 +435,7 @@ private fun UpdateAllCapsule(
                     FluidContextAction(
                         label = "Cerca adesso",
                         icon = Icons.Rounded.Refresh,
-                        onClick = onUpdateAll,
+                        onClick = onRecheck,
                     ),
                 )
             },

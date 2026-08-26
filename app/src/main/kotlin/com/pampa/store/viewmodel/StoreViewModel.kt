@@ -15,6 +15,7 @@ import com.pampa.store.data.Channel
 import com.pampa.store.data.DownloadState
 import com.pampa.store.data.InstallEvent
 import com.pampa.store.data.OwnershipFilter
+import com.pampa.store.data.PendingReinstall
 import com.pampa.store.data.QueueEntry
 import com.pampa.store.data.RepositoryRef
 import com.pampa.store.data.STORE_APP_ID
@@ -30,6 +31,7 @@ import com.pampa.store.data.clearPending
 import com.pampa.store.data.enqueue
 import com.pampa.store.data.enumOrDefault
 import com.pampa.store.data.releaseAssetUrl
+import com.pampa.store.data.requiresUninstallFirst
 import com.pampa.store.data.resolveStoreApps
 import com.pampa.store.data.retryFailed
 import com.pampa.store.data.versionFor
@@ -188,6 +190,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             // Quello che è stato appena installato non è più un aggiornamento in attesa, e la
             // notifica che lo annunciava non ha più niente da dire.
             notifications.syncWithUpdates(_uiState.value.updatableApps)
+            resumePendingReinstall()
         }
     }
 
@@ -270,6 +273,87 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     /** Aggiorna una sola app sul canale da cui è installata. */
     fun updateOne(appId: String) = installApp(appId, channel = null)
+
+    /**
+     * Installa una release **precisa**, scelta dalla cronologia.
+     *
+     * Se è più vecchia di quella installata non si può sovrascrivere: Android riserva al sistema la
+     * deroga a `INSTALL_FAILED_VERSION_DOWNGRADE`, quindi il ritorno indietro passa per forza dalla
+     * disinstallazione. Qui non si prova e basta — provare e fallire lascerebbe la riga su "Riprova"
+     * senza dire che il problema non è il download — ma si mette da parte l'installazione e si
+     * chiede ad Android di togliere l'app; il resto lo fa [resumePendingReinstall] al rientro.
+     */
+    fun installVersion(appId: String, version: VersionInfo) {
+        val app = app(appId) ?: return
+        if (version.apkAsset.isBlank() || version.releaseTag.isBlank()) {
+            setInstallState(appId, DownloadState.Error("Questa release non contiene un APK."))
+            return
+        }
+        val isDowngrade = requiresUninstallFirst(app.installedVersion, version.version)
+        if (!isDowngrade) {
+            enqueueAll(
+                listOf(
+                    QueueEntry(
+                        appId = appId,
+                        name = app.entry.name,
+                        channel = app.installedChannel ?: Channel.STABLE,
+                        targetVersion = version.version,
+                        explicitVersion = version,
+                    ),
+                ),
+            )
+            return
+        }
+        _uiState.update {
+            it.copy(
+                pendingReinstall = PendingReinstall(
+                    appId = appId,
+                    appName = app.entry.name,
+                    packageName = app.entry.packageName,
+                    version = version,
+                ),
+            )
+        }
+        if (!appService.requestUninstall(app.entry.packageName)) {
+            cancelPendingReinstall()
+            announce(
+                id = "uninstall-failed-$appId",
+                title = "Non riesco ad aprire la disinstallazione",
+                message = "Rimuovi ${app.entry.name} dalle impostazioni, poi torna qui.",
+                tone = StoreEventTone.Error,
+            )
+        }
+    }
+
+    fun cancelPendingReinstall() = _uiState.update { it.copy(pendingReinstall = null) }
+
+    /**
+     * Riprende l'installazione messa da parte, se l'app è davvero sparita.
+     *
+     * Chiamata al ritorno in primo piano, che è l'unico segnale che abbiamo: il dialogo di
+     * disinstallazione è del sistema e non ci dice com'è andata. Se il pacchetto c'è ancora la
+     * persona ha annullato, e annullare deve voler dire annullare — non ritrovarsi la richiesta
+     * ancora lì al prossimo giro.
+     */
+    private fun resumePendingReinstall() {
+        val pending = _uiState.value.pendingReinstall ?: return
+        if (appService.isInstalled(pending.packageName)) {
+            cancelPendingReinstall()
+            return
+        }
+        cancelPendingReinstall()
+        enqueueAll(
+            listOf(
+                QueueEntry(
+                    appId = pending.appId,
+                    name = pending.appName,
+                    channel = Channel.STABLE,
+                    targetVersion = pending.version.version,
+                    explicitVersion = pending.version,
+                ),
+            ),
+        )
+    }
 
     /**
      * Accoda tutto quello che è aggiornabile.
@@ -369,7 +453,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         val app = state.apps.firstOrNull { it.entry.id == entry.appId }
-        val version = app?.entry?.versionFor(entry.channel)
+        val version = entry.explicitVersion ?: app?.entry?.versionFor(entry.channel)
         if (app == null || version == null) {
             setInstallState(entry.appId, DownloadState.Error("L’app non è più nel catalogo."))
             return

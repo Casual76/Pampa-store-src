@@ -341,6 +341,9 @@ fun PampaStoreApp(
                                     prerequisites = state.prerequisites,
                                     onBack = navController::navigateUp,
                                     onInstall = { channel -> viewModel.installApp(appId, channel) },
+                                    onInstallVersion = { version ->
+                                        viewModel.installVersion(appId, version)
+                                    },
                                     onOpen = viewModel::openApp,
                                     onOpenInstallSettings = viewModel::openInstallSettings,
                                 )

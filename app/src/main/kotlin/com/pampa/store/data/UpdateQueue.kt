@@ -13,6 +13,15 @@ data class QueueEntry(
     val channel: Channel,
     val targetVersion: String,
     val state: DownloadState = DownloadState.Queued,
+    /**
+     * La release esatta da installare, quando non è semplicemente "l'ultima del canale".
+     *
+     * Serve alle installazioni scelte dalla cronologia: il canale sa dire qual è l'ultima versione,
+     * non quale delle vecchie hai chiesto. Quando è null la voce si risolve come sempre, dal canale,
+     * così il caso normale non porta in giro una copia della release che potrebbe invecchiare fra
+     * l'accodamento e il turno.
+     */
+    val explicitVersion: VersionInfo? = null,
 ) {
     /** In volo: ha già cominciato e non si richiama indietro. */
     val isRunning: Boolean
