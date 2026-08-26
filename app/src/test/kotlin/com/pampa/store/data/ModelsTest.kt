@@ -30,6 +30,63 @@ class ModelsTest {
     }
 
     @Test
+    fun storeReleaseRepositoryBuildsThePublicDistributionAssetUrl() {
+        val channels = json.decodeFromString<StoreReleaseChannels>(
+            """{
+                "repository":{"repoOwner":"Casual76","repoName":"Pampa-store"},
+                "stable":{"version":"1.5.0","releaseTag":"stable-pampa-store-v1.5.0","apkAsset":"pampa-store-1.5.0.apk"}
+            }""",
+        )
+        val stable = requireNotNull(channels.stable)
+
+        assertEquals("Pampa-store", channels.repository.repoName)
+        assertEquals(
+            "https://github.com/Casual76/Pampa-store/releases/download/" +
+                "stable-pampa-store-v1.5.0/pampa-store-1.5.0.apk",
+            channels.repository.releaseAssetUrl(stable),
+        )
+    }
+
+    @Test
+    fun historicalStoreReleaseManifestFallsBackToThePublicDistributionRepository() {
+        val channels = json.decodeFromString<StoreReleaseChannels>(
+            """{"stable":{"version":"1.4.0"}}""",
+        )
+
+        assertEquals(STORE_RELEASE_OWNER, channels.repository.repoOwner)
+        assertEquals(STORE_RELEASE_REPOSITORY, channels.repository.repoName)
+    }
+
+    @Test
+    fun indexedAppKeepsTheDistributionRepositoryDeclaredByItsManifest() {
+        val decoded = fixtureApp("voice", "com.example.voice").copy(
+            repository = RepositoryRef("PampaDistribution", "android-downloads"),
+        )
+        val indexed = decoded.withIndexIdentity(
+            StoreIndexEntry("keyvoice", "Casual76", "KeyVoice"),
+        )
+
+        assertEquals("keyvoice", indexed.id)
+        assertEquals("PampaDistribution", indexed.repository.repoOwner)
+        assertEquals("android-downloads", indexed.repository.repoName)
+        assertEquals(
+            "https://github.com/PampaDistribution/android-downloads/releases/download/" +
+                "stable-voice-v1.0/voice.apk",
+            indexed.repository.releaseAssetUrl(requireNotNull(indexed.stable)),
+        )
+    }
+
+    @Test
+    fun indexedAppFallsBackToItsSourceRepositoryForHistoricalManifests() {
+        val indexed = fixtureApp("voice", "com.example.voice").withIndexIdentity(
+            StoreIndexEntry("keyvoice", "Casual76", "KeyVoice"),
+        )
+
+        assertEquals("Casual76", indexed.repository.repoOwner)
+        assertEquals("KeyVoice", indexed.repository.repoName)
+    }
+
+    @Test
     fun cachedCatalogRoundTrips() {
         val catalog = CachedCatalog(
             apps = listOf(fixtureApp("one", installedPackage = "com.example.one")),

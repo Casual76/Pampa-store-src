@@ -3,8 +3,10 @@ package com.pampa.store.data
 import kotlinx.serialization.Serializable
 
 const val STORE_APP_ID = "pampa-store"
-const val STORE_OWNER = "Casual76"
-const val STORE_REPOSITORY = "Pampa-store"
+const val STORE_INDEX_OWNER = "Casual76"
+const val STORE_INDEX_REPOSITORY = "Pampa-store"
+const val STORE_RELEASE_OWNER = STORE_INDEX_OWNER
+const val STORE_RELEASE_REPOSITORY = STORE_INDEX_REPOSITORY
 const val STORE_MANIFEST_PATH = "manifest.json"
 
 @Serializable
@@ -63,6 +65,10 @@ data class StoreIndexEntry(
 
 @Serializable
 data class StoreReleaseChannels(
+    val repository: RepositoryRef = RepositoryRef(
+        repoOwner = STORE_RELEASE_OWNER,
+        repoName = STORE_RELEASE_REPOSITORY,
+    ),
     val stable: VersionInfo? = null,
     val beta: VersionInfo? = null,
 )

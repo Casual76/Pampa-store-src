@@ -16,8 +16,6 @@ import com.pampa.store.data.DownloadState
 import com.pampa.store.data.InstallEvent
 import com.pampa.store.data.OwnershipFilter
 import com.pampa.store.data.RepositoryRef
-import com.pampa.store.data.STORE_OWNER
-import com.pampa.store.data.STORE_REPOSITORY
 import com.pampa.store.data.StoreApp
 import com.pampa.store.data.StorePersistence
 import com.pampa.store.data.StorePreferences
@@ -319,7 +317,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         val version = state.storeReleases.versionFor(channel)
         val update = version?.takeIf { isVersionNewer(it.version, BuildConfig.VERSION_NAME) }?.let {
             StoreUpdate(
-                repository = RepositoryRef(STORE_OWNER, STORE_REPOSITORY),
+                repository = state.storeReleases.repository,
                 version = it,
             )
         }

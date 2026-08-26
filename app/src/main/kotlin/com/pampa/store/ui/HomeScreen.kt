@@ -3,8 +3,6 @@ package com.pampa.store.ui
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -13,6 +11,7 @@ import dev.antigravity.fluidengine.ui.fluid.FluidHero
 import dev.antigravity.fluidengine.ui.fluid.FluidHeroMetric
 import dev.antigravity.fluidengine.ui.fluid.FluidHeroMotif
 import dev.antigravity.fluidengine.ui.fluid.FluidHeroTone
+import dev.antigravity.fluidengine.ui.fluid.FluidBarAction
 import dev.antigravity.fluidengine.ui.fluid.FluidLoadingBlock
 import dev.antigravity.fluidengine.ui.fluid.FluidScreen
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
@@ -47,9 +46,11 @@ fun HomeScreen(
         isRefreshing = state.isRefreshing,
         onRefresh = onRefresh,
         actions = {
-            IconButton(onClick = onRefresh) {
-                Icon(Icons.Rounded.Refresh, contentDescription = "Aggiorna catalogo")
-            }
+            FluidBarAction(
+                icon = Icons.Rounded.Refresh,
+                contentDescription = "Aggiorna catalogo",
+                onClick = onRefresh,
+            )
         },
     ) {
         if (state.isLoading && state.apps.isEmpty()) {

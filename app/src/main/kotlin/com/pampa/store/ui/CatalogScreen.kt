@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pampa.store.data.OwnershipFilter
 import com.pampa.store.data.StoreUiState
+import dev.antigravity.fluidengine.ui.fluid.FluidBarAction
 import dev.antigravity.fluidengine.ui.fluid.FluidChip
 import dev.antigravity.fluidengine.ui.fluid.FluidLoadingBlock
 import dev.antigravity.fluidengine.ui.fluid.FluidScreen
@@ -45,9 +45,11 @@ fun CatalogScreen(
         isRefreshing = state.isRefreshing,
         onRefresh = onRefresh,
         actions = {
-            IconButton(onClick = onRefresh) {
-                Icon(Icons.Rounded.Refresh, contentDescription = "Aggiorna catalogo")
-            }
+            FluidBarAction(
+                icon = Icons.Rounded.Refresh,
+                contentDescription = "Aggiorna catalogo",
+                onClick = onRefresh,
+            )
         },
     ) {
         item {

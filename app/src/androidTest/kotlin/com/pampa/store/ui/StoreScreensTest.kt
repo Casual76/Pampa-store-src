@@ -2,6 +2,7 @@ package com.pampa.store.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import com.pampa.store.data.AppEntry
@@ -31,6 +32,7 @@ class StoreScreensTest {
             }
         }
         composeRule.onNodeWithTag("home-hero").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Aggiorna catalogo").assertIsDisplayed()
         composeRule.onNodeWithText("LA TUA RACCOLTA").assertIsDisplayed()
         composeRule.onNodeWithText("KeyVoice").assertIsDisplayed()
     }
@@ -50,6 +52,7 @@ class StoreScreensTest {
             }
         }
         composeRule.onNodeWithTag("catalog-search").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Aggiorna catalogo").assertIsDisplayed()
         composeRule.onNodeWithTag("catalog-ownership-filter").assertIsDisplayed()
         composeRule.onNodeWithText("KeyVoice").assertIsDisplayed()
     }

@@ -23,6 +23,21 @@ DEFAULT_STORE_REPO = "Pampa-store"
 DEFAULT_MANIFEST_PATH = "manifest.json"
 USER_AGENT = "PampaStorePublisherMCP/1.0"
 
+PUBLISH_TOOL_INPUT_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "channel": {"type": "string", "enum": ["stable", "beta"]},
+        "dryRun": {
+            "type": "boolean",
+            "description": "Build the release plan and run preflight checks without remote writes.",
+        },
+        "releaseOwner": {"type": "string", "description": "Release asset owner override."},
+        "releaseRepo": {"type": "string", "description": "Release asset repository override."},
+    },
+    "required": ["channel"],
+    "additionalProperties": False,
+}
+
 
 class SkillError(RuntimeError):
     """User-facing error for the publisher workflow."""
@@ -89,6 +104,16 @@ def build_parser() -> argparse.ArgumentParser:
     publish_parser.add_argument("--store-owner", default="", help="Override the central Pampa Store owner.")
     publish_parser.add_argument("--store-repo", default="", help="Override the central Pampa Store repo.")
     publish_parser.add_argument("--store-manifest-path", default=DEFAULT_MANIFEST_PATH, help="Manifest path in the store repository.")
+    publish_parser.add_argument(
+        "--release-owner",
+        default="",
+        help="Override the GitHub owner used only for the release tag and APK asset.",
+    )
+    publish_parser.add_argument(
+        "--release-repo",
+        default="",
+        help="Override the GitHub repository used only for the release tag and APK asset.",
+    )
     publish_parser.add_argument("--apk-path", default="", help="Use an existing APK instead of discovering one.")
     publish_parser.add_argument("--task", default="", help="Explicit Gradle release task.")
     publish_parser.add_argument("--skip-build", action="store_true", help="Skip the Gradle build step.")
@@ -170,6 +195,8 @@ def build_publish_namespace(params: dict[str, Any] | None) -> argparse.Namespace
         store_owner=coerce_string(source.get("storeOwner")),
         store_repo=coerce_string(source.get("storeRepo")),
         store_manifest_path=coerce_string(source.get("storeManifestPath")) or DEFAULT_MANIFEST_PATH,
+        release_owner=coerce_string(source.get("releaseOwner")),
+        release_repo=coerce_string(source.get("releaseRepo")),
         apk_path=coerce_string(source.get("apkPath")),
         task=coerce_string(source.get("task")),
         skip_build=coerce_bool(source.get("skipBuild")),
@@ -232,6 +259,9 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
         raise SkillError(
             "Unable to determine the GitHub repository. Configure origin or pass --repo-owner and --repo-name."
         )
+    source_preflight = inspect_source_preflight(repo_root)
+    if not args.dry_run:
+        require_source_publish_preflight(source_preflight)
 
     modules = discover_android_modules(repo_root)
     selected_module = choose_module(modules, args.module)
@@ -269,6 +299,26 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
     store_owner = args.store_owner.strip() or os.getenv("PAMPA_REPO_OWNER", "").strip() or DEFAULT_STORE_OWNER
     store_repo = args.store_repo.strip() or os.getenv("PAMPA_REPO_NAME", "").strip() or DEFAULT_STORE_REPO
     store_manifest_path = args.store_manifest_path.strip() or DEFAULT_MANIFEST_PATH
+    release_repository = resolve_release_repository(
+        source_repository=repository,
+        store_owner=store_owner,
+        store_repo=store_repo,
+        app_id=app_id,
+        package_name=package_name,
+        release_owner=args.release_owner.strip() or os.getenv("PAMPA_RELEASE_OWNER", "").strip(),
+        release_repo=args.release_repo.strip() or os.getenv("PAMPA_RELEASE_REPO", "").strip(),
+    )
+    release_target_commitish = resolve_release_target_commitish(
+        source_repository=repository,
+        release_repository=release_repository,
+        source_commit_sha=source_preflight["commitSha"],
+        token=token,
+    )
+    release_body = build_release_body(
+        changelog=changelog,
+        source_repository=repository,
+        source_commit_sha=source_preflight["commitSha"],
+    )
 
     store_manifest, store_manifest_sha = load_store_manifest(
         store_owner,
@@ -298,6 +348,8 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
         category=category,
         channel=channel,
         version_info=version_info,
+        release_owner=release_repository["repoOwner"],
+        release_repo=release_repository["repoName"],
     )
     updated_store_manifest = upsert_store_manifest(
         existing_manifest=store_manifest,
@@ -309,12 +361,25 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
         manifest_path=app_manifest_path,
         channel=channel,
         version_info=version_info,
+        release_owner=release_repository["repoOwner"],
+        release_repo=release_repository["repoName"],
     )
 
     summary: dict[str, Any] = {
         "mode": "dry-run" if args.dry_run else "publish",
         "repoRoot": str(repo_root),
         "repository": repository,
+        "releaseRepository": release_repository,
+        "sourceProvenance": {
+            "repoOwner": repository["repoOwner"],
+            "repoName": repository["repoName"],
+            "commitSha": source_preflight["commitSha"],
+        },
+        "sourcePreflight": source_preflight,
+        "releasePlan": {
+            "targetCommitish": release_target_commitish,
+            "body": release_body,
+        },
         "channel": channel,
         "appId": app_id,
         "appName": app_name,
@@ -350,22 +415,33 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
         ]
         if not token:
             dry_run_notes.append("No GitHub token was available, so remote manifests were not fetched during the dry-run.")
+        if not source_preflight["ready"]:
+            dry_run_notes.append(
+                "Live publish preflight is not ready: " + "; ".join(source_preflight["issues"])
+            )
         summary["notes"] = dry_run_notes
         return summary
 
-    if version_exists(owner=repository["repoOwner"], repo=repository["repoName"], tag=release_tag, token=token):
+    if version_exists(
+        owner=release_repository["repoOwner"],
+        repo=release_repository["repoName"],
+        tag=release_tag,
+        token=token,
+    ):
         raise SkillError(
-            f"Release tag '{release_tag}' already exists in {repository['repoOwner']}/{repository['repoName']}."
+            f"Release tag '{release_tag}' already exists in "
+            f"{release_repository['repoOwner']}/{release_repository['repoName']}."
         )
 
     release_payload = create_release(
-        owner=repository["repoOwner"],
-        repo=repository["repoName"],
+        owner=release_repository["repoOwner"],
+        repo=release_repository["repoName"],
         token=token,
         tag=release_tag,
         name=release_name,
-        body=changelog,
+        body=release_body,
         prerelease=(channel == "beta"),
+        target_commitish=release_target_commitish,
     )
     
     upload_asset(
@@ -459,6 +535,113 @@ def resolve_repository(repo_owner: str, repo_name: str, repo_root: Path) -> dict
         "repoOwner": repo_owner.strip() or parsed.get("repoOwner", ""),
         "repoName": repo_name.strip() or parsed.get("repoName", ""),
     }
+
+
+def resolve_release_repository(
+    source_repository: dict[str, str],
+    store_owner: str,
+    store_repo: str,
+    app_id: str,
+    package_name: str,
+    release_owner: str = "",
+    release_repo: str = "",
+) -> dict[str, str]:
+    is_pampa_store = app_id == "pampa-store" or package_name == "com.pampa.store"
+    default_owner = store_owner if is_pampa_store else source_repository["repoOwner"]
+    default_repo = store_repo if is_pampa_store else source_repository["repoName"]
+    return {
+        "repoOwner": release_owner.strip() or default_owner,
+        "repoName": release_repo.strip() or default_repo,
+    }
+
+
+def repositories_match(left: dict[str, str], right: dict[str, str]) -> bool:
+    return (
+        left.get("repoOwner", "").strip().casefold() == right.get("repoOwner", "").strip().casefold()
+        and left.get("repoName", "").strip().casefold() == right.get("repoName", "").strip().casefold()
+    )
+
+
+def resolve_release_target_commitish(
+    source_repository: dict[str, str],
+    release_repository: dict[str, str],
+    source_commit_sha: str,
+    token: str | None,
+) -> str:
+    if repositories_match(source_repository, release_repository):
+        return source_commit_sha.strip()
+    return get_repository_default_branch(
+        owner=release_repository["repoOwner"],
+        repo=release_repository["repoName"],
+        token=token,
+    )
+
+
+def build_release_body(
+    changelog: str,
+    source_repository: dict[str, str],
+    source_commit_sha: str,
+) -> str:
+    source_name = f"{source_repository['repoOwner']}/{source_repository['repoName']}"
+    commit_sha = source_commit_sha.strip()
+    provenance = f"Source: {source_name}@{commit_sha}" if commit_sha else f"Source: {source_name}@unavailable"
+    return f"{changelog.strip()}\n\n---\n{provenance}"
+
+
+def inspect_source_preflight(repo_root: Path) -> dict[str, Any]:
+    commit_process = run_command(["git", "rev-parse", "HEAD"], cwd=repo_root, check=False)
+    commit_sha = commit_process.stdout.strip() if commit_process.returncode == 0 else ""
+
+    status_process = run_command(
+        ["git", "status", "--porcelain", "--untracked-files=normal"],
+        cwd=repo_root,
+        check=False,
+    )
+    worktree_clean = status_process.returncode == 0 and not status_process.stdout.strip()
+
+    upstream_process = run_command(
+        ["git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"],
+        cwd=repo_root,
+        check=False,
+    )
+    upstream = upstream_process.stdout.strip() if upstream_process.returncode == 0 else ""
+    head_in_upstream = False
+    if commit_sha and upstream:
+        ancestor_process = run_command(
+            ["git", "merge-base", "--is-ancestor", commit_sha, upstream],
+            cwd=repo_root,
+            check=False,
+        )
+        head_in_upstream = ancestor_process.returncode == 0
+
+    issues: list[str] = []
+    if not commit_sha:
+        issues.append("source HEAD is unavailable")
+    if not worktree_clean:
+        issues.append("source worktree is not clean")
+    if not upstream:
+        issues.append("source branch has no upstream")
+    elif not head_in_upstream:
+        issues.append("source HEAD is not included in its upstream")
+
+    return {
+        "ready": not issues,
+        "commitSha": commit_sha,
+        "worktreeClean": worktree_clean,
+        "upstream": upstream,
+        "headIncludedInUpstream": head_in_upstream,
+        "issues": issues,
+    }
+
+
+def require_source_publish_preflight(preflight: dict[str, Any]) -> None:
+    if preflight.get("ready"):
+        return
+    issues = "; ".join(str(issue) for issue in preflight.get("issues") or [])
+    raise SkillError(
+        "Source publish preflight failed: "
+        f"{issues}. Commit all source changes and push HEAD to the configured upstream before publishing."
+    )
 
 
 def discover_git_remote(repo_root: Path) -> str:
@@ -959,6 +1142,8 @@ def upsert_app_manifest(
     category: str,
     channel: str,
     version_info: dict[str, Any],
+    release_owner: str | None = None,
+    release_repo: str | None = None,
 ) -> dict[str, Any]:
     manifest = deep_copy(existing_manifest) if existing_manifest else {"app": {}}
     app = manifest.setdefault("app", {})
@@ -972,8 +1157,8 @@ def upsert_app_manifest(
     app["developer"] = developer
     app["screenshots"] = list(app.get("screenshots") or [])
     app["repository"] = {
-        "repoOwner": repo_owner,
-        "repoName": repo_name,
+        "repoOwner": release_owner or repo_owner,
+        "repoName": release_repo or repo_name,
         "manifestPath": manifest_path,
         "ref": "",
     }
@@ -1005,6 +1190,8 @@ def upsert_store_manifest(
     manifest_path: str,
     channel: str | None = None,
     version_info: dict[str, Any] | None = None,
+    release_owner: str | None = None,
+    release_repo: str | None = None,
 ) -> dict[str, Any]:
     store_manifest = normalize_store_manifest(existing_manifest, store_owner, store_repo)
     apps = list(store_manifest.get("apps") or [])
@@ -1023,6 +1210,10 @@ def upsert_store_manifest(
     store_manifest["apps"] = sorted(apps, key=lambda item: item.get("id", "").lower())
     store_releases = deep_copy(store_manifest.get("storeReleases") or {})
     if app_id == "pampa-store" and version_info:
+        store_releases["repository"] = {
+            "repoOwner": release_owner or store_owner,
+            "repoName": release_repo or store_repo,
+        }
         if channel == "stable":
             store_releases["stable"] = deep_copy(version_info)
             store_releases["beta"] = deep_copy(version_info)
@@ -1192,6 +1383,7 @@ def create_release(
     name: str,
     body: str,
     prerelease: bool,
+    target_commitish: str,
 ) -> dict[str, Any]:
     url = f"https://api.github.com/repos/{owner}/{repo}/releases"
     payload = {
@@ -1199,8 +1391,18 @@ def create_release(
         "name": name,
         "body": body,
         "prerelease": prerelease,
+        "target_commitish": target_commitish,
     }
     return github_request("POST", url, token=token, payload=payload)
+
+
+def get_repository_default_branch(owner: str, repo: str, token: str | None) -> str:
+    url = f"https://api.github.com/repos/{owner}/{repo}"
+    response = github_request("GET", url, token=token)
+    default_branch = str(response.get("default_branch", "")).strip()
+    if not default_branch:
+        raise SkillError(f"GitHub did not report a default branch for {owner}/{repo}.")
+    return default_branch
 
 
 def upload_asset(

@@ -31,8 +31,8 @@ data class CatalogFetchResult(
 
 class CatalogClient(
     private val storeRepository: RepositoryRef = RepositoryRef(
-        repoOwner = STORE_OWNER,
-        repoName = STORE_REPOSITORY,
+        repoOwner = STORE_INDEX_OWNER,
+        repoName = STORE_INDEX_REPOSITORY,
     ),
     private val httpClient: HttpClient = defaultHttpClient(),
 ) : AutoCloseable {
@@ -90,7 +90,7 @@ class CatalogClient(
         require(decoded.id.isNotBlank()) { "id app mancante" }
         // L'indice è la sorgente canonica dell'identificatore. Alcuni manifest storici usano il
         // nome visuale o una diversa capitalizzazione: normalizzarli evita di perdere app sane.
-        return decoded.copy(id = indexEntry.id, repository = repository)
+        return decoded.withIndexIdentity(indexEntry)
     }
 
     suspend fun download(
@@ -154,6 +154,12 @@ class CatalogClient(
             }
         }
     }
+}
+
+internal fun AppEntry.withIndexIdentity(indexEntry: StoreIndexEntry): AppEntry {
+    val sourceRepository = indexEntry.repository()
+    val distributionRepository = repository.takeIf { it.isConfigured } ?: sourceRepository
+    return copy(id = indexEntry.id, repository = distributionRepository)
 }
 
 object BuildVersion {

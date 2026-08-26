@@ -33,9 +33,10 @@ archival purposes, but they are unsupported and are never added to new manifests
 5. Validate app and store manifests before writing.
 6. Detect the Android application module and version.
 7. Build the release APK unless `skipBuild` is set or `apkPath` is provided.
-8. Create the GitHub release and upload the APK asset.
-9. Update the app repository `manifest.json`.
-10. Update the central Pampa Store `manifest.json`.
+8. Verify that the source worktree is clean and its HEAD is already contained in the configured upstream.
+9. Create the GitHub release with explicit source provenance and upload the APK asset.
+10. Update the app repository `manifest.json`.
+11. Update the central Pampa Store `manifest.json`.
 
 ## Claude
 
@@ -57,4 +58,12 @@ archival purposes, but they are unsupported and are never added to new manifests
 - In this repo-local layout the server defaults `repoRoot` to the repository root automatically.
 - For a home-local installation, pass `repoRoot` explicitly in tool calls.
 - Read-only catalog and release calls can also work without a token against public GitHub repositories.
-- Start with `dryRun: true` before pushing a live release.
+- Source and binary distribution can use different repositories. `releaseOwner`/`releaseRepo` (or
+  `--release-owner`/`--release-repo`) override the release target; Pampa Store defaults its APK to
+  the public central store repository so installed clients can download it without GitHub credentials.
+- The central index always points to the source manifest; the app manifest's `repository` points to
+  the APK distribution repository used to build release asset URLs.
+- Every release body records the source repository and commit SHA. Same-repository releases target
+  that exact SHA; split distribution releases target the distribution repository's default branch.
+- Start with `dryRun: true` before committing or pushing. It reports preflight failures without
+  mutating Git or GitHub; live publishing requires a clean worktree and a pushed HEAD.

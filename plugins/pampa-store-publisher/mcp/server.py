@@ -52,7 +52,12 @@ TOOLS = [
     build_tool("get_pampa_store_catalog", "Catalog", "Full manifest.", {"type": "object", "properties": COMMON_STORE_PROPS, "additionalProperties": False}),
     build_tool("list_pampa_store_apps", "List Apps", "Search apps.", {"type": "object", "properties": {**COMMON_STORE_PROPS, "query": {"type": "string"}}, "additionalProperties": False}),
     build_tool("get_pampa_store_app", "Get App", "App details.", {"type": "object", "properties": {"appId": {"type": "string"}}, "required": ["appId"], "additionalProperties": False}),
-    build_tool("publish_pampa_store_android_release", "Publish", "Build and sync.", {"type": "object", "properties": {"channel": {"type": "string", "enum": ["stable", "beta"]}}, "required": ["channel"], "additionalProperties": False}),
+    build_tool(
+        "publish_pampa_store_android_release",
+        "Publish",
+        "Build and sync.",
+        publisher.PUBLISH_TOOL_INPUT_SCHEMA,
+    ),
 ]
 
 HANDLERS = {
