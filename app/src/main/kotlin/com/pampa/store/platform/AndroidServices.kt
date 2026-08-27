@@ -81,6 +81,29 @@ class AndroidAppService(private val context: Context) {
         "downloads",
     ).also(File::mkdirs)
 
+    /**
+     * Butta l’APK che ha finito il suo lavoro.
+     *
+     * La cartella dei download sta in `getExternalFilesDir`, che nessuno svuota per noi. Una
+     * volta che il pacchetto è stato consegnato al PackageInstaller il file non serve più a
+     * niente — tenerlo vuol dire solo lasciare decine di megabyte a ogni installazione.
+     */
+    fun discardDownload(file: File) {
+        runCatching { file.delete() }
+    }
+
+    /**
+     * Svuota la cartella dei download da quello che è rimasto indietro.
+     *
+     * Perché [discardDownload] da solo non basta: se l’installazione fallisce, o se è lo Store
+     * stesso ad aggiornarsi — e allora Android termina il processo prima che ci sia modo di
+     * cancellare alcunché — l’APK resta lì. Da chiamare solo quando non c’è nessun download in
+     * volo, altrimenti si porta via il file che qualcuno sta ancora scrivendo.
+     */
+    fun pruneDownloads() {
+        runCatching { downloadsDirectory().listFiles()?.forEach(File::delete) }
+    }
+
     fun validateApk(file: File, expectedPackageName: String): Result<PackageInfo> = runCatching {
         require(file.exists() && file.length() > 0L) { "Il file scaricato è vuoto o mancante." }
         val info = context.packageManager.archivePackageInfo(file.absolutePath)

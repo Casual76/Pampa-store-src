@@ -94,6 +94,9 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun bootstrap() {
+        // Prima di qualunque download: qui non c’è ancora niente di nostro in volo, ed è l’unico
+        // momento in cui la cartella si può svuotare senza stare a guardare cosa c’è dentro.
+        withContext(Dispatchers.IO) { appService.pruneDownloads() }
         val cached = withContext(Dispatchers.IO) { persistence.readCachedCatalog() }
         if (cached != null && cached.apps.isNotEmpty()) {
             applyCatalog(cached, usingCache = true)
@@ -506,6 +509,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                     is InstallEvent.Installing ->
                         setInstallState(stateId, DownloadState.Installing(event.message))
                     InstallEvent.Success -> {
+                        // L’APK è già dentro la sessione di Android: da qui in poi è solo peso.
+                        withContext(Dispatchers.IO) { appService.discardDownload(destination) }
                         setInstallState(stateId, DownloadState.Installed(version.version))
                         announce(
                             id = "installed-$stateId-${version.version}",
