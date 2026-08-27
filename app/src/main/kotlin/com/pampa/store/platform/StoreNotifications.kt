@@ -15,7 +15,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.pampa.store.MainActivity
 import com.pampa.store.R
-import com.pampa.store.data.StoreApp
+import com.pampa.store.data.PendingUpdate
 
 /**
  * La notifica che dice che c'è qualcosa da aggiornare, e nient'altro.
@@ -33,7 +33,8 @@ class StoreNotifications(private val context: Context) {
             "Aggiornamenti disponibili",
             NotificationManager.IMPORTANCE_DEFAULT,
         ).apply {
-            description = "Avvisa quando una delle app installate ha una versione più recente."
+            description = "Avvisa quando una delle app installate — o lo Store stesso — ha una " +
+                "versione più recente."
             setShowBadge(true)
         }
         context.getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
@@ -53,19 +54,22 @@ class StoreNotifications(private val context: Context) {
             PackageManager.PERMISSION_GRANTED
     }
 
-    fun notifyUpdates(updatable: List<StoreApp>) {
-        if (updatable.isEmpty() || !canPost()) return
+    fun notifyUpdates(updates: List<PendingUpdate>) {
+        if (updates.isEmpty() || !canPost()) return
         ensureChannel()
 
-        val title = if (updatable.size == 1) {
+        val title = if (updates.size == 1) {
             "1 aggiornamento pronto"
         } else {
-            "${updatable.size} aggiornamenti pronti"
+            "${updates.size} aggiornamenti pronti"
         }
-        val names = updatable.map { app ->
-            val from = app.installedVersion
-            val to = app.availableVersion
-            if (from != null && to != null) "${app.entry.name}  $from → $to" else app.entry.name
+        val names = updates.map { update ->
+            val from = update.installedVersion
+            if (from != null) {
+                "${update.name}  $from → ${update.availableVersion}"
+            } else {
+                "${update.name}  ${update.availableVersion}"
+            }
         }
 
         val style = NotificationCompat.InboxStyle().setBigContentTitle(title)
@@ -88,9 +92,15 @@ class StoreNotifications(private val context: Context) {
         runCatching { NotificationManagerCompat.from(context).notify(NotificationId, notification) }
     }
 
-    /** Ritira la notifica quando non c'è più niente da annunciare. */
-    fun syncWithUpdates(updatable: List<StoreApp>) {
-        if (updatable.isEmpty()) cancel()
+    /**
+     * Ritira la notifica quando non c'è più niente da annunciare.
+     *
+     * L'elenco deve comprendere **anche** lo Store: chiamata con le sole app del catalogo, questa
+     * riga cancellerebbe una notifica che parla di un aggiornamento ancora in piedi, e la notizia
+     * sparirebbe dall'ombra senza che nessuno l'abbia letta.
+     */
+    fun syncWithUpdates(updates: List<PendingUpdate>) {
+        if (updates.isEmpty()) cancel()
     }
 
     fun cancel() {

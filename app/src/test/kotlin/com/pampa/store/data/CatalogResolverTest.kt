@@ -82,37 +82,108 @@ class CatalogResolverTest {
         hasUpdate = true,
     )
 
+    private fun pending(id: String, from: String, to: String) =
+        listOf(updatable(id, from, to)).pendingUpdates()
+
     @Test
     fun `la stessa versione non si annuncia due volte`() {
-        val apps = listOf(updatable("alpha", "1.0.0", "1.1.0"))
+        val apps = pending("alpha", "1.0.0", "1.1.0")
 
         val first = updatesToAnnounce(apps, emptyMap())
         val second = updatesToAnnounce(apps, announcedVersions(apps))
 
-        assertEquals(listOf("alpha"), first.map { it.entry.id })
+        assertEquals(listOf("alpha"), first.map { it.id })
         assertTrue(second.isEmpty())
     }
 
     @Test
     fun `una versione ancora piu nuova e una notizia nuova`() {
-        val announced = announcedVersions(listOf(updatable("alpha", "1.0.0", "1.1.0")))
+        val announced = announcedVersions(pending("alpha", "1.0.0", "1.1.0"))
 
-        val fresh = updatesToAnnounce(listOf(updatable("alpha", "1.0.0", "1.2.0")), announced)
+        val fresh = updatesToAnnounce(pending("alpha", "1.0.0", "1.2.0"), announced)
 
-        assertEquals(listOf("alpha"), fresh.map { it.entry.id })
+        assertEquals(listOf("alpha"), fresh.map { it.id })
     }
 
     @Test
     fun `il registro si ricostruisce dall insieme corrente invece di accumulare`() {
         val before = announcedVersions(
-            listOf(updatable("alpha", "1.0.0", "1.1.0"), updatable("beta", "2.0.0", "2.1.0")),
+            pending("alpha", "1.0.0", "1.1.0") + pending("beta", "2.0.0", "2.1.0"),
         )
         assertEquals(2, before.size)
 
         // alpha e' stata installata: esce dall'insieme aggiornabile, quindi esce dal registro.
-        val after = announcedVersions(listOf(updatable("beta", "2.0.0", "2.1.0")))
+        val after = announcedVersions(pending("beta", "2.0.0", "2.1.0"))
 
         assertEquals(setOf("beta"), after.keys)
+    }
+
+    @Test
+    fun `solo cio che e aggiornabile diventa un annuncio`() {
+        val apps = listOf(
+            updatable("alpha", "1.0.0", "1.1.0"),
+            StoreApp(entry = entry("beta"), installedVersion = "1.2.0", availableVersion = "1.2.0"),
+            StoreApp(entry = entry("gamma")),
+        )
+
+        assertEquals(listOf("alpha"), apps.pendingUpdates().map { it.id })
+    }
+
+    // --- lo Store, che non e' nel catalogo -----------------------------------------------
+
+    private fun releases(stable: String? = null, beta: String? = null) = StoreReleaseChannels(
+        stable = stable?.let { VersionInfo(version = it, apkAsset = "store.apk", releaseTag = "v$it") },
+        beta = beta?.let { VersionInfo(version = it, apkAsset = "store.apk", releaseTag = "v$it") },
+    )
+
+    @Test
+    fun `una versione dello Store piu recente di quella in esecuzione e un aggiornamento`() {
+        val update = resolveStoreUpdate(releases(stable = "1.7.0"), Channel.STABLE, "1.6.3")
+
+        assertEquals("1.7.0", update?.version?.version)
+    }
+
+    @Test
+    fun `la stessa versione dello Store non e un aggiornamento`() {
+        assertNull(resolveStoreUpdate(releases(stable = "1.6.3"), Channel.STABLE, "1.6.3"))
+    }
+
+    @Test
+    fun `chi sta sul canale beta dello Store prende la beta`() {
+        val update = resolveStoreUpdate(releases(stable = "1.7.0", beta = "1.8.0"), Channel.BETA, "1.6.3")
+
+        assertEquals("1.8.0", update?.version?.version)
+    }
+
+    @Test
+    fun `sul canale beta senza una beta si ripiega sulla stabile`() {
+        val update = resolveStoreUpdate(releases(stable = "1.7.0"), Channel.BETA, "1.6.3")
+
+        assertEquals("1.7.0", update?.version?.version)
+    }
+
+    @Test
+    fun `senza release non c e niente da aggiornare`() {
+        assertNull(resolveStoreUpdate(releases(), Channel.STABLE, "1.6.3"))
+    }
+
+    @Test
+    fun `lo Store si annuncia accanto alle app e con il proprio id`() {
+        val store = resolveStoreUpdate(releases(stable = "1.7.0"), Channel.STABLE, "1.6.3")!!
+        val updates = pending("alpha", "1.0.0", "1.1.0") + store.pendingUpdate("1.6.3")
+
+        assertEquals(listOf("alpha", STORE_APP_ID), updates.map { it.id })
+        assertEquals(STORE_APP_NAME, updates.last().name)
+        assertEquals("1.6.3", updates.last().installedVersion)
+        assertEquals(mapOf("alpha" to "1.1.0", STORE_APP_ID to "1.7.0"), announcedVersions(updates))
+    }
+
+    @Test
+    fun `lo Store gia annunciato non si riannuncia al giro dopo`() {
+        val store = resolveStoreUpdate(releases(stable = "1.7.0"), Channel.STABLE, "1.6.3")!!
+        val updates = listOf(store.pendingUpdate("1.6.3"))
+
+        assertTrue(updatesToAnnounce(updates, announcedVersions(updates)).isEmpty())
     }
 
     // --- tornare indietro ---------------------------------------------------------------

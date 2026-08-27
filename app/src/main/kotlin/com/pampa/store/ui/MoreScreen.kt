@@ -13,6 +13,7 @@ import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.NotificationsActive
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.Icon
@@ -53,6 +54,8 @@ fun MoreScreen(
     onDefaultChannel: (Channel) -> Unit,
     onStoreChannel: (Channel) -> Unit,
     onAutoCheck: (Boolean) -> Unit,
+    onCheckStoreUpdate: () -> Unit,
+    onInstallStoreUpdate: () -> Unit,
     onOpenInstallSettings: () -> Unit,
     onOpenNotificationSettings: () -> Unit,
 ) {
@@ -164,10 +167,44 @@ fun MoreScreen(
 
         item { FluidSectionHeader(title = "Pampa Store", detail = "Aggiornamenti e diagnostica") }
         item {
+            val storeUpdate = state.storeUpdate
             FluidListGroup(glass = true) {
+                // Il controllo a mano vive qui e non solo dietro il refresh della schermata
+                // Aggiornamenti: questa è la sezione in cui si viene a cercarlo, ed è l'unico
+                // punto in cui la risposta — anche quando è "niente di nuovo" — viene detta.
+                FluidListRow(
+                    title = if (storeUpdate != null) {
+                        "Aggiorna alla ${storeUpdate.version.version}"
+                    } else {
+                        "Controlla aggiornamenti"
+                    },
+                    subtitle = when {
+                        storeUpdate != null -> "Tocca per scaricare e installare."
+                        state.isRefreshing -> "Controllo in corso…"
+                        !preferences.autoCheckStoreUpdates ->
+                            "Il controllo automatico è spento: da qui lo chiedi a mano."
+                        else -> "Nessuna versione più recente sul canale ${storeChannel.label}."
+                    },
+                    tone = if (storeUpdate != null) FluidTone.Primary else FluidTone.Neutral,
+                    leading = {
+                        Icon(
+                            if (storeUpdate != null) Icons.Rounded.Download else Icons.Rounded.Refresh,
+                            contentDescription = null,
+                        )
+                    },
+                    badge = {
+                        FluidStatusBadge(
+                            if (storeUpdate != null) "Aggiorna" else "Controlla",
+                            tone = if (storeUpdate != null) FluidTone.Primary else FluidTone.Info,
+                        )
+                    },
+                    onClick = if (storeUpdate != null) onInstallStoreUpdate else onCheckStoreUpdate,
+                )
+                FluidListDivider()
                 FluidListRow(
                     title = "Controllo automatico",
-                    subtitle = "Cerca una nuova versione dello Store all’avvio.",
+                    subtitle = "Cerca una nuova versione dello Store all’avvio e ogni sei ore, " +
+                        "anche a Store chiuso.",
                     tone = FluidTone.Primary,
                     leading = { Icon(Icons.Rounded.Sync, contentDescription = null) },
                     badge = {
@@ -195,7 +232,7 @@ fun MoreScreen(
                 FluidListRow(
                     title = "Notifiche",
                     subtitle = if (state.notificationsEnabled) {
-                        "Ti avviso quando un’app installata ha una versione nuova."
+                        "Ti avviso quando un’app installata — o lo Store stesso — ha una versione nuova."
                     } else {
                         "Disattivate: il controllo continua, ma nessun avviso arriva."
                     },

@@ -3,6 +3,7 @@ package com.pampa.store.data
 import kotlinx.serialization.Serializable
 
 const val STORE_APP_ID = "pampa-store"
+const val STORE_APP_NAME = "Pampa Store"
 const val STORE_INDEX_OWNER = "Casual76"
 const val STORE_INDEX_REPOSITORY = "Pampa-store"
 const val STORE_RELEASE_OWNER = STORE_INDEX_OWNER

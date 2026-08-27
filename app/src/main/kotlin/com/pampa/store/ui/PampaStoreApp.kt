@@ -324,6 +324,8 @@ fun PampaStoreApp(
                                     onDefaultChannel = viewModel::setDefaultChannel,
                                     onStoreChannel = viewModel::setStoreUpdateChannel,
                                     onAutoCheck = viewModel::setAutoCheckStoreUpdates,
+                                    onCheckStoreUpdate = viewModel::checkStoreUpdateNow,
+                                    onInstallStoreUpdate = viewModel::installStoreUpdate,
                                     onOpenInstallSettings = viewModel::openInstallSettings,
                                     onOpenNotificationSettings = viewModel::openNotificationSettings,
                                 )

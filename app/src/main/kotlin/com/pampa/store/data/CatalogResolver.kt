@@ -53,6 +53,59 @@ fun resolveStoreApps(
     .sortedBy { it.entry.name.lowercase() }
 
 /**
+ * Se lo Store stesso ha una versione più recente di quella in esecuzione.
+ *
+ * Sta qui accanto a [resolveStoreApps] per lo stesso identico motivo, e per un pezzo di storia non
+ * ci stava: la domanda viveva dentro il ViewModel, quindi il controllo in background — che è poi
+ * l'unico che gira quando lo Store è chiuso, cioè quando serve — non poteva farsela, e l'unico
+ * aggiornamento che nessun'altra app può annunciare al posto suo era anche l'unico di cui non
+ * arrivava mai una notifica.
+ *
+ * `installedVersion` è la versione del processo che sta eseguendo questo codice, non una lettura del
+ * PackageManager: qui si sa già, ed è l'unico caso in cui la risposta è in `BuildConfig`.
+ */
+fun resolveStoreUpdate(
+    releases: StoreReleaseChannels,
+    channel: Channel,
+    installedVersion: String,
+): StoreUpdate? = releases.versionFor(channel)
+    ?.takeIf { it.version.isNotBlank() && isVersionNewer(it.version, installedVersion) }
+    ?.let { StoreUpdate(repository = releases.repository, version = it) }
+
+/**
+ * Un aggiornamento in attesa, di qualunque cosa — Store compreso.
+ *
+ * Le due sorgenti non si assomigliano: le app del catalogo sono [StoreApp], lo Store è [StoreUpdate]
+ * e per costruzione non compare fra le app. Senza una forma comune la notifica dovrebbe conoscerle
+ * tutte e due, e la memoria di cosa è già stato annunciato ne conoscerebbe una sola — che è
+ * esattamente com'era finché lo Store non veniva annunciato affatto.
+ */
+data class PendingUpdate(
+    val id: String,
+    val name: String,
+    val installedVersion: String?,
+    val availableVersion: String,
+)
+
+fun List<StoreApp>.pendingUpdates(): List<PendingUpdate> = mapNotNull { app ->
+    if (!app.hasUpdate) return@mapNotNull null
+    val target = app.availableVersion ?: return@mapNotNull null
+    PendingUpdate(
+        id = app.entry.id,
+        name = app.entry.name,
+        installedVersion = app.installedVersion,
+        availableVersion = target,
+    )
+}
+
+fun StoreUpdate.pendingUpdate(installedVersion: String): PendingUpdate = PendingUpdate(
+    id = STORE_APP_ID,
+    name = STORE_APP_NAME,
+    installedVersion = installedVersion,
+    availableVersion = version.version,
+)
+
+/**
  * Cosa vale la pena annunciare, dato cosa è già stato annunciato.
  *
  * La mappa è `id dell'app` → `versione per cui è già uscita una notifica`. Serve perché il controllo
@@ -64,12 +117,9 @@ fun resolveStoreApps(
  * aggiornamento già annunciato, quella è una notizia nuova e si annuncia.
  */
 fun updatesToAnnounce(
-    updatable: List<StoreApp>,
+    updates: List<PendingUpdate>,
     alreadyAnnounced: Map<String, String>,
-): List<StoreApp> = updatable.filter { app ->
-    val target = app.availableVersion ?: return@filter false
-    alreadyAnnounced[app.entry.id] != target
-}
+): List<PendingUpdate> = updates.filter { alreadyAnnounced[it.id] != it.availableVersion }
 
 /**
  * Il registro degli annunci dopo un giro.
@@ -78,8 +128,8 @@ fun updatesToAnnounce(
  * tolta dal catalogo, esce dalla mappa da sola. Accumulando, il registro sarebbe cresciuto per
  * sempre e avrebbe zittito l'annuncio di una reinstallazione della stessa versione.
  */
-fun announcedVersions(updatable: List<StoreApp>): Map<String, String> =
-    updatable.mapNotNull { app -> app.availableVersion?.let { app.entry.id to it } }.toMap()
+fun announcedVersions(updates: List<PendingUpdate>): Map<String, String> =
+    updates.associate { it.id to it.availableVersion }
 
 /**
  * Se rimettere questa release richiede prima di disinstallare l'app.

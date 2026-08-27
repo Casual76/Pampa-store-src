@@ -167,6 +167,8 @@ class StoreScreensTest {
                     onDefaultChannel = {},
                     onStoreChannel = {},
                     onAutoCheck = {},
+                    onCheckStoreUpdate = {},
+                    onInstallStoreUpdate = {},
                     onOpenInstallSettings = {},
                     onOpenNotificationSettings = {},
                 )

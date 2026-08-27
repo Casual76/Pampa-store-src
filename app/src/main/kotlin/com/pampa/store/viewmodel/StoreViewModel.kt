@@ -16,9 +16,11 @@ import com.pampa.store.data.DownloadState
 import com.pampa.store.data.InstallEvent
 import com.pampa.store.data.OwnershipFilter
 import com.pampa.store.data.PendingReinstall
+import com.pampa.store.data.PendingUpdate
 import com.pampa.store.data.QueueEntry
 import com.pampa.store.data.RepositoryRef
 import com.pampa.store.data.STORE_APP_ID
+import com.pampa.store.data.STORE_APP_NAME
 import com.pampa.store.data.StoreApp
 import com.pampa.store.data.StoreEvent
 import com.pampa.store.data.StoreEventTone
@@ -30,16 +32,18 @@ import com.pampa.store.data.VersionInfo
 import com.pampa.store.data.clearPending
 import com.pampa.store.data.enqueue
 import com.pampa.store.data.enumOrDefault
+import com.pampa.store.data.pendingUpdate
+import com.pampa.store.data.pendingUpdates
 import com.pampa.store.data.releaseAssetUrl
 import com.pampa.store.data.requiresUninstallFirst
 import com.pampa.store.data.resolveStoreApps
+import com.pampa.store.data.resolveStoreUpdate
 import com.pampa.store.data.retryFailed
 import com.pampa.store.data.versionFor
 import com.pampa.store.data.withState
 import com.pampa.store.platform.AndroidAppService
 import com.pampa.store.platform.AppInstaller
 import com.pampa.store.platform.StoreNotifications
-import com.pampa.store.util.isVersionNewer
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -110,7 +114,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { refreshCatalogInternal(initial) }
     }
 
-    private suspend fun refreshCatalogInternal(initial: Boolean) {
+    private suspend fun refreshCatalogInternal(initial: Boolean): Boolean {
         _uiState.update {
             it.copy(
                 isLoading = initial && it.apps.isEmpty(),
@@ -118,7 +122,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 error = null,
             )
         }
-        runCatching { catalogClient.fetchCatalog() }
+        val outcome = runCatching { catalogClient.fetchCatalog() }
             .onSuccess { result ->
                 val cached = CachedCatalog(
                     apps = result.apps,
@@ -147,6 +151,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         _uiState.update { it.copy(isLoading = false, isRefreshing = false) }
+        return outcome.isSuccess
     }
 
     private suspend fun applyCatalog(catalog: CachedCatalog, usingCache: Boolean) {
@@ -192,7 +197,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             checkStoreUpdate()
             // Quello che è stato appena installato non è più un aggiornamento in attesa, e la
             // notifica che lo annunciava non ha più niente da dire.
-            notifications.syncWithUpdates(_uiState.value.updatableApps)
+            notifications.syncWithUpdates(pendingUpdates())
             resumePendingReinstall()
         }
     }
@@ -379,7 +384,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         val store = state.storeUpdate?.let { update ->
             QueueEntry(
                 appId = STORE_APP_ID,
-                name = "Pampa Store",
+                name = STORE_APP_NAME,
                 channel = enumOrDefault(state.preferences.storeUpdateChannel, Channel.STABLE),
                 targetVersion = update.version.version,
             )
@@ -394,7 +399,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             listOf(
                 QueueEntry(
                     appId = STORE_APP_ID,
-                    name = "Pampa Store",
+                    name = STORE_APP_NAME,
                     channel = enumOrDefault(state.preferences.storeUpdateChannel, Channel.STABLE),
                     targetVersion = update.version.version,
                 ),
@@ -572,21 +577,76 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             ?: _uiState.value.apps.firstOrNull { it.entry.id == appId }?.entry?.name
             ?: appId
 
-    private fun checkStoreUpdate() {
+    /**
+     * Ricalcola se lo Store ha una versione più recente di quella in esecuzione.
+     *
+     * `force` è per il controllo chiesto a mano: spegnere il controllo automatico vuol dire "non
+     * cercare da solo", non "non cercare", e un tasto che con l'interruttore spento non risponde
+     * è un tasto rotto. Il risultato forzato resta finché il prossimo giro automatico non lo
+     * ricalcola — e con l'interruttore spento quel giro lo azzera, che è giusto: da lì in poi è di
+     * nuovo nessuno ad averlo chiesto.
+     */
+    private fun checkStoreUpdate(force: Boolean = false): StoreUpdate? {
         val state = _uiState.value
-        if (!state.preferences.autoCheckStoreUpdates) {
+        if (!force && !state.preferences.autoCheckStoreUpdates) {
             _uiState.update { it.copy(storeUpdate = null) }
-            return
+            return null
         }
-        val channel = enumOrDefault(state.preferences.storeUpdateChannel, Channel.STABLE)
-        val version = state.storeReleases.versionFor(channel)
-        val update = version?.takeIf { isVersionNewer(it.version, BuildConfig.VERSION_NAME) }?.let {
-            StoreUpdate(
-                repository = state.storeReleases.repository,
-                version = it,
-            )
-        }
+        val update = resolveStoreUpdate(
+            releases = state.storeReleases,
+            channel = enumOrDefault(state.preferences.storeUpdateChannel, Channel.STABLE),
+            installedVersion = BuildConfig.VERSION_NAME,
+        )
         _uiState.update { it.copy(storeUpdate = update) }
+        return update
+    }
+
+    /**
+     * Il controllo dello Store chiesto a mano, che **risponde sempre**.
+     *
+     * Un controllo che non trova niente e un controllo che non è mai partito, da fuori, sono la
+     * stessa cosa: una rotella che gira e poi la schermata di prima. È il motivo per cui questo non
+     * è semplicemente [refreshCatalog] con un'etichetta diversa — dice com'è andata, e distingue il
+     * "sei all'ultima versione" dal "non sono riuscito a chiederlo", che sono notizie opposte.
+     */
+    fun checkStoreUpdateNow() {
+        viewModelScope.launch {
+            val reachable = refreshCatalogInternal(initial = false)
+            val update = checkStoreUpdate(force = true)
+            val channel = enumOrDefault(_uiState.value.preferences.storeUpdateChannel, Channel.STABLE)
+            when {
+                update != null -> announce(
+                    id = "store-update-${update.version.version}",
+                    title = "C'è la ${update.version.version}",
+                    message = "Installala da Aggiornamenti.",
+                    tone = StoreEventTone.Info,
+                )
+                !reachable -> announce(
+                    id = "store-check-unreachable",
+                    title = "Controllo non riuscito",
+                    message = "Il catalogo non risponde. Riprova quando c'è rete.",
+                    tone = StoreEventTone.Error,
+                )
+                else -> announce(
+                    id = "store-up-to-date",
+                    title = "Pampa Store è aggiornato",
+                    message = "La ${BuildConfig.VERSION_NAME} è l'ultima sul canale ${channel.label}.",
+                    tone = StoreEventTone.Success,
+                )
+            }
+        }
+    }
+
+    /**
+     * Tutto quello che una notifica avrebbe motivo di nominare, Store compreso.
+     *
+     * Serve perché è la stessa lista che compone il worker in background: se le due divergono, la
+     * notifica sopravvive a ciò che annunciava o sparisce mentre è ancora vera.
+     */
+    private fun pendingUpdates(): List<PendingUpdate> {
+        val state = _uiState.value
+        return state.updatableApps.pendingUpdates() +
+            listOfNotNull(state.storeUpdate?.pendingUpdate(BuildConfig.VERSION_NAME))
     }
 
     fun clearMessage() = _uiState.update { it.copy(warning = null, error = null) }
