@@ -335,6 +335,19 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
         asset_name=asset_name,
         size_bytes=apk_stats.get("sizeBytes", 0),
     )
+    # Which branch the store should read the app manifest from.
+    #
+    # It used to be written as the empty string, always. The store app reads that
+    # as "main" — `ref.ifBlank { "main" }` in its own Models.kt — so an app whose
+    # default branch is anything else has its manifest fetched from a branch that
+    # does not exist, and appears in the store as HTTP 404. Fluidify is on
+    # master, which is how this was found.
+    source_ref = get_repository_default_branch(
+        owner=repository["repoOwner"],
+        repo=repository["repoName"],
+        token=token,
+    )
+
     updated_app_manifest = upsert_app_manifest(
         existing_manifest=app_manifest,
         repo_owner=repository["repoOwner"],
@@ -350,6 +363,7 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
         version_info=version_info,
         release_owner=release_repository["repoOwner"],
         release_repo=release_repository["repoName"],
+        ref=source_ref,
     )
     updated_store_manifest = upsert_store_manifest(
         existing_manifest=store_manifest,
@@ -361,6 +375,7 @@ def publish(args: argparse.Namespace) -> dict[str, Any]:
         manifest_path=app_manifest_path,
         channel=channel,
         version_info=version_info,
+        ref=source_ref,
         release_owner=release_repository["repoOwner"],
         release_repo=release_repository["repoName"],
     )
@@ -1144,6 +1159,7 @@ def upsert_app_manifest(
     version_info: dict[str, Any],
     release_owner: str | None = None,
     release_repo: str | None = None,
+    ref: str = "",
 ) -> dict[str, Any]:
     manifest = deep_copy(existing_manifest) if existing_manifest else {"app": {}}
     app = manifest.setdefault("app", {})
@@ -1160,7 +1176,7 @@ def upsert_app_manifest(
         "repoOwner": release_owner or repo_owner,
         "repoName": release_repo or repo_name,
         "manifestPath": manifest_path,
-        "ref": "",
+        "ref": ref.strip(),
     }
 
     previous_version = deep_copy(app.get("stable" if channel == "stable" else "beta"))
@@ -1190,6 +1206,7 @@ def upsert_store_manifest(
     manifest_path: str,
     channel: str | None = None,
     version_info: dict[str, Any] | None = None,
+    ref: str = "",
     release_owner: str | None = None,
     release_repo: str | None = None,
 ) -> dict[str, Any]:
@@ -1200,7 +1217,7 @@ def upsert_store_manifest(
         "repoOwner": repo_owner,
         "repoName": repo_name,
         "manifestPath": manifest_path,
-        "ref": "",
+        "ref": ref.strip(),
     }
     existing_index = next((index for index, item in enumerate(apps) if item.get("id", "").strip() == app_id), -1)
     if existing_index >= 0:
