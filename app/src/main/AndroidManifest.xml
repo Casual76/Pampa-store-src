@@ -35,6 +35,21 @@
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
+    <!--
+        La coda delle installazioni avviata da PampAI/Aria gira anche senza una schermata dello
+        Store aperta: il service in primo piano tiene vivo il processo durante il download.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+    <!--
+        engine-ai (che porta i tipi dei tool per il bridge) dichiara il microfono per la voce
+        dell'assistente: lo Store non ascolta nessuno, e il permesso non deve comparire.
+    -->
+    <uses-permission
+        android:name="android.permission.RECORD_AUDIO"
+        tools:node="remove" />
+
     <application
         android:allowBackup="true"
         android:enableOnBackInvokedCallback="true"
@@ -63,6 +78,26 @@
         <receiver
             android:name=".platform.PackageInstallResultReceiver"
             android:exported="false" />
+
+        <!--
+            I tool dello Store per PampAI/Aria: protetti dal permesso `signature` del bridge, quindi
+            li chiama solo un'app firmata con la stessa chiave. L'authority segue l'applicationId:
+            la build di debug ha la sua.
+        -->
+        <provider
+            android:name=".pampai.StoreToolHostProvider"
+            android:authorities="${applicationId}.ai.tools"
+            android:exported="true"
+            android:permission="dev.antigravity.fluidengine.permission.AI_TOOLS">
+            <meta-data
+                android:name="dev.antigravity.fluidengine.ai.TOOL_HOST"
+                android:value="1" />
+        </provider>
+
+        <service
+            android:name=".pampai.StoreInstallService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
     </application>
 </manifest>

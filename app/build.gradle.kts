@@ -113,6 +113,9 @@ dependencies {
     implementation(project(":engine-net"))
     implementation(project(":engine-config"))
     implementation(project(":engine-update"))
+    // I tipi dei tool e il bridge: lo Store espone i suoi strumenti a PampAI/Aria.
+    implementation(project(":engine-ai"))
+    implementation(project(":engine-ai-bridge"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)

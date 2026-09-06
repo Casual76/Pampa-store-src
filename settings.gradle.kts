@@ -31,6 +31,8 @@ listOf(
     "engine-net",
     "engine-config",
     "engine-update",
+    "engine-ai",
+    "engine-ai-bridge",
 ).forEach { moduleName ->
     include(":$moduleName")
     project(":$moduleName").projectDir = engineDir.resolve(moduleName)
