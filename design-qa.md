@@ -55,7 +55,7 @@
 Stato aggiunto dopo il passaggio finale; non e' coperto dalle catture sopra.
 
 - Card `LaunchCountdownCard` (`ui/LaunchCountdown.kt`, tag `home-launch-countdown`) subito sotto l'hero della Home, solo nel ramo con catalogo (non nel caricamento a vuoto). Costruita su `FluidHero` (tono Tertiary, motivo Ticks): nessun colore fuori tema.
-- Dati compilati nell'app (`FunkazzenlandLaunch`): uscita `2026-10-10T17:00:00+02:00`, contatto `pampalonialessio2008@gmail.com`. Nessuna rete, nessuna modifica al catalogo remoto.
+- Dati compilati nell'app (`FunkazzenlandLaunch`): uscita `2026-10-10T15:00:00+02:00`, contatto `pampalonialessio2008@gmail.com`. Nessuna rete, nessuna modifica al catalogo remoto.
 - Stati: prima ("1g 04:12:09", sotto le 24 h "04:12:09"), dopo l'uscita ("E' uscito" + "Scrivimi per l'invito"), nascosta 14 giorni dopo l'uscita (la riga non viene emessa).
 - Accessibilita': descrizione unica al minuto ("Mancano 1 giorno, 4 ore e 12 minuti"), nessuna regione live; con animazioni di sistema spente il valore perde i secondi.
 - Pulsante: `ACTION_SENDTO mailto:` con oggetto e corpo precompilati; senza app di posta copia l'indirizzo negli appunti e mostra il banner "Nessuna app di posta".

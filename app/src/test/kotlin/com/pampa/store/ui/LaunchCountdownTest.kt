@@ -13,14 +13,14 @@ class LaunchCountdownTest {
     private fun at(iso: String): Instant = OffsetDateTime.parse(iso).toInstant()
 
     @Test
-    fun releaseIsRomeFiveInTheAfternoon() {
-        // 17:00 CEST == 15:00 UTC, comunque sia impostato il telefono.
-        assertEquals(Instant.parse("2026-10-10T15:00:00Z"), target)
+    fun releaseIsRomeThreeInTheAfternoon() {
+        // 15:00 CEST == 13:00 UTC, comunque sia impostato il telefono.
+        assertEquals(Instant.parse("2026-10-10T13:00:00Z"), target)
     }
 
     @Test
     fun beforeRelease_splitsDaysHoursMinutesSeconds() {
-        // 1 giorno, 4 ore, 12 minuti e 9 secondi prima delle 17:00 di Roma del 10.
+        // 1 giorno, 4 ore, 12 minuti e 9 secondi prima delle 15:00 di Roma del 10.
         val now = target.minus(Duration.ofSeconds(86_400L + 4 * 3_600L + 12 * 60L + 9L))
         val parts = countdownParts(now, target)
         assertEquals(CountdownParts(days = 1, hours = 4, minutes = 12, seconds = 9), parts)
@@ -74,20 +74,20 @@ class LaunchCountdownTest {
 
     @Test
     fun differentTimeZonesGiveTheSameCountdown() {
-        // Le 13:00 UTC si scrivono in modi diversi: devono contare 2 ore e basta.
+        // Le 11:00 UTC si scrivono in modi diversi: devono contare 2 ore e basta.
         val instants = listOf(
-            at("2026-10-10T13:00:00Z"),
-            at("2026-10-10T15:00:00+02:00"), // Roma
-            at("2026-10-10T08:00:00-05:00"), // Cinque ore dietro UTC
-            at("2026-10-10T22:00:00+09:00"), // Tokyo
+            at("2026-10-10T11:00:00Z"),
+            at("2026-10-10T13:00:00+02:00"), // Roma
+            at("2026-10-10T06:00:00-05:00"), // Cinque ore dietro UTC
+            at("2026-10-10T20:00:00+09:00"), // Tokyo
         )
         instants.forEach { now ->
             assertEquals(CountdownParts(0, 2, 0, 0), countdownParts(now, target))
             assertEquals(LaunchPhase.Before, launchPhase(now, target))
         }
-        // E la scadenza e' la stessa per chi la legge da Tokyo: le 00:00 del giorno dopo.
-        assertEquals(LaunchPhase.After, launchPhase(at("2026-10-11T00:00:00+09:00"), target))
-        assertEquals(LaunchPhase.Before, launchPhase(at("2026-10-10T23:59:59+09:00"), target))
+        // E la scadenza e' la stessa per chi la legge da Tokyo: le 22:00 dello stesso giorno.
+        assertEquals(LaunchPhase.After, launchPhase(at("2026-10-10T22:00:00+09:00"), target))
+        assertEquals(LaunchPhase.Before, launchPhase(at("2026-10-10T21:59:59+09:00"), target))
     }
 
     @Test

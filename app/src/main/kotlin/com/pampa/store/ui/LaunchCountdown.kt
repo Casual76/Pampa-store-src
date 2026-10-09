@@ -35,8 +35,8 @@ import kotlinx.coroutines.delay
 object FunkazzenlandLaunch {
     const val TITLE = "Fünkazzenland"
 
-    /** L'uscita, 10 ottobre 2026 alle 17:00 a Roma (CEST). L'offset e' nella stringa: il fuso del telefono non conta. */
-    val RELEASE_AT: Instant = OffsetDateTime.parse("2026-10-10T17:00:00+02:00").toInstant()
+    /** L'uscita, 10 ottobre 2026 alle 15:00 a Roma (CEST). L'offset e' nella stringa: il fuso del telefono non conta. */
+    val RELEASE_AT: Instant = OffsetDateTime.parse("2026-10-10T15:00:00+02:00").toInstant()
 
     /** Per quanti giorni dopo l'uscita la card resta in Home prima di sparire. */
     const val VISIBLE_DAYS_AFTER_RELEASE = 14L
