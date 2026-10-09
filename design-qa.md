@@ -50,6 +50,17 @@
    - The final side-by-side shows the intended hierarchy, proportions, typography, palette, icon treatment, grouped rows, and floating chrome with real catalog/device data.
    - Evidence: `home-comparison-final.png`, plus the compact, medium, tablet, light, dark, Material You, detail, catalog, and offline captures listed above.
 
+## Home: countdown di Fünkazzenland (1.8.0)
+
+Stato aggiunto dopo il passaggio finale; non e' coperto dalle catture sopra.
+
+- Card `LaunchCountdownCard` (`ui/LaunchCountdown.kt`, tag `home-launch-countdown`) subito sotto l'hero della Home, solo nel ramo con catalogo (non nel caricamento a vuoto). Costruita su `FluidHero` (tono Tertiary, motivo Ticks): nessun colore fuori tema.
+- Dati compilati nell'app (`FunkazzenlandLaunch`): uscita `2026-10-10T17:00:00+02:00`, contatto `pampalonialessio2008@gmail.com`. Nessuna rete, nessuna modifica al catalogo remoto.
+- Stati: prima ("1g 04:12:09", sotto le 24 h "04:12:09"), dopo l'uscita ("E' uscito" + "Scrivimi per l'invito"), nascosta 14 giorni dopo l'uscita (la riga non viene emessa).
+- Accessibilita': descrizione unica al minuto ("Mancano 1 giorno, 4 ore e 12 minuti"), nessuna regione live; con animazioni di sistema spente il valore perde i secondi.
+- Pulsante: `ACTION_SENDTO mailto:` con oggetto e corpo precompilati; senza app di posta copia l'indirizzo negli appunti e mostra il banner "Nessuna app di posta".
+- Verifica: 12 test JVM in `LaunchCountdownTest` (prima/durante/dopo, a un secondo dalla scadenza, fusi diversi, 14 giorni, tick). **Da fare su dispositivo**: cattura della Home (chiaro/scuro), stato dopo la scadenza (orologio iniettabile via `launchClock` di `HomeScreen`), tocco sul pulsante con e senza app di posta. Nessun dispositivo era collegato quando e' stata scritta questa sezione, quindi non ci sono screenshot.
+
 ## Focused-region comparison
 
 A separate crop was not required: the normalized 2160 x 2340 board keeps the hero typography, three metrics, app icons, version pills, and navigation labels readable. The original 1080 x 2340 implementation captures were also inspected at native resolution for wrapping, crop, radii, dividers, and chrome.

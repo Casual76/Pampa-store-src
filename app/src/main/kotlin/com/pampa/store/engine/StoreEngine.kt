@@ -40,6 +40,7 @@ import com.pampa.store.data.withState
 import com.pampa.store.pampai.StoreInstallService
 import com.pampa.store.platform.AndroidAppService
 import com.pampa.store.platform.AppInstaller
+import com.pampa.store.platform.MailDraft
 import com.pampa.store.platform.StoreNotifications
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
@@ -233,6 +234,20 @@ class StoreEngine private constructor(private val context: Context) {
   fun openInstallSettings() = appService.openInstallSettings()
 
   fun openNotificationSettings() = notifications.openSettings()
+
+  /**
+   * Apre la posta con la bozza; se non c'e' un'app di posta l'indirizzo e' gia' negli appunti e
+   * qui lo si dice, con lo stesso banner degli altri avvisi.
+   */
+  fun composeEmail(draft: MailDraft) {
+    if (appService.composeEmail(draft)) return
+    announce(
+      id = "mail-unavailable",
+      title = "Nessuna app di posta",
+      message = "Ho copiato l’indirizzo ${draft.to}: incollalo dove preferisci.",
+      tone = StoreEventTone.Warning,
+    )
+  }
 
   fun openApp(packageName: String): Boolean {
     val launched = appService.launch(packageName)
