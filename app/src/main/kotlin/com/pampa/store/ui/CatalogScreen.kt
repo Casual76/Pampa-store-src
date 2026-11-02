@@ -30,6 +30,7 @@ import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
 import dev.antigravity.fluidengine.ui.fluid.FluidSegmentedControl
 import dev.antigravity.fluidengine.ui.fluid.FluidTextField
 import dev.antigravity.fluidengine.ui.theme.FluidEmptyState
+import dev.antigravity.fluidengine.ui.theme.FluidInlineMessage
 import dev.antigravity.fluidengine.ui.theme.FluidTone
 
 @Composable
@@ -107,11 +108,12 @@ fun CatalogScreen(
             item { FluidLoadingBlock() }
         } else if (state.error != null && state.apps.isEmpty()) {
             item {
-                InlineNotice(
+                FluidInlineMessage(
                     title = "Il catalogo non si è caricato",
                     message = state.error,
                     tone = FluidTone.Danger,
                     onClick = onRefresh,
+                    leading = { Icon(noticeIcon(FluidTone.Danger), contentDescription = null) },
                 )
             }
         } else if (state.visibleApps.isEmpty()) {

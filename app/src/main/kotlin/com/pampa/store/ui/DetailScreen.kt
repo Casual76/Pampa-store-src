@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,8 +28,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.pampa.store.data.Channel
@@ -57,13 +55,12 @@ import dev.antigravity.fluidengine.ui.fluid.FluidRadius
 import dev.antigravity.fluidengine.ui.fluid.FluidGlassModalPortal
 import dev.antigravity.fluidengine.ui.fluid.FluidGlassModalPresentation
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
-import dev.antigravity.fluidengine.ui.fluid.LocalFluidItemSpacing
 import dev.antigravity.fluidengine.ui.fluid.FluidSegmentedControl
 import dev.antigravity.fluidengine.ui.fluid.fluidExpandOrigin
+import dev.antigravity.fluidengine.ui.fluid.fluidGlassGroups
 import dev.antigravity.fluidengine.ui.theme.FluidEmptyState
+import dev.antigravity.fluidengine.ui.theme.FluidInlineMessage
 import dev.antigravity.fluidengine.ui.theme.FluidListDivider
-import dev.antigravity.fluidengine.ui.theme.FluidGroupOpenEdge
-import dev.antigravity.fluidengine.ui.theme.FluidGroupSegment
 import dev.antigravity.fluidengine.ui.theme.FluidListGroup
 import dev.antigravity.fluidengine.ui.theme.FluidListRow
 import dev.antigravity.fluidengine.ui.theme.FluidStatusBadge
@@ -167,11 +164,12 @@ fun DetailScreen(
 
         if (!prerequisites.canInstallPackages && !targetInstalled) {
             item {
-                InlineNotice(
+                FluidInlineMessage(
                     title = "Autorizzazione necessaria",
                     message = prerequisites.message.orEmpty(),
                     tone = FluidTone.Warning,
                     onClick = onOpenInstallSettings,
+                    leading = { Icon(noticeIcon(FluidTone.Warning), contentDescription = null) },
                 )
             }
         }
@@ -243,16 +241,23 @@ fun DetailScreen(
                     detail = "Tocca una versione per rimetterla",
                 )
             }
-            versionHistory(
-                history = app.entry.history,
-                installedVersion = app.installedVersion,
-                pickedIndex = { historyPick },
-                onMeasured = { index, rect -> historyOrigins[index] = rect },
-                onPick = { index ->
-                    pickedOrigin = historyOrigins[index]
-                    historyPick = index
-                },
-            )
+            // Una lista lunga in pannelli di vetro da otto righe che sembrano uno solo: e' la meccanica
+            // dell'engine (`fluidGlassGroups`), la stessa di ClasseViva da cui l'avevamo portata.
+            fluidGlassGroups(
+                items = app.entry.history.withIndex().toList(),
+                key = "history",
+            ) { (index, version) ->
+                HistoryRow(
+                    version = version,
+                    isCurrent = version.version == app.installedVersion,
+                    isPicked = { historyPick == index },
+                    onMeasured = { rect -> historyOrigins[index] = rect },
+                    onPick = {
+                        pickedOrigin = historyOrigins[index]
+                        historyPick = index
+                    },
+                )
+            }
         }
     }
 
@@ -279,93 +284,37 @@ fun DetailScreen(
 }
 
 /**
- * La cronologia, tagliata in piu' pannelli.
+ * Una release della cronologia: tocca per vedere cosa porta e rimetterla.
  *
- * Non e' un'ottimizzazione: e' cio' che rende toccabili le righe in fondo. ClasseViva ha
- * settantotto release, e settantotto righe con le loro note dentro **un solo** gruppo dentro **un
- * solo** item della lista fanno un nodo alto decine di migliaia di pixel — che smette di ricevere i
- * tocchi molto prima di smettere di disegnarsi. Le versioni vecchie si vedevano benissimo e non
- * rispondevano al dito: nessun errore, nessun pannello, niente.
- *
- * A vedersi resta un gruppo solo. [FluidGroupSegment] arrotonda soltanto gli angoli che sono
- * davvero l'inizio e la fine e toglie il bordo speculare dai lati aperti; ogni pezzo tranne
- * l'ultimo dichiara meno altezza di quella che disegna, cosi' il successivo gli sale addosso e
- * richiude l'aria che la lista mette fra un item e l'altro.
+ * La lista lunga (ClasseViva ha settantotto release) la taglia `fluidGlassGroups` in pannelli da otto
+ * righe, perche' un solo nodo alto decine di migliaia di pixel smette di ricevere i tocchi molto prima
+ * di smettere di disegnarsi: le versioni vecchie si vedevano benissimo e non rispondevano al dito. Qui
+ * resta solo la riga, con l'ancora da cui cresce il pannello della release.
  */
-private fun LazyListScope.versionHistory(
-    history: List<VersionInfo>,
-    installedVersion: String?,
-    pickedIndex: () -> Int,
-    onMeasured: (Int, Rect) -> Unit,
-    onPick: (Int) -> Unit,
+@Composable
+private fun HistoryRow(
+    version: VersionInfo,
+    isCurrent: Boolean,
+    isPicked: () -> Boolean,
+    onMeasured: (Rect) -> Unit,
+    onPick: () -> Unit,
 ) {
-    val chunks = history.chunked(HistoryChunk)
-    chunks.forEachIndexed { chunkIndex, chunk ->
-        val first = chunkIndex == 0
-        val last = chunkIndex == chunks.lastIndex
-        val segment = when {
-            first && last -> FluidGroupSegment.Whole
-            first -> FluidGroupSegment.First
-            last -> FluidGroupSegment.Last
-            else -> FluidGroupSegment.Middle
-        }
-        item(key = "history-$chunkIndex") {
-            val seam = LocalFluidItemSpacing.current + FluidGroupOpenEdge * 2
-            FluidListGroup(
-                glass = true,
-                segment = segment,
-                modifier = Modifier
-                    .then(if (last) Modifier else Modifier.closeSeam(seam))
-                    .then(if (first) Modifier.testTag("detail-history") else Modifier),
-            ) {
-                chunk.forEachIndexed { rowIndex, version ->
-                    val index = chunkIndex * HistoryChunk + rowIndex
-                    val installable = version.apkAsset.isNotBlank() &&
-                        version.releaseTag.isNotBlank()
-                    val isCurrent = version.version == installedVersion
-                    FluidListRow(
-                        title = "Versione ${version.version}",
-                        subtitle = version.releaseDate.ifBlank { "Release precedente" },
-                        meta = version.changelog.takeIf(String::isNotBlank),
-                        tone = if (isCurrent) FluidTone.Success else FluidTone.Neutral,
-                        badge = {
-                            when {
-                                isCurrent -> FluidStatusBadge("Installata", tone = FluidTone.Success)
-                                installable -> FluidStatusBadge("Installa", tone = FluidTone.Primary)
-                                else -> FluidStatusBadge("Senza APK", tone = FluidTone.Neutral)
-                            }
-                        },
-                        onClick = if (installable && !isCurrent) {
-                            { onPick(index) }
-                        } else {
-                            null
-                        },
-                        modifier = Modifier.fluidExpandOrigin(
-                            open = { pickedIndex() == index },
-                            onMeasured = { onMeasured(index, it) },
-                        ),
-                    )
-                    if (rowIndex != chunk.lastIndex) FluidListDivider()
-                }
+    val installable = version.apkAsset.isNotBlank() && version.releaseTag.isNotBlank()
+    FluidListRow(
+        title = "Versione ${version.version}",
+        subtitle = version.releaseDate.ifBlank { "Release precedente" },
+        meta = version.changelog.takeIf(String::isNotBlank),
+        tone = if (isCurrent) FluidTone.Success else FluidTone.Neutral,
+        badge = {
+            when {
+                isCurrent -> FluidStatusBadge("Installata", tone = FluidTone.Success)
+                installable -> FluidStatusBadge("Installa", tone = FluidTone.Primary)
+                else -> FluidStatusBadge("Senza APK", tone = FluidTone.Neutral)
             }
-        }
-    }
-}
-
-/** Quante release per pannello. Otto e' quanto ne sta comodamente dentro un solo nodo. */
-private const val HistoryChunk = 8
-
-/**
- * Dichiara meno altezza di quella che disegna, cosi' il pezzo successivo sale a chiudere il vuoto.
- *
- * E' il meccanismo che [FluidGroupSegment] si aspetta da chi taglia: i lati aperti non disegnano il
- * bordo, ma l'aria fra un item e l'altro della lista resta, e senza richiuderla la giuntura si vede
- * come una fessura.
- */
-private fun Modifier.closeSeam(amount: Dp): Modifier = layout { measurable, constraints ->
-    val placeable = measurable.measure(constraints)
-    val closed = (placeable.height - amount.roundToPx()).coerceAtLeast(0)
-    layout(placeable.width, closed) { placeable.place(0, 0) }
+        },
+        onClick = if (installable && !isCurrent) onPick else null,
+        modifier = Modifier.fluidExpandOrigin(open = isPicked, onMeasured = onMeasured),
+    )
 }
 
 /**
@@ -417,7 +366,7 @@ private fun HistoryVersionPane(
             overflow = TextOverflow.Ellipsis,
         )
         if (isDowngrade) {
-            InlineNotice(
+            FluidInlineMessage(
                 title = "Tornare indietro disinstalla l’app",
                 message = "Android non lascia sovrascrivere una versione con una più vecchia. " +
                     "Ti chiedo di rimuovere $appName, e i suoi dati se ne vanno con lei; " +

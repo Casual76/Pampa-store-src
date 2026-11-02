@@ -3,6 +3,7 @@ package com.pampa.store.ui
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -16,6 +17,7 @@ import dev.antigravity.fluidengine.ui.fluid.FluidBarAction
 import dev.antigravity.fluidengine.ui.fluid.FluidLoadingBlock
 import dev.antigravity.fluidengine.ui.fluid.FluidScreen
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
+import dev.antigravity.fluidengine.ui.theme.FluidInlineMessage
 import dev.antigravity.fluidengine.ui.theme.FluidTone
 import java.time.Instant
 import java.time.ZoneId
@@ -84,32 +86,35 @@ fun HomeScreen(
 
             state.storeUpdate?.let { update ->
                 item {
-                    InlineNotice(
+                    FluidInlineMessage(
                         title = "Pampa Store ${update.version.version} è disponibile",
                         message = update.version.changelog.ifBlank { "Nuova versione pronta da installare." },
                         tone = FluidTone.Primary,
                         onClick = onShowUpdates,
+                        leading = { Icon(noticeIcon(FluidTone.Primary), contentDescription = null) },
                     )
                 }
             }
 
             state.error?.let { message ->
                 item {
-                    InlineNotice(
+                    FluidInlineMessage(
                         title = "Catalogo non disponibile",
                         message = message,
                         tone = FluidTone.Danger,
                         onClick = onRefresh,
+                        leading = { Icon(noticeIcon(FluidTone.Danger), contentDescription = null) },
                     )
                 }
             }
             state.warning?.takeIf { state.isUsingCache }?.let { message ->
                 item {
-                    InlineNotice(
+                    FluidInlineMessage(
                         title = "Modalità offline",
                         message = message,
                         tone = FluidTone.Warning,
                         onClick = onRefresh,
+                        leading = { Icon(noticeIcon(FluidTone.Warning), contentDescription = null) },
                     )
                 }
             }

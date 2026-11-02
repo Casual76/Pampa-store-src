@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DeleteSweep
@@ -41,7 +40,7 @@ import com.pampa.store.data.versionFor
 import dev.antigravity.fluidengine.ui.fluid.FluidAmbient
 import dev.antigravity.fluidengine.ui.fluid.FluidBarAction
 import dev.antigravity.fluidengine.ui.fluid.FluidContextAction
-import dev.antigravity.fluidengine.ui.fluid.FluidFoldingTabBarDefaults
+import dev.antigravity.fluidengine.ui.fluid.FluidFloatingCapsulePlacement
 import dev.antigravity.fluidengine.ui.fluid.FluidGlassModalPortal
 import dev.antigravity.fluidengine.ui.fluid.FluidGlassModalPresentation
 import dev.antigravity.fluidengine.ui.fluid.FluidHero
@@ -54,9 +53,11 @@ import dev.antigravity.fluidengine.ui.fluid.FluidScreen
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionFootnote
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
 import dev.antigravity.fluidengine.ui.fluid.GlassBackdropState
+import dev.antigravity.fluidengine.ui.fluid.fluidCapsuleInsets
 import dev.antigravity.fluidengine.ui.fluid.fluidExpandOrigin
 import dev.antigravity.fluidengine.ui.fluidphysics.FluidMorphMenuButton
 import dev.antigravity.fluidengine.ui.theme.FluidEmptyState
+import dev.antigravity.fluidengine.ui.theme.FluidInlineMessage
 import dev.antigravity.fluidengine.ui.theme.FluidListDivider
 import dev.antigravity.fluidengine.ui.theme.FluidListGroup
 import dev.antigravity.fluidengine.ui.theme.FluidListRow
@@ -179,19 +180,20 @@ fun UpdatesScreen(
 
         if (!state.prerequisites.canInstallPackages) {
             item {
-                InlineNotice(
+                FluidInlineMessage(
                     title = "Autorizzazione necessaria",
                     message = state.prerequisites.message
                         ?: "Abilita Pampa Store fra le origini consentite per installare gli APK.",
                     tone = FluidTone.Warning,
                     onClick = onOpenInstallSettings,
+                    leading = { Icon(noticeIcon(FluidTone.Warning), contentDescription = null) },
                 )
             }
         }
 
         if (!state.notificationsEnabled) {
             item {
-                InlineNotice(
+                FluidInlineMessage(
                     title = "Notifiche disattivate",
                     message = "Il controllo automatico continua lo stesso, ma senza notifiche " +
                         "scopri gli aggiornamenti solo aprendo lo Store.",
@@ -417,11 +419,14 @@ private fun UpdateAllCapsule(
     modifier: Modifier = Modifier,
 ) {
     val morphMenu = LocalStoreMorphMenu.current ?: return
-    Box(
-        modifier = modifier
-            .navigationBarsPadding()
-            .padding(bottom = FluidFoldingTabBarDefaults.ContentInset + 8.dp),
-    ) {
+    // Sopra la barra di navigazione, alla distanza che l'engine le da'; sul tablet la barra non c'e'
+    // (c'e' il rail, accanto) e il tasto sta dove starebbe lei.
+    val placement = if (LocalStoreUsesRail.current) {
+        FluidFloatingCapsulePlacement.ReplacingTabBar
+    } else {
+        FluidFloatingCapsulePlacement.AboveTabBar
+    }
+    Box(modifier = modifier.fluidCapsuleInsets(placement)) {
         FluidMorphMenuButton(
             state = morphMenu,
             actions = {

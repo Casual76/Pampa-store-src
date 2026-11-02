@@ -26,7 +26,6 @@ import com.pampa.store.data.StoreApp
 import dev.antigravity.fluidengine.ui.fluid.ContinuousCornerShape
 import dev.antigravity.fluidengine.ui.fluid.FluidContextAction
 import dev.antigravity.fluidengine.ui.fluid.FluidRadius
-import dev.antigravity.fluidengine.ui.theme.FluidInlineMessage
 import dev.antigravity.fluidengine.ui.theme.FluidListDivider
 import dev.antigravity.fluidengine.ui.theme.FluidListGroup
 import dev.antigravity.fluidengine.ui.theme.FluidListRow
@@ -136,39 +135,12 @@ fun AppIcon(url: String, packageName: String, name: String, modifier: Modifier =
 }
 
 /**
- * Un avviso dentro la pagina.
+ * Il segno di un avviso che si tocca, nella piastrella davanti al titolo di `FluidInlineMessage`.
  *
- * Due forme, e la differenza è se c'è qualcosa da toccare. Senza azione è il messaggio in linea
- * dell'engine; con un'azione è una riga di lista con un pannello suo — che è esattamente cosa *è*
- * un avviso toccabile, e ha già il tocco, il bersaglio e la piastrella colorata dell'icona.
- *
- * L'engine non ha un [FluidInlineMessage] cliccabile, e inventarne uno qui significherebbe
- * riscrivere a mano la superficie, i colori del tono e il feedback del tocco — cioè le tre cose che
- * il design system esiste per non far riscrivere.
+ * Senza un tocco l'avviso e' una frase e non ha bisogno di un segno; con un tocco il segno dice, prima
+ * di leggere, se la cosa e' un errore, un'attenzione o un'informazione.
  */
-@Composable
-fun InlineNotice(
-    title: String,
-    message: String,
-    tone: FluidTone = FluidTone.Info,
-    onClick: (() -> Unit)? = null,
-) {
-    if (onClick == null) {
-        FluidInlineMessage(message = message, title = title, tone = tone)
-        return
-    }
-    FluidListGroup(glass = true) {
-        FluidListRow(
-            title = title,
-            subtitle = message,
-            tone = tone,
-            leading = { Icon(noticeIcon(tone), contentDescription = null) },
-            onClick = onClick,
-        )
-    }
-}
-
-private fun noticeIcon(tone: FluidTone) = when (tone) {
+internal fun noticeIcon(tone: FluidTone) = when (tone) {
     FluidTone.Danger -> Icons.Rounded.ErrorOutline
     FluidTone.Warning -> Icons.Rounded.WarningAmber
     FluidTone.Neutral -> Icons.Rounded.CloudOff

@@ -1,84 +1,72 @@
 package com.pampa.store.ui
 
 import android.net.Uri
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Apps
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import kotlinx.coroutines.flow.Flow
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.pampa.store.data.StoreEvent
 import com.pampa.store.data.StoreEventTone
 import com.pampa.store.viewmodel.StoreViewModel
-import dev.antigravity.fluidengine.ui.fluid.FluidFoldingTabBar
-import dev.antigravity.fluidengine.ui.fluid.FluidFoldingTabBarDefaults
+import dev.antigravity.fluidengine.ui.fluid.FluidChromeController
+import dev.antigravity.fluidengine.ui.fluid.FluidFloatingTabBar
+import dev.antigravity.fluidengine.ui.fluid.FluidFloatingTabBarDefaults
 import dev.antigravity.fluidengine.ui.fluid.FluidGlassModalHost
+import dev.antigravity.fluidengine.ui.fluid.FluidMotionPolicyProvider
 import dev.antigravity.fluidengine.ui.fluid.FluidNotification
 import dev.antigravity.fluidengine.ui.fluid.FluidNotificationHost
 import dev.antigravity.fluidengine.ui.fluid.FluidNotificationTone
+import dev.antigravity.fluidengine.ui.fluid.FluidScrollToTopBus
 import dev.antigravity.fluidengine.ui.fluid.FluidTabItem
 import dev.antigravity.fluidengine.ui.fluid.FluidTabRail
-import dev.antigravity.fluidengine.ui.fluid.FluidMotion
 import dev.antigravity.fluidengine.ui.fluid.LocalFluidGlassModalHostState
 import dev.antigravity.fluidengine.ui.fluid.LocalFluidNotificationHostState
 import dev.antigravity.fluidengine.ui.fluid.ProvideFluidChrome
-import dev.antigravity.fluidengine.ui.fluid.FluidMotionPolicyProvider
-import dev.antigravity.fluidengine.ui.fluid.FluidScrollToTopBus
 import dev.antigravity.fluidengine.ui.fluid.fluidGlassModalObscured
-import dev.antigravity.fluidengine.ui.fluid.rememberFluidBarFold
 import dev.antigravity.fluidengine.ui.fluid.rememberFluidChromeController
+import dev.antigravity.fluidengine.ui.fluid.rememberFluidFloatingTabBarScrollConnection
 import dev.antigravity.fluidengine.ui.fluid.rememberFluidGlassModalHostState
 import dev.antigravity.fluidengine.ui.fluid.rememberFluidNotificationHostState
 import dev.antigravity.fluidengine.ui.fluid.rememberGlassBackdrop
 import dev.antigravity.fluidengine.ui.fluidphysics.FluidMorphMenuHost
 import dev.antigravity.fluidengine.ui.fluidphysics.FluidMorphMenuState
 import dev.antigravity.fluidengine.ui.fluidphysics.rememberFluidMorphMenuState
-import dev.antigravity.fluidengine.ui.theme.FluidRouteMotion
-import dev.antigravity.fluidengine.ui.theme.FluidRouteMotionHost
+import dev.antigravity.fluidengine.ui.navigation.FluidNavHost
+import dev.antigravity.fluidengine.ui.navigation.composable
+import dev.antigravity.fluidengine.ui.page.FluidPageHostState
+import dev.antigravity.fluidengine.ui.page.FluidPeerMove
+import dev.antigravity.fluidengine.ui.page.rememberFluidPageHostState
 import dev.antigravity.fluidengine.ui.theme.FluidScreenSurface
-import dev.antigravity.fluidengine.ui.theme.LocalRouteMotionSignals
-import dev.antigravity.fluidengine.ui.theme.MotionOrigin
-import dev.antigravity.fluidengine.ui.theme.RouteMotionSignals
-import dev.antigravity.fluidengine.ui.theme.rememberRouteMotionSignals
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Apps
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.Tune
 import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.Flow
 
 private object Routes {
     const val Home = "home"
@@ -107,90 +95,41 @@ private val topLevelRouteOrder = topLevelItems.map(FluidTabItem::route)
  */
 private fun topLevelRouteFor(route: String): String? = topLevelRouteOrder.firstOrNull { it == route }
 
-internal enum class StoreRouteMotionKind { TopLevelSwitch, Detail }
-
-internal data class StoreRouteMotionDecision(
-    val kind: StoreRouteMotionKind,
-    val direction: Int = 0,
-)
-
-internal fun decideStoreRouteMotion(fromRoute: String?, toRoute: String?): StoreRouteMotionDecision {
-    if (fromRoute.isDetailRoute() || toRoute.isDetailRoute()) {
-        return StoreRouteMotionDecision(StoreRouteMotionKind.Detail)
-    }
-    val fromIndex = topLevelRouteOrder.indexOf(fromRoute)
-    val toIndex = topLevelRouteOrder.indexOf(toRoute)
-    val direction = when {
-        fromIndex < 0 || toIndex < 0 -> 0
-        toIndex > fromIndex -> 1
-        toIndex < fromIndex -> -1
-        else -> 0
-    }
-    return StoreRouteMotionDecision(StoreRouteMotionKind.TopLevelSwitch, direction)
+/**
+ * Di quanto si sposta chi passa da una scheda all'altra, nell'ordine della barra: positivo se
+ * [toRoute] sta dopo [fromRoute], negativo se sta prima, zero se non sono due schede (il dettaglio
+ * non è una scheda, e un passo laterale verso di lui direbbe «sei tornato» mentre si va avanti).
+ *
+ * È il `peer` di `FluidNavHost`: due schede fanno il passo laterale, nel verso che la barra implica;
+ * tutto il resto è una pagina che si apre da destra e si chiude sotto il dito.
+ */
+internal fun tabStep(fromRoute: String?, toRoute: String?): Int {
+    val from = topLevelRouteOrder.indexOf(fromRoute)
+    val to = topLevelRouteOrder.indexOf(toRoute)
+    return if (from < 0 || to < 0) 0 else (to - from).coerceIn(-1, 1)
 }
 
-private fun String?.isDetailRoute(): Boolean = this?.startsWith("detail/") == true
+private fun String?.isDetailRoute(): Boolean = this == Routes.Detail
 
-private fun RouteMotionSignals.resolveStoreRouteMotion(
-    initialState: NavBackStackEntry,
-    targetState: NavBackStackEntry,
-): StoreRouteMotionDecision = decideStoreRouteMotion(
-    fromRoute = initialState.destination.route,
-    toRoute = targetState.destination.route,
-).also { hierarchical = it.kind == StoreRouteMotionKind.Detail }
-
-private fun peerSlideSpec() = tween<IntOffset>(
-    durationMillis = FluidMotion.DurationPeer,
-    easing = FluidMotion.EaseEmphasized,
-)
-
-private fun peerSlidePx(width: Int, direction: Int): Int =
-    (width * FluidMotion.PeerSlideFraction * direction).roundToInt()
-
-private fun storeRouteEnterTransition(
-    decision: StoreRouteMotionDecision,
-    isPop: Boolean,
-): EnterTransition = when (decision.kind) {
-    StoreRouteMotionKind.TopLevelSwitch -> slideInHorizontally(
-        animationSpec = peerSlideSpec(),
-    ) { width -> peerSlidePx(width, decision.direction) }
-
-    StoreRouteMotionKind.Detail -> scaleIn(
-        animationSpec = tween(
-            durationMillis = if (isPop) FluidMotion.DurationCollapse else FluidMotion.DurationExpand,
-            easing = FluidMotion.EaseEmphasized,
-        ),
-        initialScale = if (isPop) FluidRouteMotion.ExpandParentScale else FluidRouteMotion.ExpandInitialScale,
-        transformOrigin = MotionOrigin.Center.toTransformOrigin(),
-    )
-}
-
-private fun storeRouteExitTransition(
-    decision: StoreRouteMotionDecision,
-    isPop: Boolean,
-): ExitTransition = when (decision.kind) {
-    StoreRouteMotionKind.TopLevelSwitch -> {
-        val settle = fadeOut(
-            tween(FluidMotion.DurationPeerFadeOut, easing = FluidMotion.EaseIn),
-        )
-        settle + slideOutHorizontally(
-            animationSpec = peerSlideSpec(),
-        ) { width -> peerSlidePx(width, -decision.direction) }
+/**
+ * Passa a un'altra scheda.
+ *
+ * Com'era con `NavHost`: la pila resta `[Home, scheda]`, e il back da una scheda torna a Home prima
+ * di uscire. Si risale fino alla radice (che qui è Home e non esce mai dalla pila, quindi le schede
+ * non si accumulano) e si salva lo stato di quelle lasciate, così tornandoci la lista è dov'era.
+ */
+private fun NavHostController.selectTab(route: String) {
+    navigate(route) {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
     }
-
-    StoreRouteMotionKind.Detail -> fadeOut(
-        tween(FluidMotion.DurationRouteFadeOut, easing = FluidMotion.EaseIn),
-    ) + scaleOut(
-        animationSpec = tween(
-            durationMillis = if (isPop) FluidMotion.DurationCollapse else FluidMotion.DurationExpand,
-            easing = FluidMotion.EaseEmphasized,
-        ),
-        targetScale = if (isPop) FluidRouteMotion.ExpandInitialScale else FluidRouteMotion.ExpandParentScale,
-        transformOrigin = MotionOrigin.Center.toTransformOrigin(),
-    )
 }
 
 internal val LocalStoreHorizontalPadding = staticCompositionLocalOf { 20.dp }
+
+/** Vero se la pagina sta accanto al rail del tablet e non sopra la barra del telefono. */
+internal val LocalStoreUsesRail = staticCompositionLocalOf { false }
 
 /**
  * Il menù che nasce da un tasto, per la schermata che ne ha uno.
@@ -213,67 +152,38 @@ fun PampaStoreApp(
         FluidMotionPolicyProvider {
             FluidScreenSurface(modifier = Modifier.fillMaxSize()) {
                 val navController = rememberNavController()
-                val routeMotionSignals = rememberRouteMotionSignals()
+                val pages = rememberFluidPageHostState()
                 val backStackEntry by navController.currentBackStackEntryAsState()
                 val route = backStackEntry?.destination?.route
-                val showNavigation = route != Routes.Detail
 
                 LaunchedEffect(pendingRoute) {
                     val target = pendingRoute?.let(::topLevelRouteFor) ?: return@LaunchedEffect
-                    navController.navigate(target) {
-                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    navController.selectTab(target)
                     onRouteConsumed()
                 }
 
-                CompositionLocalProvider(LocalRouteMotionSignals provides routeMotionSignals) {
-                    PampaNavigationSuite(
-                        currentRoute = route,
-                        visible = showNavigation,
-                        events = viewModel.events,
-                        onSelect = { target ->
-                            navController.navigate(target) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
+                // Fra due schede la pagina fa il passo laterale nel verso della barra.
+                val peer = remember {
+                    FluidPeerMove<NavBackStackEntry> { from, to ->
+                        tabStep(from.destination.route, to.destination.route)
+                    }
+                }
+
+                PampaNavigationSuite(
+                    currentRoute = route,
+                    pages = pages,
+                    events = viewModel.events,
+                    onSelect = navController::selectTab,
+                ) { shell ->
+                    FluidNavHost(
+                        navController = navController,
+                        startDestination = Routes.Home,
+                        modifier = Modifier.fillMaxSize(),
+                        peer = peer,
+                        state = pages,
                     ) {
-                        NavHost(
-                            navController = navController,
-                            startDestination = Routes.Home,
-                            modifier = Modifier.fillMaxSize().clipToBounds(),
-                            enterTransition = {
-                                storeRouteEnterTransition(
-                                    routeMotionSignals.resolveStoreRouteMotion(initialState, targetState),
-                                    isPop = false,
-                                )
-                            },
-                            exitTransition = {
-                                storeRouteExitTransition(
-                                    routeMotionSignals.resolveStoreRouteMotion(initialState, targetState),
-                                    isPop = false,
-                                )
-                            },
-                            popEnterTransition = {
-                                storeRouteEnterTransition(
-                                    routeMotionSignals.resolveStoreRouteMotion(initialState, targetState),
-                                    isPop = true,
-                                )
-                            },
-                            popExitTransition = {
-                                storeRouteExitTransition(
-                                    routeMotionSignals.resolveStoreRouteMotion(initialState, targetState),
-                                    isPop = true,
-                                )
-                            },
-                        ) {
                         composable(Routes.Home) {
-                            FluidRouteMotionHost(this@composable) {
+                            TabPage(shell) {
                                 HomeScreen(
                                     state = state,
                                     onRefresh = viewModel::refreshCatalog,
@@ -285,7 +195,7 @@ fun PampaStoreApp(
                             }
                         }
                         composable(Routes.Catalog) {
-                            FluidRouteMotionHost(this@composable) {
+                            TabPage(shell) {
                                 CatalogScreen(
                                     state = state,
                                     onRefresh = viewModel::refreshCatalog,
@@ -298,7 +208,7 @@ fun PampaStoreApp(
                             }
                         }
                         composable(Routes.Updates) {
-                            FluidRouteMotionHost(this@composable) {
+                            TabPage(shell) {
                                 UpdatesScreen(
                                     state = state,
                                     onRefresh = viewModel::refreshCatalog,
@@ -314,7 +224,7 @@ fun PampaStoreApp(
                             }
                         }
                         composable(Routes.More) {
-                            FluidRouteMotionHost(this@composable) {
+                            TabPage(shell) {
                                 MoreScreen(
                                     state = state,
                                     onRefresh = viewModel::refreshCatalog,
@@ -331,17 +241,20 @@ fun PampaStoreApp(
                                 )
                             }
                         }
+                        // Il dettaglio non è una scheda: si apre da destra sopra la scheda da cui si
+                        // arriva e si chiude col dito. Non lascia lo spazio della barra, che gli
+                        // esce di sotto insieme alla pagina.
                         composable(
                             route = Routes.Detail,
                             arguments = listOf(navArgument("appId") { type = NavType.StringType }),
                         ) { entry ->
                             val appId = entry.arguments?.getString("appId").orEmpty()
-                            FluidRouteMotionHost(this@composable) {
+                            DetailPage(shell) {
                                 DetailScreen(
                                     app = state.apps.firstOrNull { it.entry.id == appId },
                                     preferences = state.preferences,
                                     prerequisites = state.prerequisites,
-                                    onBack = navController::navigateUp,
+                                    onBack = { navController.popBackStack() },
                                     onInstall = { channel -> viewModel.installApp(appId, channel) },
                                     onInstallVersion = { version ->
                                         viewModel.installVersion(appId, version)
@@ -351,11 +264,53 @@ fun PampaStoreApp(
                                 )
                             }
                         }
-                        }
                     }
                 }
             }
         }
+    }
+}
+
+/** Quello che le pagine prendono dal guscio: il registro della barra, il «torna in cima» e il tipo di navigazione. */
+internal class StoreShell(
+    val chrome: FluidChromeController,
+    val scrollToTop: FluidScrollToTopBus,
+    val useRail: Boolean,
+)
+
+/**
+ * Una scheda: la lista lascia in fondo lo spazio della barra (che la copre), o a sinistra quello del
+ * rail. Per pagina e non per guscio: mentre il dettaglio si apre la scheda sotto è ancora composta, e
+ * deve tenere i suoi margini finché non è coperta.
+ */
+@Composable
+private fun TabPage(shell: StoreShell, content: @Composable () -> Unit) {
+    ProvideFluidChrome(
+        controller = shell.chrome,
+        bottomInset = if (shell.useRail) 0.dp else FluidFloatingTabBarDefaults.ContentInset,
+        scrollToTop = shell.scrollToTop,
+    ) {
+        CompositionLocalProvider(
+            LocalStoreHorizontalPadding provides if (shell.useRail) 108.dp else 20.dp,
+            LocalStoreUsesRail provides shell.useRail,
+            content = content,
+        )
+    }
+}
+
+/** Il dettaglio: niente barra sotto, niente rail accanto. */
+@Composable
+private fun DetailPage(shell: StoreShell, content: @Composable () -> Unit) {
+    ProvideFluidChrome(
+        controller = shell.chrome,
+        bottomInset = 0.dp,
+        scrollToTop = shell.scrollToTop,
+    ) {
+        CompositionLocalProvider(
+            LocalStoreHorizontalPadding provides 20.dp,
+            LocalStoreUsesRail provides false,
+            content = content,
+        )
     }
 }
 
@@ -366,14 +321,18 @@ fun PampaStoreApp(
  * del contenuto e leggono tutti lo stesso backdrop. È l'unico montaggio in cui un pop-up esce
  * *sopra* la capsula di navigazione, e il motivo per cui serve: un pannello su cui la barra può
  * appoggiarsi non è un modale.
+ *
+ * La barra (o il rail) è una sola e sta ferma fuori dall'host delle pagine: esce insieme al
+ * dettaglio che si apre e rientra insieme a quello che si chiude, **col dito**, perché legge
+ * l'avanzamento dell'host e non un interruttore (vedi [tabBarHidden]).
  */
 @Composable
 private fun PampaNavigationSuite(
     currentRoute: String?,
-    visible: Boolean,
+    pages: FluidPageHostState,
     events: Flow<StoreEvent>,
     onSelect: (String) -> Unit,
-    content: @Composable () -> Unit,
+    content: @Composable (StoreShell) -> Unit,
 ) {
     val controller = rememberFluidChromeController()
     val fallbackBackdrop = rememberGlassBackdrop()
@@ -381,12 +340,27 @@ private fun PampaNavigationSuite(
     val modalHost = rememberFluidGlassModalHostState()
     val notificationHost = rememberFluidNotificationHostState()
     val morphMenu = rememberFluidMorphMenuState()
-    val barFold = rememberFluidBarFold()
+    val tabBarScroll = rememberFluidFloatingTabBarScrollConnection()
+    val layoutDirection = LocalLayoutDirection.current
+
+    // Prima che navigation abbia una rotta si è su Home; il dettaglio non ha una scheda.
+    val tabRoute = if (currentRoute == null) Routes.Home else topLevelRouteFor(currentRoute)
+    val onTab = tabRoute != null
+
+    // L'ultima scheda davanti: mentre il dettaglio si apre e la barra se ne va, la barra resta
+    // com'era invece di saltare su una scheda che non c'è.
+    val lastTab = remember { LastTab() }
+    if (tabRoute != null) lastTab.route = tabRoute
 
     // Cambiare scheda riapre la barra. Restare ripiegati dopo un cambio di rotta lascia la persona
     // su una pagina nuova senza la navigazione che ce l'ha portata: si vede una pastiglia sola,
     // con l'icona della scheda in cui sei, e non c'e' modo di raggiungere le altre senza scorrere.
-    LaunchedEffect(currentRoute) { barFold.unfold() }
+    // `settle` perché una lista smontata a metà gesto non consegna il suo fling, e senza il flag di
+    // scorrimento resta alzato: il vetro rifrangerebbe per sempre l'ultima cattura.
+    LaunchedEffect(currentRoute) {
+        tabBarScroll.settle()
+        tabBarScroll.expand()
+    }
 
     // Gli avvisi del ViewModel diventano banner in vetro in cima. La coda del banner e' dell'engine
     // (deduplica per id e li presenta uno alla volta), quindi qui basta consegnare.
@@ -415,65 +389,72 @@ private fun PampaNavigationSuite(
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             val useRail = maxWidth >= 600.dp
-            val bottomInset = if (visible && !useRail) FluidFoldingTabBarDefaults.ContentInset else 0.dp
-            val screenHorizontalPadding = if (visible && useRail) 108.dp else 20.dp
             val backdrop = controller.activeBackdrop.value ?: fallbackBackdrop
+            val shell = remember(controller, scrollToTop, useRail) { StoreShell(controller, scrollToTop, useRail) }
+            // 0 al suo posto, 1 fuori dallo schermo: letto quando si posa, mai in composizione.
+            val hidden: () -> Float = {
+                tabBarHidden(
+                    moving = pages.isMoving,
+                    fromHidden = (pages.from as? NavBackStackEntry)?.destination?.route.isDetailRoute(),
+                    toHidden = (pages.to as? NavBackStackEntry)?.destination?.route.isDetailRoute(),
+                    progress = pages.progress,
+                    restHidden = !onTab,
+                )
+            }
 
-            ProvideFluidChrome(controller = controller, bottomInset = bottomInset, scrollToTop = scrollToTop) {
-                CompositionLocalProvider(LocalStoreHorizontalPadding provides screenHorizontalPadding) {
+            ProvideFluidChrome(controller = controller, bottomInset = 0.dp, scrollToTop = scrollToTop) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        // Il rail non si ripiega: sul tablet ha una colonna sua e non toglie
+                        // spazio al contenuto, quindi non c'e' niente da recuperare scorrendo.
+                        .then(if (useRail) Modifier else Modifier.nestedScroll(tabBarScroll))
+                        .fluidGlassModalObscured(),
+                ) { content(shell) }
+            }
+
+            if (onTab || pages.isMoving) {
+                if (useRail) {
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            // Il rail non si ripiega: sul tablet ha una colonna sua e non toglie
-                            // spazio al contenuto, quindi non c'e' niente da recuperare scorrendo.
-                            .then(if (useRail) Modifier else Modifier.nestedScroll(barFold.connection))
-                            .fluidGlassModalObscured(),
-                    ) { content() }
+                            .align(Alignment.CenterStart)
+                            .slideOffStart(layoutDirection, hidden)
+                            .systemBarsPadding()
+                            .padding(start = 14.dp),
+                    ) {
+                        FluidTabRail(
+                            items = topLevelItems,
+                            selectedRoute = lastTab.route,
+                            onSelect = { onSelect(it.route) },
+                            onReselect = { scrollToTop.request() },
+                            backdrop = backdrop,
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .slideOffBottom(hidden)
+                            .navigationBarsPadding()
+                            .padding(
+                                horizontal = FluidFloatingTabBarDefaults.HorizontalMargin,
+                                vertical = FluidFloatingTabBarDefaults.BottomMargin,
+                            ),
+                    ) {
+                        FluidFloatingTabBar(
+                            items = topLevelItems,
+                            selectedRoute = lastTab.route,
+                            onSelect = { onSelect(it.route) },
+                            onReselect = { scrollToTop.request() },
+                            scrollConnection = tabBarScroll,
+                            backdrop = backdrop,
+                        )
+                    }
                 }
             }
 
-            if (useRail) {
-                AnimatedVisibility(
-                    visible = visible,
-                    enter = slideInHorizontally { -it },
-                    exit = slideOutHorizontally { -it },
-                    modifier = Modifier.align(Alignment.CenterStart).systemBarsPadding().padding(start = 14.dp),
-                ) {
-                    FluidTabRail(
-                        items = topLevelItems,
-                        selectedRoute = currentRoute,
-                        onSelect = { onSelect(it.route) },
-                        onReselect = { scrollToTop.request() },
-                        backdrop = backdrop,
-                    )
-                }
-            } else {
-                AnimatedVisibility(
-                    visible = visible,
-                    enter = slideInVertically { it },
-                    exit = slideOutVertically { it },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .navigationBarsPadding()
-                        .padding(
-                            horizontal = FluidFoldingTabBarDefaults.HorizontalMargin,
-                            vertical = FluidFoldingTabBarDefaults.BottomMargin,
-                        ),
-                ) {
-                    FluidFoldingTabBar(
-                        items = topLevelItems,
-                        selectedRoute = currentRoute,
-                        onSelect = { onSelect(it.route) },
-                        onReselect = { scrollToTop.request() },
-                        onExpandRequest = barFold::unfold,
-                        backdrop = backdrop,
-                        fold = { barFold.progress.value },
-                    )
-                }
-            }
-
-            // Sopra la barra, ed e' esattamente il motivo per cui questi tre host stanno qui alla
-            // radice invece che dentro la pagina che li usa.
+            // Sopra la barra, ed e' esattamente il motivo per cui questi tre host stanno qui
+            // alla radice invece che dentro la pagina che li usa.
             FluidGlassModalHost(state = modalHost, backdrop = backdrop)
             FluidMorphMenuHost(state = morphMenu, backdrop = backdrop)
             FluidNotificationHost(
@@ -484,3 +465,30 @@ private fun PampaNavigationSuite(
         }
     }
 }
+
+/** Un valore ricordato fuori dallo stato di Compose: si scrive durante la composizione senza riscriverla. */
+private class LastTab {
+    var route: String = Routes.Home
+}
+
+/**
+ * Sposta in basso, fuori dallo schermo, di [hidden] volte la propria altezza: 0 è al suo posto, 1 è via.
+ * È un offset di posizione, letto quando si posa: il vetro della barra sa dov'è davvero, e non c'è mai
+ * un layer traslato sopra una lastra che rifrange.
+ */
+private fun Modifier.slideOffBottom(hidden: () -> Float): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    layout(placeable.width, placeable.height) {
+        placeable.place(0, (placeable.height * hidden().coerceIn(0f, 1f)).roundToInt())
+    }
+}
+
+/** Lo stesso per il rail: esce dal lato da cui è ancorato (a sinistra, a destra nelle lingue da destra a sinistra). */
+private fun Modifier.slideOffStart(direction: LayoutDirection, hidden: () -> Float): Modifier =
+    layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        val sign = if (direction == LayoutDirection.Rtl) 1 else -1
+        layout(placeable.width, placeable.height) {
+            placeable.place((sign * placeable.width * hidden().coerceIn(0f, 1f)).roundToInt(), 0)
+        }
+    }
