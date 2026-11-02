@@ -281,7 +281,6 @@ fun PampaStoreApp(
                                     onOpenCatalog = { navController.navigate(Routes.Catalog) },
                                     onShowUpdates = { navController.navigate(Routes.Updates) },
                                     onLaunchApp = viewModel::openApp,
-                                    onRequestInvite = viewModel::composeEmail,
                                 )
                             }
                         }

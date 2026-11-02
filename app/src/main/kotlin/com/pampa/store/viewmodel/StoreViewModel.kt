@@ -12,7 +12,6 @@ import com.pampa.store.data.StoreEvent
 import com.pampa.store.data.StoreUiState
 import com.pampa.store.data.VersionInfo
 import com.pampa.store.engine.StoreEngine
-import com.pampa.store.platform.MailDraft
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -43,7 +42,6 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
   fun setAutoCheckStoreUpdates(enabled: Boolean) = engine.updatePreferences { it.copy(autoCheckStoreUpdates = enabled) }
   fun openInstallSettings() = engine.openInstallSettings()
   fun openNotificationSettings() = engine.openNotificationSettings()
-  fun composeEmail(draft: MailDraft) = engine.composeEmail(draft)
   fun openApp(packageName: String) {
     engine.openApp(packageName)
   }

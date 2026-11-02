@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.pampa.store.data.StoreUiState
-import com.pampa.store.platform.MailDraft
 import dev.antigravity.fluidengine.ui.fluid.FluidAmbient
 import dev.antigravity.fluidengine.ui.fluid.FluidHero
 import dev.antigravity.fluidengine.ui.fluid.FluidHeroMetric
@@ -30,8 +29,6 @@ fun HomeScreen(
     onOpenCatalog: () -> Unit,
     onShowUpdates: () -> Unit,
     onLaunchApp: (String) -> Unit,
-    onRequestInvite: (MailDraft) -> Unit = {},
-    launchClock: () -> Instant = Instant::now,
 ) {
     val installed = state.apps.filter { it.installedVersion != null }
     val shownApps = installed.ifEmpty { state.apps.take(4) }
@@ -83,17 +80,6 @@ fun HomeScreen(
                     onAction = if (state.updateCount > 0) onShowUpdates else onOpenCatalog,
                     modifier = Modifier.testTag("home-hero"),
                 )
-            }
-
-            // Se la card e' gia' sparita non si emette nemmeno la riga: un item vuoto lascerebbe
-            // comunque il doppio spazio fra le sezioni.
-            if (launchPhase(launchClock()) != LaunchPhase.Hidden) {
-                item {
-                    LaunchCountdownCard(
-                        onRequestInvite = onRequestInvite,
-                        clock = launchClock,
-                    )
-                }
             }
 
             state.storeUpdate?.let { update ->

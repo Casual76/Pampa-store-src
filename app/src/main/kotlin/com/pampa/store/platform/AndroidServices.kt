@@ -1,9 +1,6 @@
 package com.pampa.store.platform
 
 import android.app.PendingIntent
-import android.content.ActivityNotFoundException
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
@@ -18,13 +15,6 @@ import java.io.File
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.takeWhile
-
-/** Una mail da precompilare: destinatario, oggetto e corpo. */
-data class MailDraft(
-    val to: String,
-    val subject: String,
-    val body: String,
-)
 
 class AndroidAppService(private val context: Context) {
     fun installPrerequisites(): InstallPrerequisites {
@@ -55,38 +45,6 @@ class AndroidAppService(private val context: Context) {
                 Uri.parse("package:${context.packageName}"),
             ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
         )
-    }
-
-    /**
-     * Apre l'app di posta con la bozza gia' scritta.
-     *
-     * `ACTION_SENDTO` con schema `mailto:` e non `ACTION_SEND`: cosi' compaiono solo le app di
-     * posta, non ogni app che sa condividere testo. Destinatario, oggetto e corpo vanno anche negli
-     * extra perche' i client non concordano su quale dei due leggere.
-     *
-     * Se nessuna app di posta risponde (`ActivityNotFoundException`) l'indirizzo finisce negli
-     * appunti, cosi' la persona puo' incollarlo dove vuole. Torna vero solo se la bozza si e' aperta.
-     */
-    fun composeEmail(draft: MailDraft): Boolean {
-        val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", draft.to, null))
-            .putExtra(Intent.EXTRA_EMAIL, arrayOf(draft.to))
-            .putExtra(Intent.EXTRA_SUBJECT, draft.subject)
-            .putExtra(Intent.EXTRA_TEXT, draft.body)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        return try {
-            context.startActivity(intent)
-            true
-        } catch (_: ActivityNotFoundException) {
-            copyToClipboard(label = "Indirizzo", text = draft.to)
-            false
-        }
-    }
-
-    private fun copyToClipboard(label: String, text: String) {
-        runCatching {
-            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-            clipboard?.setPrimaryClip(ClipData.newPlainText(label, text))
-        }
     }
 
     fun launch(packageName: String): Boolean {
