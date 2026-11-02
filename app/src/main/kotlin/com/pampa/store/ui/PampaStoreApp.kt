@@ -228,9 +228,9 @@ fun PampaStoreApp(
                                 MoreScreen(
                                     state = state,
                                     onRefresh = viewModel::refreshCatalog,
-                                    onThemeMode = viewModel::setThemeMode,
-                                    onAccentSource = viewModel::setAccentSource,
-                                    onAccentPreset = viewModel::setAccentPreset,
+                                    onAppearanceChange = { next ->
+                                        viewModel.updatePreferences { it.withEngineSettings(next) }
+                                    },
                                     onDefaultChannel = viewModel::setDefaultChannel,
                                     onStoreChannel = viewModel::setStoreUpdateChannel,
                                     onAutoCheck = viewModel::setAutoCheckStoreUpdates,

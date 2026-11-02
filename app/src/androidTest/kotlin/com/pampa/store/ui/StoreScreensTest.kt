@@ -161,9 +161,7 @@ class StoreScreensTest {
                         prerequisites = InstallPrerequisites(false, "Autorizzazione necessaria per installare APK."),
                     ),
                     onRefresh = {},
-                    onThemeMode = {},
-                    onAccentSource = {},
-                    onAccentPreset = {},
+                    onAppearanceChange = {},
                     onDefaultChannel = {},
                     onStoreChannel = {},
                     onAutoCheck = {},
@@ -174,7 +172,9 @@ class StoreScreensTest {
                 )
             }
         }
-        composeRule.onNodeWithTag("appearance-settings").assertIsDisplayed()
+        // La sezione Aspetto e' dell'engine: la testata, il nero assoluto, il nome del colore scelto.
+        composeRule.onNodeWithText("Aspetto").assertIsDisplayed()
+        composeRule.onNodeWithText("Nero assoluto").assertIsDisplayed()
         composeRule.onNodeWithText("Nebula 76").assertIsDisplayed()
         composeRule.onNodeWithText("Origini consentite").assertIsDisplayed()
     }

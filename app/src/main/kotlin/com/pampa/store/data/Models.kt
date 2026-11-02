@@ -147,6 +147,10 @@ data class StorePreferences(
     val defaultChannel: String = Channel.STABLE.name,
     val storeUpdateChannel: String = Channel.STABLE.name,
     val autoCheckStoreUpdates: Boolean = true,
+    /** Sfondi neri nel tema scuro, per gli schermi OLED. Dalla 1.9.0; spento di serie. */
+    val pureBlack: Boolean = false,
+    /** Le vibrazioni dell'engine, tutte. Dalla 1.9.0; accese di serie, com'erano prima dell'interruttore. */
+    val hapticsEnabled: Boolean = true,
 )
 
 data class InstallPrerequisites(

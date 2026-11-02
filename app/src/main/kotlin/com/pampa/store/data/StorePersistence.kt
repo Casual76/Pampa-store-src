@@ -28,6 +28,8 @@ class StorePersistence(private val context: Context) {
             defaultChannel = values[Keys.defaultChannel] ?: Channel.STABLE.name,
             storeUpdateChannel = values[Keys.storeUpdateChannel] ?: Channel.STABLE.name,
             autoCheckStoreUpdates = values[Keys.autoCheckStoreUpdates] ?: true,
+            pureBlack = values[Keys.pureBlack] ?: false,
+            hapticsEnabled = values[Keys.hapticsEnabled] ?: true,
         )
     }
 
@@ -41,6 +43,8 @@ class StorePersistence(private val context: Context) {
             values[Keys.defaultChannel] = updated.defaultChannel
             values[Keys.storeUpdateChannel] = updated.storeUpdateChannel
             values[Keys.autoCheckStoreUpdates] = updated.autoCheckStoreUpdates
+            values[Keys.pureBlack] = updated.pureBlack
+            values[Keys.hapticsEnabled] = updated.hapticsEnabled
         }
     }
 
@@ -82,6 +86,8 @@ class StorePersistence(private val context: Context) {
         val defaultChannel = stringPreferencesKey("default_channel")
         val storeUpdateChannel = stringPreferencesKey("store_update_channel")
         val autoCheckStoreUpdates = booleanPreferencesKey("auto_check_store_updates")
+        val pureBlack = booleanPreferencesKey("pure_black")
+        val hapticsEnabled = booleanPreferencesKey("haptics_enabled")
         val catalogJson = stringPreferencesKey("catalog_json")
         val catalogSavedAt = longPreferencesKey("catalog_saved_at")
         val announcedVersions = stringPreferencesKey("announced_versions")

@@ -1,17 +1,11 @@
 package com.pampa.store.ui
 
-import android.os.Build
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Security
@@ -19,17 +13,14 @@ import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import com.pampa.store.BuildConfig
-import com.pampa.store.data.AccentPresetId
 import com.pampa.store.data.AccentSource
 import com.pampa.store.data.AppThemeMode
 import com.pampa.store.data.Channel
 import com.pampa.store.data.StoreUiState
 import com.pampa.store.data.enumOrDefault
+import dev.antigravity.fluidengine.foundation.EngineSettings
 import dev.antigravity.fluidengine.ui.fluid.FluidAmbient
-import dev.antigravity.fluidengine.ui.fluid.FluidChip
 import dev.antigravity.fluidengine.ui.fluid.FluidHeroMotif
 import dev.antigravity.fluidengine.ui.fluid.FluidHeroTone
 import dev.antigravity.fluidengine.ui.fluid.FluidScreen
@@ -37,7 +28,8 @@ import dev.antigravity.fluidengine.ui.fluid.FluidSectionFootnote
 import dev.antigravity.fluidengine.ui.fluid.fluidLicensesSection
 import dev.antigravity.fluidengine.ui.fluid.FluidSectionHeader
 import dev.antigravity.fluidengine.ui.fluid.FluidSegmentedControl
-import dev.antigravity.fluidengine.ui.fluid.FluidSwitch
+import dev.antigravity.fluidengine.ui.fluid.FluidToggleRow
+import dev.antigravity.fluidengine.ui.fluid.fluidAppearanceSection
 import dev.antigravity.fluidengine.ui.theme.FluidListDivider
 import dev.antigravity.fluidengine.ui.theme.FluidListGroup
 import dev.antigravity.fluidengine.ui.theme.FluidListRow
@@ -48,9 +40,8 @@ import dev.antigravity.fluidengine.ui.theme.FluidTone
 fun MoreScreen(
     state: StoreUiState,
     onRefresh: () -> Unit,
-    onThemeMode: (AppThemeMode) -> Unit,
-    onAccentSource: (AccentSource) -> Unit,
-    onAccentPreset: (AccentPresetId) -> Unit,
+    /** La sezione «Aspetto» riscrive le impostazioni dell'engine intere: chi le riceve le traduce in preferenze. */
+    onAppearanceChange: (EngineSettings) -> Unit,
     onDefaultChannel: (Channel) -> Unit,
     onStoreChannel: (Channel) -> Unit,
     onAutoCheck: (Boolean) -> Unit,
@@ -61,7 +52,6 @@ fun MoreScreen(
 ) {
     val preferences = state.preferences
     val themeMode = enumOrDefault(preferences.themeMode, AppThemeMode.SYSTEM)
-    val accentSource = enumOrDefault(preferences.accentSource, AccentSource.PRESET)
     val defaultChannel = enumOrDefault(preferences.defaultChannel, Channel.STABLE)
     val storeChannel = enumOrDefault(preferences.storeUpdateChannel, Channel.STABLE)
 
@@ -74,58 +64,15 @@ fun MoreScreen(
         onRefresh = onRefresh,
         ambient = FluidAmbient(tone = FluidHeroTone.Secondary, motif = FluidHeroMotif.Dots),
     ) {
-        item { FluidSectionHeader(title = "Aspetto", detail = "Tema, accento e colori dinamici") }
-        item {
-            FluidListGroup(modifier = Modifier.testTag("appearance-settings"), glass = true) {
-                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    FluidListRow(
-                        title = "Tema",
-                        subtitle = "Segui il sistema oppure scegli chiaro o scuro.",
-                        tone = FluidTone.Primary,
-                        leading = { Icon(Icons.Rounded.Palette, contentDescription = null) },
-                    )
-                    FluidSegmentedControl(
-                        options = AppThemeMode.entries,
-                        selected = themeMode,
-                        onSelect = onThemeMode,
-                        label = AppThemeMode::label,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            }
-        }
-        item {
-            FluidSegmentedControl(
-                options = AccentSource.entries,
-                selected = accentSource,
-                onSelect = onAccentSource,
-                label = AccentSource::label,
-            )
-        }
-        if (accentSource == AccentSource.PRESET) {
-            item {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(AccentPresetId.entries, key = AccentPresetId::storageName) { preset ->
-                        FluidChip(
-                            label = preset.label,
-                            selected = preferences.selectedAccentPreset() == preset,
-                            onClick = { onAccentPreset(preset) },
-                            leading = { Icon(Icons.Rounded.AutoAwesome, contentDescription = null) },
-                        )
-                    }
-                }
-            }
-        } else {
-            item {
-                FluidSectionFootnote(
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        "Material You usa la palette del wallpaper; puoi tornare ai preset in qualsiasi momento."
-                    } else {
-                        "Material You richiede Android 12: su questo dispositivo viene usato Nebula 76."
-                    },
-                )
-            }
-        }
+        // Tema, accento, aptica: la sezione e' dell'engine (la stessa di ogni app Pampa), e lo Store la
+        // alimenta con quello che salva da sempre. Nebula 76 e' il marchio: il selettore offre gli altri.
+        fluidAppearanceSection(
+            settings = preferences.toEngineSettings(),
+            onSettingsChange = onAppearanceChange,
+            brand = PampaBrand,
+            presets = PampaSelectablePresets,
+            glass = true,
+        )
 
         item { FluidSectionHeader(title = "Installazione", detail = "Canali e autorizzazioni Android") }
         item {
@@ -201,18 +148,14 @@ fun MoreScreen(
                     onClick = if (storeUpdate != null) onInstallStoreUpdate else onCheckStoreUpdate,
                 )
                 FluidListDivider()
-                FluidListRow(
+                FluidToggleRow(
                     title = "Controllo automatico",
                     subtitle = "Cerca una nuova versione dello Store all’avvio e ogni sei ore, " +
                         "anche a Store chiuso.",
+                    checked = preferences.autoCheckStoreUpdates,
+                    onCheckedChange = onAutoCheck,
                     tone = FluidTone.Primary,
                     leading = { Icon(Icons.Rounded.Sync, contentDescription = null) },
-                    badge = {
-                        FluidSwitch(
-                            checked = preferences.autoCheckStoreUpdates,
-                            onCheckedChange = onAutoCheck,
-                        )
-                    },
                 )
                 FluidListDivider()
                 FluidListRow(

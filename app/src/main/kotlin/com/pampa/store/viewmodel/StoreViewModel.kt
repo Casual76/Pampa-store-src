@@ -2,13 +2,11 @@ package com.pampa.store.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import com.pampa.store.data.AccentPresetId
-import com.pampa.store.data.AccentSource
-import com.pampa.store.data.AppThemeMode
 import com.pampa.store.data.Channel
 import com.pampa.store.data.OwnershipFilter
 import com.pampa.store.data.StoreApp
 import com.pampa.store.data.StoreEvent
+import com.pampa.store.data.StorePreferences
 import com.pampa.store.data.StoreUiState
 import com.pampa.store.data.VersionInfo
 import com.pampa.store.engine.StoreEngine
@@ -34,9 +32,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
   fun setSearchQuery(query: String) = engine.setSearchQuery(query)
   fun setCategory(category: String?) = engine.setCategory(category)
   fun setOwnershipFilter(filter: OwnershipFilter) = engine.setOwnershipFilter(filter)
-  fun setThemeMode(mode: AppThemeMode) = engine.updatePreferences { it.copy(themeMode = mode.name) }
-  fun setAccentSource(source: AccentSource) = engine.updatePreferences { it.copy(accentSource = source.name) }
-  fun setAccentPreset(preset: AccentPresetId) = engine.updatePreferences { it.copy(accentSource = AccentSource.PRESET.name, accentPreset = preset.storageName) }
+  /** Le preferenze cambiate da chi ha il modello sotto mano (la sezione Aspetto passa dalle impostazioni dell'engine). */
+  fun updatePreferences(transform: (StorePreferences) -> StorePreferences) = engine.updatePreferences(transform)
   fun setDefaultChannel(channel: Channel) = engine.updatePreferences { it.copy(defaultChannel = channel.name) }
   fun setStoreUpdateChannel(channel: Channel) = engine.updatePreferences { it.copy(storeUpdateChannel = channel.name) }
   fun setAutoCheckStoreUpdates(enabled: Boolean) = engine.updatePreferences { it.copy(autoCheckStoreUpdates = enabled) }
