@@ -35,8 +35,8 @@ android {
         applicationId = "com.pampa.store"
         minSdk = 26
         targetSdk = 36
-        versionCode = 33
-        versionName = "1.8.3"
+        versionCode = 34
+        versionName = "1.9.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
